@@ -1,0 +1,12 @@
+{
+  "id": "system-info",
+  "name": "Systeminfo",
+  "description": "Zeigt Hostname, Plattform und Python-Version.",
+  "tags": [
+    "system",
+    "info",
+    "host"
+  ],
+  "handler": "builtin.system_info",
+  "params": {}
+}

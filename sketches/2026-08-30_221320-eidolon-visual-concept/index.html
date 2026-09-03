@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eidolon Visual Concept</title>
+  <style>
+    :root {
+      --bg:#0b0f14;
+      --panel:#121821;
+      --panel-2:#161e29;
+      --panel-3:#0f141c;
+      --line:#243041;
+      --text:#edf2f7;
+      --muted:#8fa0b8;
+      --accent:#7dd3fc;
+      --accent-soft:rgba(125,211,252,.12);
+      --warn:#f6c760;
+      --warn-soft:rgba(246,199,96,.12);
+      --danger:#ef6b73;
+      --danger-soft:rgba(239,107,115,.12);
+      --ok:#63d39b;
+      --ok-soft:rgba(99,211,155,.12);
+      --radius:18px;
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(180deg,#0a0e13,#0d131b 30%,#0b0f14);color:var(--text)}
+    .shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+    .sidebar{border-right:1px solid var(--line);padding:24px 18px;background:rgba(8,11,15,.72);backdrop-filter:blur(10px)}
+    .brand{font-size:13px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:24px}
+    .brand strong{display:block;color:var(--text);font-size:22px;letter-spacing:.02em;text-transform:none;margin-bottom:6px}
+    .navgroup{margin:26px 0 12px;font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#6f8198}
+    .navitem{display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid transparent;border-radius:12px;color:#c6d1df;margin-bottom:6px;background:transparent}
+    .navitem.active{background:var(--accent-soft);border-color:rgba(125,211,252,.22);color:var(--text)}
+    .navdot{width:8px;height:8px;border-radius:50%;background:#4b5d74}.navitem.active .navdot{background:var(--accent);box-shadow:0 0 0 6px rgba(125,211,252,.12)}
+    .main{padding:26px 28px 32px}
+    .topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+    .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);margin-bottom:8px}
+    .title{font-size:34px;font-weight:700;letter-spacing:-.03em;margin:0 0 8px}
+    .subtitle{color:var(--muted);max-width:780px;line-height:1.5}
+    .controls{display:flex;gap:10px;align-items:center}.btn{background:var(--panel);border:1px solid var(--line);color:var(--text);padding:11px 14px;border-radius:12px}.btn.primary{background:linear-gradient(180deg,#18293a,#122131);border-color:#35516e}
+    .layout{display:grid;grid-template-columns:minmax(620px,1fr) 360px;gap:18px}
+    .stack{display:grid;gap:18px}
+    .card{background:linear-gradient(180deg,var(--panel),var(--panel-3));border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:0 20px 40px rgba(0,0,0,.2)}
+    .mission{padding:24px;position:relative;overflow:hidden}
+    .mission::after{content:"";position:absolute;inset:-30% auto auto 60%;width:320px;height:320px;background:radial-gradient(circle,rgba(125,211,252,.18),transparent 60%);pointer-events:none}
+    .pulse{box-shadow:0 0 0 0 rgba(125,211,252,.18);animation:pulse 2.8s ease-in-out infinite}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(125,211,252,.10)}50%{box-shadow:0 0 0 10px rgba(125,211,252,.03)}}
+    .mission-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start}
+    .mission h2{font-size:28px;line-height:1.1;margin:8px 0 12px;max-width:760px}
+    .mission p{margin:0;color:#b9c7d8;max-width:760px;line-height:1.55}
+    .pillrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.pill{padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.03);border:1px solid var(--line);color:#dbe4ef;font-size:13px}
+    .mission-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+    .attention{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .signal{padding:16px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.02)}
+    .signal.warn{background:var(--warn-soft);border-color:rgba(246,199,96,.28)}
+    .signal.danger{background:var(--danger-soft);border-color:rgba(239,107,115,.28)}
+    .signal.ok{background:var(--ok-soft);border-color:rgba(99,211,155,.26)}
+    .label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    .signal.warn .label{color:#f4d996}.signal.danger .label{color:#ffb6bc}.signal.ok .label{color:#b4f0cf}
+    .signal strong{display:block;font-size:18px;margin-bottom:6px}.signal p{margin:0;color:#d4dce7;line-height:1.45;font-size:14px}
+    .section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.section-title h3{margin:0;font-size:16px}.muted{color:var(--muted);font-size:13px}
+    .pods{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+    .pod-primary,.pod-list-item{border:1px solid var(--line);border-radius:16px;background:var(--panel-2)}
+    .pod-primary{padding:18px;position:relative}.pod-primary.active{outline:1px solid rgba(125,211,252,.24)}
+    .pod-state{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;font-size:12px;border:1px solid var(--line);background:rgba(255,255,255,.03)}
+    .state-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+    .pod-title{font-size:22px;margin:14px 0 10px}.pod-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+    .meta{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04)}
+    .meta b{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600}.meta span{font-size:14px}
+    .pod-list{display:grid;gap:10px}.pod-list-item{padding:14px}.pod-list-item.active{background:rgba(125,211,252,.08);border-color:rgba(125,211,252,.22)}
+    .pod-list-item h4{margin:0 0 6px;font-size:15px}.pod-list-item p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+    .evidence-list,.timeline,.exec-list,.graph-list{display:grid;gap:10px}
+    .row{display:flex;justify-content:space-between;gap:18px;padding:12px 0;border-top:1px solid rgba(255,255,255,.06)} .row:first-child{border-top:0;padding-top:0}
+    .row strong{display:block;font-size:14px}.row span{display:block;color:var(--muted);font-size:13px;line-height:1.4}
+    .mini-graph{height:260px;border-radius:18px;background:radial-gradient(circle at 20% 30%,rgba(125,211,252,.08),transparent 28%),radial-gradient(circle at 70% 60%,rgba(99,211,155,.08),transparent 24%),linear-gradient(180deg,#111722,#0d131b);border:1px solid var(--line);position:relative;overflow:hidden}
+    .node{position:absolute;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:#18212d;font-size:13px}.node.mission{left:30px;top:24px}.node.active{left:220px;top:90px;border-color:rgba(125,211,252,.3);background:rgba(125,211,252,.12)}.node.verify{left:420px;top:40px}.node.blocked{left:470px;top:168px;border-color:rgba(239,107,115,.3);background:rgba(239,107,115,.1)}.node.delivery{left:120px;top:175px}
+    .line{position:absolute;height:2px;background:rgba(180,198,219,.3);transform-origin:left center}.line.a{left:140px;top:74px;width:125px;transform:rotate(19deg)}.line.b{left:338px;top:117px;width:110px;transform:rotate(-29deg)}.line.c{left:188px;top:191px;width:118px;transform:rotate(-12deg)}
+    .mobile-preview{margin-top:10px;border:1px solid var(--line);border-radius:28px;padding:14px;background:#0b1017;max-width:360px}.mobile-screen{border:1px solid rgba(255,255,255,.08);border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#111824,#0d141d)}
+    .mobile-top{padding:16px 16px 10px;border-bottom:1px solid rgba(255,255,255,.06)} .mobile-top h4{margin:6px 0 6px;font-size:22px}.mobile-top p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
+    .mobile-card{margin:12px;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px;background:rgba(255,255,255,.03)}
+    .mobile-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.06);color:var(--muted);font-size:11px;text-align:center}
+    @media (max-width:1100px){.shell{grid-template-columns:1fr}.sidebar{display:none}.layout{grid-template-columns:1fr}.attention,.pods{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><strong>Eidolon</strong>Zentrales agentisches Hauptsystem</div>
+      <div class="navgroup">Arbeiten</div>
+      <div class="navitem active"><span class="navdot"></span>Mission Control</div>
+      <div class="navitem"><span class="navdot"></span>Intent Stream</div>
+      <div class="navitem"><span class="navdot"></span>Pods</div>
+      <div class="navitem"><span class="navdot"></span>Work Graph</div>
+      <div class="navitem"><span class="navdot"></span>Execution</div>
+      <div class="navgroup">System</div>
+      <div class="navitem"><span class="navdot"></span>Mesh & Geräte</div>
+      <div class="navitem"><span class="navdot"></span>Systemstatus</div>
+      <div class="navitem"><span class="navdot"></span>Einstellungen</div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <div class="eyebrow">Leitstand zuerst · Studio danach</div>
+          <h1 class="title">Eidolon Visual Concept</h1>
+          <div class="subtitle">Ein ruhiger, dichter, wahrheitsfähiger Arbeitsleitstand. Kein Chattool, kein KPI-Dashboard, kein Agenten-Theater.</div>
+        </div>
+        <div class="controls">
+          <button class="btn">Pods</button>
+          <button class="btn">Graph</button>
+          <button class="btn primary">Weiterführen</button>
+        </div>
+      </div>
+
+      <div class="layout">
+        <div class="stack">
+          <section class="card mission pulse">
+            <div class="mission-head">
+              <div>
+                <div class="eyebrow">Mission Control</div>
+                <h2>Vereinheitliche Operate-, Pod- und Execution-Wahrheit über Web und Mobile</h2>
+                <p>Eidolon führt reale Arbeit, sichtbare Child-Runs, Freigaben, Blocker, Evidence und Ausführung in einen gemeinsamen operativen Kern. Die Oberfläche erklärt nicht Features, sondern den tatsächlichen Arbeitszustand.</p>
+                <div class="pillrow">
+                  <div class="pill">Phase: Execute</div>
+                  <div class="pill">State: Active</div>
+                  <div class="pill">Next: Verify</div>
+                  <div class="pill">3 aktive Pods</div>
+                </div>
+                <div class="mission-actions">
+                  <button class="btn primary">Weiterführen</button>
+                  <button class="btn">Pod-Detail öffnen</button>
+                  <button class="btn">Work Graph ansehen</button>
+                </div>
+              </div>
+              <div style="min-width:260px;max-width:300px">
+                <div class="label">Aktueller Grund</div>
+                <strong style="display:block;font-size:20px;margin-bottom:8px">Screen-Closure läuft</strong>
+                <div class="muted">Mission Control, Pods und Execution werden entlang echter Operate-Verträge visualisiert.</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="attention">
+            <div class="signal warn">
+              <div class="label">Freigabe nötig</div>
+              <strong>Strukturelle UI-Umbenennung bestätigen</strong>
+              <p>Mission Control und Execution Surface sind bereit zur finalen Sprache im Produkt.</p>
+            </div>
+            <div class="signal ok">
+              <div class="label">Aktive Ausführung</div>
+              <strong>Workspace-Aktion läuft sauber weiter</strong>
+              <p>Graph-, Pod- und Operate-Daten werden konsistent geladen und weitergeführt.</p>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="section-title"><h3>Aktive Pods</h3><div class="muted">operative Körper realer Child-Runs</div></div>
+            <div class="pods">
+              <div class="pod-primary active pulse">
+                <div class="pod-state"><span class="state-dot"></span>Active foreground</div>
+                <div class="pod-title">Verification Stream</div>
+                <div class="muted">Prüft Routen, UI-Screens und Verträge gegen den aktuellen Kernel.</div>
+                <div class="pod-meta">
+                  <div class="meta"><b>Funktion</b><span>verifier</span></div>
+                  <div class="meta"><b>Mission</b><span>UI-/Route-Closure verifizieren</span></div>
+                  <div class="meta"><b>Reason</b><span>99 Tests grün halten</span></div>
+                  <div class="meta"><b>Evidence</b><span>6 neue Prüfsignale</span></div>
+                </div>
+              </div>
+              <div class="pod-list">
+                <div class="pod-list-item active">
+                  <h4>Route Cutover</h4>
+                  <p>Operationelle Routen werden in wartbare Domänenschichten verschoben.</p>
+                </div>
+                <div class="pod-list-item">
+                  <h4>Work Graph Sync</h4>
+                  <p>Graph-Overlay und Projektkontext bleiben an Operate gekoppelt.</p>
+                </div>
+                <div class="pod-list-item" style="border-color:rgba(246,199,96,.22);background:rgba(246,199,96,.08)">
+                  <h4>Approval Gate</h4>
+                  <p>Wartet auf Entscheidung zur finalen visuellen Sprache.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="section-title"><h3>Work Graph</h3><div class="muted">Struktur + Ausführung im selben Raum</div></div>
+            <div class="mini-graph">
+              <div class="node mission">Mission</div>
+              <div class="node active">Pod aktiv</div>
+              <div class="node verify">Verify</div>
+              <div class="node blocked">Blocker</div>
+              <div class="node delivery">Deliverable</div>
+              <div class="line a"></div><div class="line b"></div><div class="line c"></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="section-title"><h3>Recent Evidence</h3><div class="muted">ruhig, seriös, nachvollziehbar</div></div>
+            <div class="evidence-list">
+              <div class="row"><div><strong>pytest vollständig ausgeführt</strong><span>99 passed, 3 warnings</span></div><div class="muted">verified</div></div>
+              <div class="row"><div><strong>Pods- und Execution-Surfaces ergänzt</strong><span>Neue Assets und echte Empty States verdrahtet</span></div><div class="muted">observed</div></div>
+              <div class="row"><div><strong>Operate-Snapshot angereichert</strong><span>canonical_phase, active_pods, evidence_status</span></div><div class="muted">observed</div></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="stack">
+          <section class="card">
+            <div class="section-title"><h3>Decision / Risk</h3><div class="muted">nicht im Strom verstecken</div></div>
+            <div class="signal warn" style="margin-bottom:12px">
+              <div class="label">Approval Needed</div>
+              <strong>Benennung finalisieren</strong>
+              <p>Soll Mobile denselben Mission-Control-Fokus behalten oder stärker event-driven werden?</p>
+            </div>
+            <div class="signal danger">
+              <div class="label">Blocker</div>
+              <strong>Kein Live-Prozess-Overlay im UI</strong>
+              <p>Die visuelle Schicht kennt Runtime- und Device-Signale, aber noch keinen dichten Prozessmonitor.</p>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="section-title"><h3>Execution Surface</h3><div class="muted">reale Runtime statt Technikmüll</div></div>
+            <div class="exec-list">
+              <div class="row"><div><strong>Browser Control</strong><span>verfügbar</span></div><div class="muted">capability</div></div>
+              <div class="row"><div><strong>Mesh / QUIC</strong><span>not_wired</span></div><div class="muted">ehrlich leer</div></div>
+              <div class="row"><div><strong>Gekoppelte Geräte</strong><span>0 aktuell verbunden</span></div><div class="muted">mobile</div></div>
+              <div class="row"><div><strong>Aktiver Workspace</strong><span>Work Graph · UI Closure</span></div><div class="muted">running</div></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="section-title"><h3>Transition Timeline</h3><div class="muted">kein Theater, nur echte Events</div></div>
+            <div class="timeline">
+              <div class="row"><div><strong>understanding → planning</strong><span>Ziel und Scope normalisiert</span></div><div class="muted">10:04</div></div>
+              <div class="row"><div><strong>planning → execute</strong><span>Pods gestartet und Screens getrennt</span></div><div class="muted">10:19</div></div>
+              <div class="row"><div><strong>execute → verify</strong><span>UI- und API-Verträge gegen Tests gehalten</span></div><div class="muted">10:41</div></div>
+            </div>
+          </section>
+
+          <section class="mobile-preview">
+            <div class="mobile-screen">
+              <div class="mobile-top">
+                <div class="eyebrow">Mobile</div>
+                <h4>Mission</h4>
+                <p>Run aktiv · 1 Freigabe · 1 führender Pod</p>
+              </div>
+              <div class="mobile-card" style="background:rgba(125,211,252,.08);border-color:rgba(125,211,252,.22)">
+                <div class="label">Hauptfokus</div>
+                <strong>Mission läuft aktiv weiter</strong>
+                <p class="muted">Operate-, Pod- und Execution-Wahrheit werden zusammengeführt.</p>
+              </div>
+              <div class="mobile-card" style="background:rgba(246,199,96,.08);border-color:rgba(246,199,96,.22)">
+                <div class="label">Freigabe</div>
+                <strong>Visual Language bestätigen</strong>
+              </div>
+              <div class="mobile-card">
+                <div class="label">Primärer Pod</div>
+                <strong>Verification Stream</strong>
+                <p class="muted">prüft 99 grüne Tests gegen neue Screens</p>
+              </div>
+              <div class="mobile-bar">
+                <div>Mission</div><div>Intent</div><div>Pods</div><div>Graph</div><div>Mehr</div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

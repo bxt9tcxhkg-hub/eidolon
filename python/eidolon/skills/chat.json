@@ -1,0 +1,14 @@
+{
+  "id": "chat",
+  "name": "Chat mit Eidolon",
+  "description": "Verwende Eidolon als KI-Assistent für natürliche Konversation.",
+  "tags": [
+    "chat",
+    "conversation",
+    "assistant"
+  ],
+  "handler": "builtin.chat",
+  "params": {
+    "text": "string"
+  }
+}

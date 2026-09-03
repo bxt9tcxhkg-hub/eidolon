@@ -1,0 +1,402 @@
+[
+  {
+    "tab": "chat",
+    "label": "💬\nChat",
+    "buttons": [
+      {
+        "text": "Senden",
+        "onclick": "sendChat()",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-primary"
+      }
+    ],
+    "inputs": [
+      {
+        "tag": "INPUT",
+        "id": "chat-input",
+        "placeholder": "Nachricht eingeben...",
+        "value": ""
+      }
+    ],
+    "text": "Noch kein Gesprächskontext. Schreibe oben deine erste Nachricht, damit Eidolon einen realen Arbeitskontext aufbauen kann.\nSenden"
+  },
+  {
+    "tab": "dashboard",
+    "label": "📊\nStatus",
+    "buttons": [
+      {
+        "text": "Aktualisieren",
+        "onclick": "loadDashboard(this)",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      }
+    ],
+    "inputs": [],
+    "text": "Gesamtzustand\nEingeschränkt\nAktualisieren\nLaufzeit\n8h 16m\nStatus\nok_with_limits\nSkills\n8/8\nCapabilities\n9/12\nZertifikate\n821 Tage\nMesh-Peers\n0 verbunden\nKomponenten\nKnowledge Graph\n0 Entitäten\nQUIC-Transport\nnot_wired\nSelf-Healing\nnot_wired\nEvidence Store\n0 verifiziert / 0 blockiert\nAusführungsziele\n1 aktiv / 2 erledigt\nSicherungen\n4 vorhanden\nCapabilities\n9/12\nautonomy_loop\navailable\nbrowser_control\nunavailable\nevidence_store\navailable\nfile_read\navailable\nfile_write\navailable\nimage_generate\nKein lokales Bildmodell konfiguriert\nllm_ollama\navailable\nmesh_quic\nunavailable\npython_execute\navailable\nskills_runtime\navailable\ntts_speak\navailable\nui_hud\navailable\nLaufzeit & Ressourcen\nProzessspeicher\n82 MB\nThreads\n2\nSystem-CPU\n40.4%\nRAM gesamt\n13.3 / 31.4 GB\nFreier Speicher\n95 GB\nDatenablage\nbackups\n1480.66 MB · 23686 Dateien\nautonomy\n0.02 MB · 1 Dateien\nmesh\n0 MB · 6 Dateien\nuser\n0.15 MB · 18 Dateien"
+  },
+  {
+    "tab": "workspaces",
+    "label": "🧩\nProjektflächen",
+    "buttons": [
+      {
+        "text": "Aktualisieren",
+        "onclick": "loadWorkspaces()",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "+ Neues Projekt",
+        "onclick": "toggleProjectComposer(true)",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm btn-primary"
+      }
+    ],
+    "inputs": [],
+    "text": "Arbeitskontext\nAktualisieren\nWorkflow-Schleife\nverstehen, strukturieren, einordnen, organisieren, ausführen, verifizieren, fortsetzen\nAktuelle Phase\nawait_input\nKontextzustand\nno_live_context\nAktueller Fokus\n—\nAktiver Projektkontext\n—\nAktive Projektfläche\n—\nProjektkandidaten (Labels)\n—\nChat-Themen (Labels)\n—\nProjektkandidaten\n0\nChat-Themen\n0\nKontextwechsel\nawaiting_input\nNächster Übergang\n—\nNächster Schritt\nKein aktiver Gesprächs- oder Projektkontext vorhanden. Auf neue Live-Signale warten.\nFreigaberahmen\nawaiting_live_input\nVerantwortliche Rolle\neidolon-core\nProjektflächen\n+ Neues Projekt\nKeine Projekte"
+  },
+  {
+    "tab": "goals",
+    "label": "🎯\nAusführung",
+    "buttons": [
+      {
+        "text": "Prüfen & aufräumen",
+        "onclick": "revalidateGoals(this)",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Aus Systemzustand ableiten",
+        "onclick": "deriveGoals(this)",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Zyklus ausführen",
+        "onclick": "runAutonomyCycle(this)",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "+ Neues Ziel",
+        "onclick": "openGoalForm()",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm btn-primary"
+      },
+      {
+        "text": "Pausieren",
+        "onclick": "transitionGoal('439f52c4', 'paused')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Erledigt",
+        "onclick": "transitionGoal('439f52c4', 'done')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Fehlgeschlagen",
+        "onclick": "transitionGoal('439f52c4', 'failed')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Löschen",
+        "onclick": "deleteGoal('439f52c4')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Starten",
+        "onclick": "transitionGoal('9287df9a', 'active')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Löschen",
+        "onclick": "deleteGoal('9287df9a')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Starten",
+        "onclick": "transitionGoal('6e670f16', 'active')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Löschen",
+        "onclick": "deleteGoal('6e670f16')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Starten",
+        "onclick": "transitionGoal('ecc8e114', 'active')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Löschen",
+        "onclick": "deleteGoal('ecc8e114')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Aktualisieren",
+        "onclick": "loadGoalLog()",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      }
+    ],
+    "inputs": [
+      {
+        "tag": "SELECT",
+        "id": "goals-filter",
+        "placeholder": "",
+        "value": ""
+      }
+    ],
+    "text": "Übersicht\nPrüfen & aufräumen\nAus Systemzustand ableiten\nZyklus ausführen\n+ Neues Ziel\n6\nGESAMT\n1\nAKTIV\n2\nERLEDIGT\nZiele\nAlle Status\nAktiv\nGeplant\nPausiert\nErledigt\nFehlgeschlagen\nACTIVE\nBlocker: Image-Generation\ncapability:image.generate · verify: open · Kein lokales Bildmodell konfiguriert\nPausieren\nErledigt\nFehlgeschlagen\nLöschen\nPLANNED\nHärten: TTS STT\nroadmap:tts-stt · verify: open · TTS/STT ✅/⚠️ Capability-Lage ist gegenüber Phase 6 verbessert; endgültige Produktreife hängt von konkreter UX-/Runtime-Integration ab\nStarten\nLöschen\nPAUSED\nHärten: Browser-Automation\nroadmap:browser-automation · verify: open · Browser-Automation ✅/⚠️ Capability ist inzwischen verfügbar; produktive End-to-End-Nutzung bleibt dennoch separat zu härten\nStarten\nLöschen\nPAUSED\nHärten: Desktop-HUD\nroadmap:desktop-hud · verify: open · Desktop-HUD ✅/⚠️ (PyQt6 ist inzwischen vorhanden; Overlay-Datei existiert, ist aber noch kein vollständig integrierter Produktpfad)\nStarten\nLöschen\nDONE\nmTLS-Zertifikate für QUIC-Mesh in Ordnung bringen\ncertificates:mtls · verify: resolved · CA + Server vorhanden, Kette gültig, 821 Tage Restlaufzeit\nKeine Aktionen\nDONE\nRust-Stubs ausbauen (9 von 56 Dateien)\ncode:rust-stubs · verify: resolved · Keine Stubs mehr (56 Dateien geprüft)\nKeine Aktionen\nVerlauf\nAktualisieren\n—\n{\"at\":\"2026-08-25T23:01:22.062364+00:00\",\"goal_id\":\"8a31d805\",\"action\":\"auto_closed\",\"detail\":\"planned → done; Problem behoben: Keine Stubs mehr (56 Dateien geprüft)\"}\n—\n{\"at\":\"2026-08-24T20:06:06.895755+00:00\",\"goal_id\":\"0e558717\",\"action\":\"regression_detected\",\"detail\":\"9/56 Dateien sind Stubs\"}\n—\n{\"at\":\"2026-08-24T20:06:06.882755+00:00\",\"goal_id\":\"5ab19490\",\"action\":\"regression_detected\",\"detail\":\"TTS/STT ✅/⚠️ Capability-Lage ist gegenüber Phase 6 verbessert; endgültige Produktreife hängt von konkreter UX-\"}\n—\n{\"at\":\"2026-08-24T20:06:06.880757+00:00\",\"goal_id\":\"15511133\",\"action\":\"regression_detected\",\"detail\":\"Kein lokales Bildmodell\"}\n—\n{\"at\":\"2026-08-24T20:05:59.238622+00:00\",\"goal_id\":\"0"
+  },
+  {
+    "tab": "identity",
+    "label": "🪞\nProduktidentität",
+    "buttons": [],
+    "inputs": [],
+    "text": "Selbstbeschreibung\nEidolon — zentrales agentisches Hauptsystem für Gespräch, Projektbildung, adaptive Arbeitsflächen und autonome Ausführung mit klaren Leitplanken.\nName\nEidolon\nRolle\nZentrales agentisches Hauptsystem\nModell\nllama3.1:8b\nProvider\nollama\nDirektes Gegenüber\nEidolon ist das direkte Gegenüber und steuert Gespräch, Projektkontext und delegierte Arbeit.\nAktive Rollen\n1\nDefinierte Vorlagenrollen\n3\nRollentypen\nmeta, operational, project, task\nAKTIV WIRKSAME ROLLEN\nEidolon\ndirect · mit Freigabe\nEidolon ist das direkte Gegenüber und steuert Gespräch, Projektkontext und delegierte Arbeit.\nDEFINIERTE VORLAGEN\nProjekt-Bot (Vorlage)\nproject · explicit_approval\nProjekt-Bots sind definierte Rollen, werden aber erst nach expliziter Freigabe als dauerhafte Gegenüber angelegt.\nTask-Bot (Vorlage)\ntask · ephemeral_only\nTask-Bots sind Hintergrundrollen für klar begrenzte operative Arbeit, nicht dauerhafte Gesprächspartner.\nMeta-/Management-Bot (Vorlage)\nmeta · explicit_approval\nMeta-Bots liefern Organisationsintelligenz, sind aber nur definierte Rollen und nicht still aktive Entscheider."
+  },
+  {
+    "tab": "skills",
+    "label": "⚡\nFähigkeiten",
+    "buttons": [],
+    "inputs": [],
+    "text": "Übersicht\nchat\nAllgemeiner Chat-Skill\nruntime_facts\nLiefert Fakten über den LLM-Runtime\nsystem_info\nSystem-Informationen\ngoal_manager\nVerwalte autonome Ziele\ndevice_status\nZeige verbundene Geräte\nmesh_send\nNachricht an Peer senden\nnote\nNotizen verwalten\nfile_organizer\nDateien organisieren\nAlle Skills\nchat\nAllgemeiner Chat-Skill\nruntime_facts\nLiefert Fakten über den LLM-Runtime\nsystem_info\nSystem-Informationen\ngoal_manager\nVerwalte autonome Ziele\ndevice_status\nZeige verbundene Geräte\nmesh_send\nNachricht an Peer senden\nnote\nNotizen verwalten\nfile_organizer\nDateien organisieren"
+  },
+  {
+    "tab": "code",
+    "label": "🔧\nSystempflege",
+    "buttons": [
+      {
+        "text": "Analysieren",
+        "onclick": "analyzeCode()",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Dateien laden",
+        "onclick": "loadCodeRepair()",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Reparieren",
+        "onclick": "fixCode()",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      }
+    ],
+    "inputs": [
+      {
+        "tag": "INPUT",
+        "id": "code-file-path",
+        "placeholder": "Relativer Datei-Pfad, z.B. python/agent_server.py",
+        "value": "python/agent_server.py"
+      },
+      {
+        "tag": "TEXTAREA",
+        "id": "code-issue",
+        "placeholder": "Konkrete Issue-Beschreibung für einen Vorschlag eingeben...",
+        "value": ""
+      }
+    ],
+    "text": "Code-Analyse\nAnalysieren\nDateien laden\nCode-Reparatur\nReparieren"
+  },
+  {
+    "tab": "healing",
+    "label": "🩹\nStabilität",
+    "buttons": [
+      {
+        "text": "Aktualisieren",
+        "onclick": "loadHealing()",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      }
+    ],
+    "inputs": [],
+    "text": "Healing-Status\nAktualisieren\nStatus\nnot_wired\nEreignisse"
+  },
+  {
+    "tab": "mesh",
+    "label": "📡\nMesh & Geräte",
+    "buttons": [
+      {
+        "text": "🔄 Scan",
+        "onclick": "scanMeshPeers()",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Neues Pairing",
+        "onclick": "createPairing()",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-primary btn-sm"
+      },
+      {
+        "text": "Verbinden",
+        "onclick": "acceptPairing()",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-primary btn-sm"
+      }
+    ],
+    "inputs": [
+      {
+        "tag": "INPUT",
+        "id": "mesh-input-code",
+        "placeholder": "Pairing-Code eingeben...",
+        "value": ""
+      }
+    ],
+    "text": "Status\n🔄 Scan\nVerbindung herstellen\nQR-Code\nNeues Pairing\nCode eingeben\nVerbinden\nVerbundene Peers\nKeine Peers\nAusstehende Anfragen\nKeine Anfragen"
+  },
+  {
+    "tab": "backups",
+    "label": "💾\nSicherungen",
+    "buttons": [
+      {
+        "text": "+ Neues Backup",
+        "onclick": "createBackup()",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm btn-primary"
+      },
+      {
+        "text": "Wiederherstellen",
+        "onclick": "restoreBackupById(\"20260822_143050_test\")",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Löschen",
+        "onclick": "deleteBackupById(\"20260822_143050_test\")",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Wiederherstellen",
+        "onclick": "restoreBackupById(\"20260822_135523_test_manual\")",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Löschen",
+        "onclick": "deleteBackupById(\"20260822_135523_test_manual\")",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Wiederherstellen",
+        "onclick": "restoreBackupById(\"20260822_133534_pre_restore\")",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Löschen",
+        "onclick": "deleteBackupById(\"20260822_133534_pre_restore\")",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Wiederherstellen",
+        "onclick": "restoreBackupById(\"20260822_133452_test_manual\")",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Löschen",
+        "onclick": "deleteBackupById(\"20260822_133452_test_manual\")",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      }
+    ],
+    "inputs": [],
+    "text": "Status\n+ Neues Backup\nBackups\n4 / 10\nSpeicher\n386.74 MB\nVerfügbare Backups\n20260822_143050_test\ntest · 0.3 MB\nWiederherstellen\nLöschen\n20260822_135523_test_manual\ntest_manual · 0.3 MB\nWiederherstellen\nLöschen\n20260822_133534_pre_restore\npre_restore · 193.1 MB\nWiederherstellen\nLöschen\n20260822_133452_test_manual\ntest_manual · 193.1 MB\nWiederherstellen\nLöschen"
+  },
+  {
+    "tab": "settings",
+    "label": "⚙️\nEinstellungen",
+    "buttons": [
+      {
+        "text": "Zurücksetzen",
+        "onclick": "resetSettingsArea('network')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Zurücksetzen",
+        "onclick": "resetSettingsArea('llm')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Zurücksetzen",
+        "onclick": "resetSettingsArea('autonomy')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Zurücksetzen",
+        "onclick": "resetSettingsArea('privacy')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      },
+      {
+        "text": "Zurücksetzen",
+        "onclick": "resetSettingsArea('ui')",
+        "disabled": false,
+        "id": "",
+        "cls": "btn btn-sm"
+      }
+    ],
+    "inputs": [],
+    "text": "🌐 Netzwerk\nZurücksetzen\nHTTP-Port\n8002 standard\nQUIC-Port\n4434 standard\n🧠 LLM & KI\nZurücksetzen\nModell\nllama3.1:8b standard\nProvider\nollama standard\n🤖 Autonomie\nZurücksetzen\nAutonomiegrad\nproactive standard\n🔒 Datenschutz\nZurücksetzen\nStatistiken\ntrue standard\n🎨 Darstellung\nZurücksetzen\nTheme\ndark standard"
+  }
+]

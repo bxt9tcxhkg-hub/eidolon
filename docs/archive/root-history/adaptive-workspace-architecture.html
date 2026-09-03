@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eidolon Adaptive Workspace Architecture</title>
+  <style>
+    body { margin:0; font-family: Inter, Arial, sans-serif; background:#020617; color:#e2e8f0; }
+    .wrap { max-width: 1500px; margin: 0 auto; padding: 28px; }
+    h1 { font-size: 32px; margin: 0 0 8px; }
+    p.lead { color:#94a3b8; max-width: 980px; line-height:1.6; }
+    .badge { display:inline-block; margin-top:12px; padding:8px 12px; border-radius:999px; background:rgba(34,211,238,.14); border:1px solid rgba(34,211,238,.35); color:#67e8f9; font-size:13px; }
+    .grid { display:grid; grid-template-columns: 1.15fr 0.85fr; gap:22px; margin-top:24px; }
+    .card { background:#0f172a; border:1px solid #1e293b; border-radius:18px; padding:18px; }
+    .card h2 { margin:0 0 12px; font-size:20px; }
+    .muted { color:#94a3b8; }
+    .stack { display:grid; gap:14px; }
+    .node { border-radius:16px; padding:16px; border:1px solid #1e293b; background:rgba(15,23,42,.92); }
+    .node.core { border-color:#fb7185; background:rgba(136,19,55,.18); }
+    .node.data { border-color:#a78bfa; background:rgba(76,29,149,.22); }
+    .node.logic { border-color:#34d399; background:rgba(6,78,59,.22); }
+    .node.ui { border-color:#22d3ee; background:rgba(8,51,68,.22); }
+    .node h3 { margin:0 0 8px; font-size:17px; }
+    ul { margin:10px 0 0 18px; color:#cbd5e1; line-height:1.55; }
+    .flow { display:grid; gap:12px; }
+    .arrow { text-align:center; color:#38bdf8; font-weight:700; }
+    .footer { display:grid; grid-template-columns: repeat(3, 1fr); gap:18px; margin-top:24px; }
+    .mini { background:#0f172a; border:1px solid #1e293b; border-radius:16px; padding:16px; }
+    .mini h3 { margin:0 0 8px; font-size:16px; }
+    code { color:#67e8f9; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Eidolon Adaptive Workspace Architecture</h1>
+    <p class="lead">Domänenagnostische, need-driven Workspaces statt hardcodierter Hubs. Nutzerpräferenzen und wiederkehrende Themen erzeugen adaptive Arbeitsbereiche — mit harter Core-Shell-Sperre, lokalem Fallback und Feature-Flag-Kill-Switch.</p>
+    <div class="badge">CORE SHELL LOCKED · WORKSPACE HOST SANDBOXED · NEED-DRIVEN GENERATION</div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Systemfluss</h2>
+        <div class="flow">
+          <div class="node core">
+            <h3>Locked Core Shell</h3>
+            <div class="muted">Navigation, Chat, Dashboard, Mesh, Settings, Topbar, Status</div>
+            <ul>
+              <li>niemals durch adaptive Module ersetzt</li>
+              <li>bleibt bei Modulfehlern immer bedienbar</li>
+              <li>Fallback bleibt im Core-System renderbar</li>
+            </ul>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="node data">
+            <h3>User Model Store</h3>
+            <ul>
+              <li><code>user_model.json</code></li>
+              <li>Sprache, Visualisierungsstil, Autonomiegrad, UI-Dichte</li>
+              <li>Core-Shell-Lock-Präferenz</li>
+            </ul>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="node data">
+            <h3>Topic Attention Store</h3>
+            <ul>
+              <li><code>interaction_log.jsonl</code> + <code>topic_attention.json</code></li>
+              <li>Wiederholung, Frische, Handlungsrelevanz</li>
+              <li>Need-Scores: planning / tracking / decision / knowledge / execution / reflection</li>
+            </ul>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="node logic">
+            <h3>Workspace Generator</h3>
+            <ul>
+              <li>kein Training-/Health-/Career-Sonderfall</li>
+              <li>Topic + Need + User Profile → Layout + Module</li>
+              <li>Templates: hybrid / planner / tracker / decision / knowledge / review</li>
+            </ul>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="node logic">
+            <h3>Workspace Registry</h3>
+            <ul>
+              <li><code>workspaces.json</code></li>
+              <li>Feature-Flag, activate/suspend, aktuelle Themenlage</li>
+              <li>veraltete Vorschläge werden verworfen</li>
+            </ul>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="node ui">
+            <h3>Adaptive Workspace Host</h3>
+            <ul>
+              <li>einziger erlaubter Render-Slot: <code>#adaptive-workspace-host</code></li>
+              <li>lokale Error Boundary + geschützter Fallback</li>
+              <li>zeigt User Model, Topic Attention und generierte Workspaces</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          <h2>Safety Contract</h2>
+          <ul>
+            <li><code>CORE_LOCKED_AREAS</code> schützt Root-Navigation, Chat, Dashboard, Settings</li>
+            <li><code>safe_mode = "sandboxed"</code></li>
+            <li><code>mutable_core_areas = []</code></li>
+            <li>Fehler im Host führen zu lokalem Fallback statt globalem Script-Absturz</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>API Surface</h2>
+          <ul>
+            <li><code>GET/POST /user/model</code></li>
+            <li><code>GET /user/topics</code></li>
+            <li><code>POST /user/topics/recompute</code></li>
+            <li><code>GET /workspaces</code></li>
+            <li><code>POST /workspaces/propose</code></li>
+            <li><code>POST /workspaces/feature-flag</code></li>
+            <li><code>POST /workspaces/{id}/activate</code></li>
+            <li><code>POST /workspaces/{id}/suspend</code></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Current Foundation Scope</h2>
+          <ul>
+            <li>implementiert: sichere Infrastruktur</li>
+            <li>noch offen: semantische Topic-Clustering-Ebene</li>
+            <li>noch offen: Proactive Assistance Engine</li>
+            <li>noch offen: echte persistente Workspace-Datenmodelle</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="mini">
+        <h3>Warum kein hardcodierter Hub?</h3>
+        <div class="muted">Weil das Thema nicht der richtige Primärschlüssel ist — der Unterstützungsbedarf ist es.</div>
+      </div>
+      <div class="mini">
+        <h3>Produktlogik</h3>
+        <div class="muted">Nicht domain-driven hubs, sondern need-driven workspaces.</div>
+      </div>
+      <div class="mini">
+        <h3>Failure Behavior</h3>
+        <div class="muted">Workspace kaputt → Host-Fallback. Core Shell bleibt stabil und interaktiv.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

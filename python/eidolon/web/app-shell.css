@@ -1,0 +1,15 @@
+@import url('./components/shell/shell-theme.css');
+@import url('./components/shell/shell-layout.css');
+@import url('./components/shell/shell-header.css');
+
+/* compatibility selectors kept inline for direct contract reads */
+.nav-item .icon::before {
+    content: '';
+    display: block;
+    width: 5px;
+    height: 5px;
+    margin: 6px auto 0;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.55;
+}

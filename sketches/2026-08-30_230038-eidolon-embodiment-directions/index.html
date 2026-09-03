@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eidolon Embodiment Directions</title>
+  <style>
+    :root{
+      --bg:#071018;--bg2:#0d1621;--panel:#111b27;--panel2:#162231;--line:rgba(170,200,235,.14);
+      --text:#eef4fb;--muted:#92a6bc;--accent:#7dd3fc;--accent2:#8b5cf6;--ok:#6ee7b7;--warn:#f6c760;--danger:#ef6b73;
+      --radius:24px;
+    }
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--text);
+      background:radial-gradient(circle at 15% 20%, rgba(125,211,252,.12), transparent 20%),radial-gradient(circle at 82% 14%, rgba(139,92,246,.10), transparent 18%),linear-gradient(180deg,#050b12,#08111a 55%,#071018)}
+    .page{padding:28px;max-width:1540px;margin:0 auto}
+    .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    h1{font-size:38px;letter-spacing:-.04em;margin:0 0 12px} .lead{max-width:980px;color:#c7d5e4;line-height:1.6;font-size:16px;margin-bottom:24px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+    .btn{border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));color:var(--text);padding:12px 14px;border-radius:14px;cursor:pointer}
+    .btn.active{background:linear-gradient(180deg,rgba(125,211,252,.18),rgba(125,211,252,.08));border-color:rgba(125,211,252,.25)}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .card{background:linear-gradient(180deg,rgba(17,27,39,.96),rgba(10,16,24,.96));border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:0 24px 60px rgba(0,0,0,.34);position:relative;overflow:hidden}
+    .tag{display:inline-flex;padding:7px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:#dbe7f4;background:rgba(255,255,255,.03);margin-bottom:12px}
+    .card h2{margin:0 0 10px;font-size:26px;letter-spacing:-.03em} .card p{margin:0;color:#c6d4e3;line-height:1.55}
+    .stage{height:360px;border-radius:20px;border:1px solid rgba(255,255,255,.06);margin:18px 0 16px;position:relative;overflow:hidden;background:linear-gradient(180deg,#0c141f,#0b1017)}
+    .stage::after{content:"";position:absolute;inset:auto 0 0 0;height:110px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.18))}
+    .info{display:grid;gap:10px}.row{padding-top:10px;border-top:1px solid rgba(255,255,255,.06)}.row:first-child{border-top:0;padding-top:0}.label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}.value{font-size:14px;line-height:1.5}
+    .hero-node{position:absolute;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(11,18,27,.76);padding:10px 12px;color:#dce8f7;font-size:12px;backdrop-filter:blur(8px)}
+    .pulse{animation:pulse 3s ease-in-out infinite}@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(125,211,252,.08)}50%{box-shadow:0 0 0 14px rgba(125,211,252,.025)}}
+    .float{animation:hover 5s ease-in-out infinite}@keyframes hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+    .blink{animation:blink 4.6s infinite}@keyframes blink{0%,46%,100%{transform:scaleY(1)}48%,52%{transform:scaleY(.22)}}
+
+    /* Variant 1 humanoid */
+    .hum-aura{position:absolute;inset:0;display:grid;place-items:center}.hum-aura::before{content:"";width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(125,211,252,.17),transparent 62%);filter:blur(8px)}
+    .humanoid{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);width:220px;height:290px}
+    .hum-head{position:absolute;left:50%;top:18px;transform:translateX(-50%);width:118px;height:118px;border-radius:50%;border:1px solid rgba(125,211,252,.28);background:radial-gradient(circle at 50% 35%, rgba(255,255,255,.10), rgba(125,211,252,.10) 42%, rgba(15,24,37,.95) 72%);box-shadow:0 0 34px rgba(125,211,252,.10), inset 0 0 20px rgba(125,211,252,.08)}
+    .hum-eye{position:absolute;top:52px;width:22px;height:8px;border-radius:999px;background:linear-gradient(90deg,transparent,rgba(125,211,252,.95),transparent);box-shadow:0 0 12px rgba(125,211,252,.42)}
+    .hum-eye.l{left:30px}.hum-eye.r{right:30px}.hum-mouth{position:absolute;left:50%;top:82px;transform:translateX(-50%);width:36px;height:10px;border-bottom:2px solid rgba(125,211,252,.56);border-radius:0 0 999px 999px}
+    .hum-body{position:absolute;left:50%;top:116px;transform:translateX(-50%);width:154px;height:146px;border-radius:44% 44% 24% 24% / 32% 32% 22% 22%;border:1px solid rgba(125,211,252,.18);background:linear-gradient(180deg,rgba(125,211,252,.10),rgba(255,255,255,.02) 32%,rgba(12,18,28,.95) 75%)}
+    .hum-core{position:absolute;left:50%;top:54px;transform:translateX(-50%);width:46px;height:46px;border-radius:50%;background:radial-gradient(circle,rgba(125,211,252,.96),rgba(96,165,250,.42) 46%,transparent 70%);box-shadow:0 0 24px rgba(125,211,252,.36)}
+    .hum-arm{position:absolute;top:136px;width:42px;height:98px;border-radius:999px;border:1px solid rgba(125,211,252,.12);background:linear-gradient(180deg,rgba(125,211,252,.07),rgba(255,255,255,.02))}
+    .hum-arm.l{left:26px;transform:rotate(14deg)} .hum-arm.r{right:26px;transform:rotate(-14deg)}
+
+    /* Variant 2 mask */
+    .mask-stage-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 28%, rgba(139,92,246,.18), transparent 28%),linear-gradient(180deg,#0c1018,#0b1017)}
+    .mask-rings{position:absolute;inset:0;display:grid;place-items:center}.mask-rings::before,.mask-rings::after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(139,92,246,.18)}
+    .mask-rings::before{width:280px;height:280px}.mask-rings::after{width:210px;height:210px}
+    .mask-face{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:170px;height:220px;border-radius:44% 44% 48% 48% / 36% 36% 62% 62%;border:1px solid rgba(139,92,246,.28);background:linear-gradient(180deg,rgba(139,92,246,.12),rgba(18,14,30,.96) 64%);box-shadow:0 0 34px rgba(139,92,246,.14), inset 0 0 26px rgba(139,92,246,.08)}
+    .mask-eye{position:absolute;top:80px;width:28px;height:18px;border:1px solid rgba(196,181,253,.34);border-radius:58% 58% 42% 42%;background:radial-gradient(circle at 50% 45%, rgba(196,181,253,.9), rgba(139,92,246,.15) 60%, transparent 72%);box-shadow:0 0 18px rgba(196,181,253,.18)}
+    .mask-eye.l{left:34px}.mask-eye.r{right:34px}.mask-mouth{position:absolute;left:50%;top:138px;transform:translateX(-50%);width:56px;height:16px;border-top:1px solid rgba(196,181,253,.22);border-bottom:1px solid rgba(196,181,253,.22);border-radius:999px;opacity:.82}
+    .mask-spire{position:absolute;left:50%;top:-10px;transform:translateX(-50%);width:2px;height:58px;background:linear-gradient(180deg,rgba(139,92,246,.55),transparent)}
+
+    /* Variant 3 spectral */
+    .spec-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 20%, rgba(110,231,183,.14), transparent 26%),linear-gradient(180deg,#0b141a,#0a0f15)}
+    .spec-shape{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:210px;height:240px;background:radial-gradient(circle at 50% 28%, rgba(255,255,255,.16), rgba(110,231,183,.18) 20%, rgba(9,23,20,.2) 44%, transparent 70%);filter:blur(.3px)}
+    .spec-head{position:absolute;left:50%;top:84px;transform:translateX(-50%);width:112px;height:112px;border-radius:50%;background:radial-gradient(circle at 50% 40%, rgba(255,255,255,.16), rgba(110,231,183,.22) 34%, rgba(17,32,29,.2) 66%, transparent 74%)}
+    .spec-body{position:absolute;left:50%;top:128px;transform:translateX(-50%);width:160px;height:162px;border-radius:48% 48% 34% 34% / 34% 34% 70% 70%;background:linear-gradient(180deg, rgba(110,231,183,.12), rgba(110,231,183,.02) 48%, transparent 100%)}
+    .spec-tail{position:absolute;left:50%;top:232px;transform:translateX(-50%);width:110px;height:90px;background:linear-gradient(180deg, rgba(110,231,183,.18), transparent);clip-path:polygon(20% 0,80% 0,100% 100%,0 100%);filter:blur(8px)}
+    .spec-eye{position:absolute;top:48px;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle, rgba(255,255,255,.94), rgba(110,231,183,.22) 66%, transparent 72%);box-shadow:0 0 20px rgba(110,231,183,.36)}
+    .spec-eye.l{left:32px}.spec-eye.r{right:32px}
+    .spec-node{position:absolute;width:8px;height:8px;border-radius:50%;background:rgba(110,231,183,.8);box-shadow:0 0 14px rgba(110,231,183,.4)}
+    .spec-node.n1{left:30%;top:24%}.spec-node.n2{right:24%;top:38%}.spec-node.n3{left:28%;bottom:24%}.spec-node.n4{right:34%;bottom:18%}
+
+    .highlight{outline:1px solid rgba(125,211,252,.24)}
+    .summary{margin-top:22px;padding:18px 20px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03);display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+    .summary strong{display:block;font-size:18px;margin-bottom:6px}.summary p{margin:0;max-width:980px;color:#c8d5e4;line-height:1.55}
+    .summary .pick{color:#9ad7ff}
+    @media (max-width:1200px){.grid{grid-template-columns:1fr}}  
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="eyebrow">Sichtbare Gestaltungsrichtungen</div>
+    <h1>So könnten meine Vorschläge konkret aussehen</h1>
+    <div class="lead">Du wolltest es dir optisch vorstellen können. Deshalb zeige ich dir drei klar unterschiedliche Richtungen für Eidolons Gesicht/Körper: <b>humanoid-operativ</b>, <b>maskenhaft-souverän</b> und <b>geistartig-systemisch</b>. Alle drei sind als sichtbare Konzepte gebaut, nicht nur beschrieben.</div>
+
+    <div class="toolbar">
+      <button class="btn active" data-select="humanoid">1 · Humanoid-operativ</button>
+      <button class="btn" data-select="mask">2 · Maskenhaft-souverän</button>
+      <button class="btn" data-select="spectral">3 · Geistartig-systemisch</button>
+    </div>
+
+    <div class="grid">
+      <section class="card highlight" id="card-humanoid">
+        <div class="tag">Empathie + Operative Klarheit</div>
+        <h2>Humanoid-operativ</h2>
+        <p>Ein klarer Kopf, angedeuteter Torso, sichtbarer Kern. Das wirkt am stärksten wie ein Gegenüber und baut am ehesten Bindung auf.</p>
+        <div class="stage">
+          <div class="hum-aura pulse"></div>
+          <div class="hero-node" style="left:18px;top:18px"><b style="display:block;color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Mission</b>Führt aktive Arbeit sichtbar</div>
+          <div class="hero-node" style="right:18px;top:44px"><b style="display:block;color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">State</b>Active foreground</div>
+          <div class="hero-node" style="left:28px;bottom:26px"><b style="display:block;color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Pods</b>3 laufende Körper</div>
+          <div class="humanoid float">
+            <div class="hum-head">
+              <div class="hum-eye l blink"></div>
+              <div class="hum-eye r blink"></div>
+              <div class="hum-mouth"></div>
+            </div>
+            <div class="hum-body"><div class="hum-core pulse"></div></div>
+            <div class="hum-arm l"></div><div class="hum-arm r"></div>
+          </div>
+        </div>
+        <div class="info">
+          <div class="row"><div class="label">Wirkung</div><div class="value">Am direktesten „jemand arbeitet für mich“. Gute Bindung zwischen Mensch und System.</div></div>
+          <div class="row"><div class="label">Stärke</div><div class="value">Präsenz, Reaktion, Wiedererkennung, Blickkontakt.</div></div>
+          <div class="row"><div class="label">Risiko</div><div class="value">Kann kippen, wenn zu menschlich, zu süß oder zu rollenspielartig.</div></div>
+        </div>
+      </section>
+
+      <section class="card" id="card-mask">
+        <div class="tag">Souverän + ikonisch + erwachsen</div>
+        <h2>Maskenhaft-souverän</h2>
+        <p>Weniger Körper, mehr Präsenz. Eine ruhige, beinahe zeremonielle Maske mit festen Augen und kontrollierter Ausstrahlung.</p>
+        <div class="stage">
+          <div class="mask-stage-bg"></div>
+          <div class="mask-rings pulse"></div>
+          <div class="hero-node" style="left:18px;top:18px"><b style="display:block;color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Signal</b>Souverän statt freundlich</div>
+          <div class="hero-node" style="right:18px;bottom:28px"><b style="display:block;color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Mode</b>Approval / Decision</div>
+          <div class="mask-face float">
+            <div class="mask-spire"></div>
+            <div class="mask-eye l blink"></div>
+            <div class="mask-eye r blink"></div>
+            <div class="mask-mouth"></div>
+          </div>
+        </div>
+        <div class="info">
+          <div class="row"><div class="label">Wirkung</div><div class="value">Sehr eigenständig, ikonisch und ernst. Eher „Instanz“ als Begleiter.</div></div>
+          <div class="row"><div class="label">Stärke</div><div class="value">Hohe Reife, wenig Gefahr von Billigkeit, starke Marke.</div></div>
+          <div class="row"><div class="label">Risiko</div><div class="value">Weniger warm. Bindung entsteht über Autorität statt Nähe.</div></div>
+        </div>
+      </section>
+
+      <section class="card" id="card-spectral">
+        <div class="tag">Systemisch + fließend + nicht-menschlich</div>
+        <h2>Geistartig-systemisch</h2>
+        <p>Weniger harter Körper, mehr operative Erscheinung. Ein intelligentes Feld mit Gesichtssignalen und weicher Form.</p>
+        <div class="stage">
+          <div class="spec-bg"></div>
+          <div class="hero-node" style="left:20px;top:18px"><b style="display:block;color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Pattern</b>Präsenz statt Anatomie</div>
+          <div class="hero-node" style="right:18px;top:40px"><b style="display:block;color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Flow</b>Verifying / Observing</div>
+          <div class="spec-shape float pulse">
+            <div class="spec-head">
+              <div class="spec-eye l blink"></div>
+              <div class="spec-eye r blink"></div>
+            </div>
+            <div class="spec-body"></div>
+            <div class="spec-tail"></div>
+            <div class="spec-node n1 pulse"></div><div class="spec-node n2 pulse"></div><div class="spec-node n3 pulse"></div><div class="spec-node n4 pulse"></div>
+          </div>
+        </div>
+        <div class="info">
+          <div class="row"><div class="label">Wirkung</div><div class="value">Am wenigsten bot-haft, am stärksten „operative Intelligenz als Erscheinung“.</div></div>
+          <div class="row"><div class="label">Stärke</div><div class="value">Eigenständig, elegant, schwer mit normalem Chatbot zu verwechseln.</div></div>
+          <div class="row"><div class="label">Risiko</div><div class="value">Kann zu abstrakt werden und weniger direkte Bindung erzeugen.</div></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="summary" id="summary">
+      <div>
+        <strong class="pick">Meine Empfehlung: humanoid-operativ als Basis</strong>
+        <p>Wenn du ausdrücklich Bindung zwischen Mensch und System willst, ist die linke Richtung die stärkste Ausgangsbasis. Aber ich würde sie strenger und erwachsener halten als einen klassischen Bot: weniger Cartoon, mehr operative Präsenz.</p>
+      </div>
+      <div class="value" style="max-width:320px">
+        <div class="label">Konkrete Ableitung</div>
+        <div>Gesicht + Torso + Lichtkern + kontrollierte Bewegung. Keine Beine, kein voller Mensch, kein Maskottchen.</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const summaries = {
+      humanoid: {
+        title: 'Meine Empfehlung: humanoid-operativ als Basis',
+        text: 'Wenn du ausdrücklich Bindung zwischen Mensch und System willst, ist die linke Richtung die stärkste Ausgangsbasis. Aber ich würde sie strenger und erwachsener halten als einen klassischen Bot: weniger Cartoon, mehr operative Präsenz.',
+        aside: 'Gesicht + Torso + Lichtkern + kontrollierte Bewegung. Keine Beine, kein voller Mensch, kein Maskottchen.'
+      },
+      mask: {
+        title: 'Maskenhaft wäre die reifste, kühlste Richtung',
+        text: 'Wenn Eidolon eher wie eine souveräne Instanz wirken soll, wäre die mittlere Richtung stark. Sie vermeidet Kitsch fast vollständig, opfert aber etwas Nähe und spontane Bindung.',
+        aside: 'Feste Maske, kontrollierte Augen, kaum Anatomie, starke ikonische Wirkung.'
+      },
+      spectral: {
+        title: 'Geistartig wäre die eigenständigste Produktidentität',
+        text: 'Wenn Eidolon nicht wie ein Bot, sondern wie eine operative Intelligenz-Erscheinung wirken soll, ist die rechte Richtung sehr stark. Sie ist elegant, aber bindet weniger direkt als ein klar lesbares Gesicht/Körper-Modell.',
+        aside: 'Fließende Form, Lichtknoten, Augen als Fokus, Körper eher als Feld denn als Anatomie.'
+      }
+    };
+    document.querySelectorAll('[data-select]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.select;
+        document.querySelectorAll('.btn').forEach(b => b.classList.toggle('active', b === btn));
+        document.getElementById('card-humanoid').classList.toggle('highlight', key === 'humanoid');
+        document.getElementById('card-mask').classList.toggle('highlight', key === 'mask');
+        document.getElementById('card-spectral').classList.toggle('highlight', key === 'spectral');
+        const s = summaries[key];
+        document.querySelector('#summary .pick').textContent = s.title;
+        document.querySelector('#summary p').textContent = s.text;
+        document.querySelector('#summary .value div:last-child').textContent = s.aside;
+      });
+    });
+  </script>
+</body>
+</html>

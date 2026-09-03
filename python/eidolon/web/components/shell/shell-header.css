@@ -1,0 +1,21 @@
+        /* Main */
+        .main {
+            flex: 1;
+            margin-left: 240px;
+            padding: 28px 32px;
+            max-width: 1320px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .page-header {
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex; justify-content: space-between; align-items: flex-start;
+        }
+        
+        .page-header h2 { font-size: 1.4rem; font-weight: 600; letter-spacing: -0.02em; }
+        .page-header .subtitle { font-size: 0.85rem; color: var(--text-muted); margin-top: 3px; }
+        
+        .page-actions { display: flex; gap: 8px; }

@@ -1,0 +1,118 @@
+/* ═══ ZIEL-KARTEN: eindeutige Statusdarstellung ═══ */
+.goal-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 4px 1fr;
+    gap: 0;
+    background: var(--surface) !important;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+.goal-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.18); }
+.goal-stripe { width: 4px; height: 100%; }
+.goal-body { padding: 16px 18px; min-width: 0; }
+.goal-card[data-status="active"] { border-color: rgba(74,125,255,0.45); }
+.goal-card[data-status="active"] .goal-stripe { background: var(--accent); }
+.goal-card[data-status="planned"] .goal-stripe { background: var(--text-dim); }
+.goal-card[data-status="paused"] .goal-stripe { background: var(--warning); }
+.goal-card[data-status="done"] .goal-stripe { background: var(--success); }
+.goal-card[data-status="failed"] { border-color: rgba(239,68,68,0.45); }
+.goal-card[data-status="failed"] .goal-stripe { background: var(--danger); }
+.goal-card[data-status="cancelled"] .goal-stripe { background: var(--border); }
+.goal-card[data-status="done"] .goal-body { opacity: 0.72; }
+.goal-card[data-status="cancelled"] .goal-body { opacity: 0.5; }
+.goal-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+.goal-headline { min-width: 0; flex: 1; }
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px 5px 9px;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.status-chip .ico { font-size: 0.9rem; line-height: 1; }
+.status-chip[data-s="active"] { background: var(--accent); color: #fff; }
+.status-chip[data-s="planned"] { background: var(--surface-hover); color: var(--text-muted); border: 1px solid var(--border); }
+.status-chip[data-s="paused"] { background: var(--warning); color: #1a1d26; }
+.status-chip[data-s="done"] { background: var(--success); color: #fff; }
+.status-chip[data-s="failed"] { background: var(--danger); color: #fff; }
+.status-chip[data-s="cancelled"] { background: var(--border); color: var(--text-muted); }
+.status-chip[data-s="active"] { animation: chipPulse 2.2s ease-in-out infinite; }
+@keyframes chipPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(74,125,255,0.45); }
+    50% { box-shadow: 0 0 0 5px rgba(74,125,255,0); }
+}
+.goal-title {
+    font-size: 1.02rem;
+    font-weight: 600;
+    margin-top: 9px;
+    line-height: 1.35;
+    word-break: break-word;
+}
+.goal-card[data-status="done"] .goal-title,
+.goal-card[data-status="cancelled"] .goal-title {
+    text-decoration: line-through;
+    text-decoration-color: var(--text-dim);
+}
+.goal-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+.prio-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+.prio-badge[data-p="5"] { background: rgba(239,68,68,0.16); color: var(--danger); border-color: rgba(239,68,68,0.35); }
+.prio-badge[data-p="4"] { background: rgba(245,158,11,0.16); color: var(--warning); border-color: rgba(245,158,11,0.35); }
+.prio-badge[data-p="3"] { background: rgba(74,125,255,0.14); color: var(--accent); border-color: rgba(74,125,255,0.3); }
+.prio-badge[data-p="2"],
+.prio-badge[data-p="1"] { background: var(--surface-hover); color: var(--text-muted); border-color: var(--border); }
+.comp-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 0.85rem;
+}
+.comp-row:last-child { border-bottom: none; }
+.comp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.comp-dot.ok { background: var(--success); }
+.comp-dot.warn { background: var(--warning); }
+.comp-dot.err { background: var(--danger); }
+.comp-name { font-weight: 500; min-width: 130px; color: var(--text); }
+.comp-detail { color: var(--text-muted); font-size: 0.8rem; flex: 1; text-align: right; }
+.meter { height: 6px; background: var(--border-subtle); border-radius: 3px; overflow: hidden; margin: 5px 0 0 0; }
+.meter-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.4s ease; }
+.meter-fill.hot { background: var(--danger); }
+.cat-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    background: var(--bg);
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+}

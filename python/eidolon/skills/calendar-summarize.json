@@ -1,0 +1,12 @@
+{
+  "id": "calendar-summarize",
+  "name": "Kalender zusammenfassen",
+  "description": "Fasst Kalendereinträge der nächsten 24h zusammen.",
+  "tags": [
+    "calendar",
+    "summary",
+    "daily"
+  ],
+  "handler": "builtin.calendar_summarize",
+  "params": {}
+}

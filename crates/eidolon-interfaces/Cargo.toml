@@ -1,0 +1,21 @@
+[package]
+name = "eidolon-interfaces"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+axum.workspace = true
+ratatui = "0.29"
+crossterm = { version = "0.28", features = ["event-stream"] }
+eidolon-core = { path = "../eidolon-core" }
+eidolon-memory = { path = "../eidolon-memory" }
+eidolon-mesh = { path = "../eidolon-mesh" }

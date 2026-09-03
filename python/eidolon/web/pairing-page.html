@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Eidolon Pairing</title>
+<style>
+:root {
+  --bg: #0e1117;
+  --surface: #161b22;
+  --border: #21262d;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --accent: #58a6ff;
+  --success: #3fb950;
+  --error: #f85149;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px 24px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+.icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #1f6feb, #58a6ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 24px;
+  line-height: 1.4;
+}
+.code-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.code {
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--accent);
+}
+.label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+button {
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  transition: opacity 0.15s;
+}
+button:hover { opacity: 0.9; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.status {
+  margin-top: 16px;
+  font-size: 0.85rem;
+  min-height: 20px;
+}
+.status.success { color: var(--success); }
+.status.error { color: var(--error); }
+.next { margin-top: 12px; font-size: 0.8rem; color: var(--text-muted); line-height: 1.45; }
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">🔗</div>
+  <h1>Eidolon Mesh</h1>
+  <p class="subtitle">Verbindung zu <strong>__PAIRING_NAME__</strong></p>
+  <div class="code-box">
+    <div class="label">Pairing-Code</div>
+    <div class="code">__PAIRING_CODE__</div>
+  </div>
+  <button id="connectBtn" onclick="connect()">Verbinden</button>
+  <div id="status" class="status"></div>
+  <div id="next" class="next">Nach erfolgreicher Kopplung öffnet sich die echte mobile Eidolon-Oberfläche.</div>
+</div>
+<script>
+const CODE = "__PAIRING_CODE_JS__";
+const NAME = "__PAIRING_NAME_JS__";
+function randomHex(bytes) {
+  const data = new Uint8Array(bytes);
+  crypto.getRandomValues(data);
+  return [...data].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function browserIdentity() {
+  const storageKey = 'eidolon-browser-peer';
+  let identity = null;
+  try { identity = JSON.parse(localStorage.getItem(storageKey) || 'null'); } catch (_) { identity = null; }
+  if (!identity || !identity.peer_id || !identity.public_key) {
+    identity = { peer_id: 'browser-' + randomHex(8), public_key: randomHex(32) };
+    localStorage.setItem(storageKey, JSON.stringify(identity));
+  }
+  return identity;
+}
+async function connect() {
+  const btn = document.getElementById('connectBtn');
+  const status = document.getElementById('status');
+  const identity = browserIdentity();
+  const deviceName = (navigator.userAgentData && navigator.userAgentData.platform ? navigator.userAgentData.platform : 'Handy-Browser');
+  btn.disabled = true;
+  status.className = 'status';
+  status.innerHTML = '<span class="spinner"></span>Verbinde dieses Gerät...';
+  try {
+    const res = await fetch('/mesh/pairing/accept', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: CODE, device_name: deviceName, device_peer_id: identity.peer_id, device_public_key: identity.public_key })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      status.className = 'status success';
+      status.innerHTML = '✓ Dieses Gerät ist mit Eidolon verbunden';
+      btn.textContent = 'Verbunden';
+      btn.style.background = 'var(--success)';
+      localStorage.setItem('eidolon-paired-device', JSON.stringify({ peer_id: identity.peer_id, name: deviceName, paired_at: new Date().toISOString() }));
+      document.getElementById('next').textContent = 'Öffne mobile Eidolon-Oberfläche...';
+      window.location.replace('/#chat');
+    } else {
+      status.className = 'status error';
+      status.textContent = '✗ ' + (data.error || 'Fehler');
+      btn.disabled = false;
+    }
+  } catch (e) {
+    status.className = 'status error';
+    status.textContent = '✗ Netzwerkfehler: ' + e.message;
+    btn.disabled = false;
+  }
+}
+document.getElementById('status').textContent = 'Tippe auf den Button, um dieses Gerät mit Eidolon zu koppeln.';
+</script>
+</body>
+</html>

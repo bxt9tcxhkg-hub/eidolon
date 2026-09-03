@@ -1,0 +1,137 @@
+            <div id="panel-chat" class="tab-panel active">
+                <div class="card">
+                    <div class="chat-shell">
+                        <div class="chat-thread-panel">
+                            <div class="chat-panel-header" style="margin-bottom:12px;">
+                                <div>
+                                    <h3 id="chat-session-title" style="margin:0;">Neue Unterhaltung</h3>
+                                    <div class="chat-panel-meta" id="chat-session-meta">Wähle links eine Unterhaltung oder starte eine neue.</div>
+                                </div>
+                                <button class="btn btn-sm btn-primary" data-ui-action="createChatSession">Neue Unterhaltung</button>
+                            </div>
+                            <div class="chat-home-hero">
+                                <div class="chat-home-brand">
+                                    <div class="eidolon-signature hero" data-presence-state="idle" aria-hidden="true">
+                                        <span class="signature-ring signature-ring-outer"></span>
+                                        <span class="signature-ring signature-ring-inner"></span>
+                                        <span class="signature-core"></span>
+                                    </div>
+                                    <div>
+                                        <div class="chat-home-eyebrow">Eidolon</div>
+                                        <h3>Arbeite mit mir direkt am Ziel, nicht an der Tool-Struktur.</h3>
+                                        <p>Beschreibe deine Aufgabe, setze eine bestehende Unterhaltung fort oder springe zurück in laufende Arbeit. Ich zeige dir nur das, was gerade zählt.</p>
+                                    </div>
+                                </div>
+                                <div class="chat-home-status-row">
+                                    <div class="chat-home-status-pill" id="chat-presence-badge">Bereit für neue Arbeit</div>
+                                    <div class="chat-home-status-note" id="chat-presence-note">Noch keine laufende Arbeit erkannt.</div>
+                                </div>
+                                <div class="chat-home-grid">
+                                    <div class="chat-home-card-block">
+                                        <div class="chat-panel-title">Gerade aktiv</div>
+                                        <div id="chat-active-summary" class="chat-home-summary"><div class="empty">Lade aktuelle Arbeit…</div></div>
+                                    </div>
+                                    <div class="chat-home-card-block">
+                                        <div class="chat-panel-title">Braucht deine Entscheidung</div>
+                                        <div id="chat-decision-summary" class="chat-home-summary"><div class="empty">Prüfe Freigaben und Blocker…</div></div>
+                                    </div>
+                                    <div class="chat-home-card-block">
+                                        <div class="chat-panel-title">Zuletzt aktiv</div>
+                                        <div id="chat-recent-summary" class="chat-home-summary"><div class="empty">Lade letzte Unterhaltungen…</div></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card" id="chat-context-summary" style="margin:0 0 12px 0;padding:12px 14px;">
+                                <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                                    <div>
+                                        <div class="chat-panel-title">Arbeitskontext</div>
+                                        <div class="chat-panel-meta" id="chat-context-state">Noch kein belastbarer Arbeitskontext.</div>
+                                    </div>
+                                    <div>
+                                        <div class="chat-panel-title">Antwortmodus</div>
+                                        <div class="chat-panel-meta" id="chat-intent-mode">Warte auf Arbeitssignal</div>
+                                    </div>
+                                </div>
+                                <div class="chat-panel-meta" id="chat-next-step" style="margin-top:10px;">Sobald ein echter Kontext da ist, erscheint hier der nächste sinnvolle Schritt.</div>
+                            </div>
+                            <div class="chat-layout">
+                                <div class="chat-messages" id="chat-messages"></div>
+                                <div class="chat-input-shell">
+                                    <div class="chat-input-caption">Sag mir, was du erreichen willst oder woran ich weiterarbeiten soll.</div>
+                                    <div class="chat-input">
+                                        <input type="text" id="chat-input" placeholder="Beschreibe Ziel, Problem oder nächsten Schritt…" data-enter-action="sendChat">
+                                        <button class="btn btn-primary" data-ui-action="sendChat">Senden</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="panel-pods" class="tab-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Helfer</h3>
+                        <button class="btn btn-sm" data-ui-action="loadPodsView">Aktualisieren</button>
+                    </div>
+                    <div id="pods-list"><div class="empty">Keine aktiven Pod-Runs.</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Helfer-Detail</h3></div>
+                    <div id="pod-detail"><div class="empty">Kein aktiver Pod gewählt.</div></div>
+                </div>
+            </div>
+            
+            <div id="panel-dashboard" class="tab-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Systemstatus</h3>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span id="health-badge" class="tag info">Lade…</span>
+                            <button class="btn btn-sm" data-ui-action="loadDashboard">Aktualisieren</button>
+                        </div>
+                    </div>
+                    <div id="health-problems"></div>
+                    <div id="health-summary"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3>Komponenten</h3></div>
+                    <div id="dash-components"><div class="empty">Lade…</div></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Fähigkeiten</h3>
+                        <span id="cap-count" class="tag info"></span>
+                    </div>
+                    <div id="capabilities-summary"><div class="empty">Lade…</div></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3>Laufzeit &amp; Ressourcen</h3></div>
+                    <div id="dash-metrics"><div class="empty">Lade…</div></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3>Datenablage</h3></div>
+                    <div id="dash-storage"><div class="empty">Lade…</div></div>
+                </div>
+            </div>
+
+            <div id="panel-execution" class="tab-panel">
+                <div class="card">
+                    <div class="card-header"><h3>Laufzeitübersicht</h3><button class="btn btn-sm" data-ui-action="loadExecutionView">Aktualisieren</button></div>
+                    <div id="execution-summary"><div class="empty">Execution Surface lädt…</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Verfügbare Laufzeitfähigkeiten</h3></div>
+                    <div id="execution-capabilities"><div class="empty">Keine Capabilities-Daten.</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Verbundene Geräte</h3></div>
+                    <div id="execution-devices"><div class="empty">Keine gekoppelten Geräte.</div></div>
+                </div>
+            </div>
+            

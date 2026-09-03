@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eidolon Project Mockups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0b1020;
+  --panel: #11182c;
+  --panel-2: #18223a;
+  --line: #243252;
+  --text: #eef4ff;
+  --muted: #9eb0d1;
+  --blue: #4f8cff;
+  --cyan: #3dd9ff;
+  --green: #35d07f;
+  --yellow: #ffcb47;
+  --red: #ff6b7a;
+  --purple: #9f6bff;
+}
+body {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: radial-gradient(circle at top left, #162548 0%, var(--bg) 45%);
+  color: var(--text);
+  min-height: 100vh;
+}
+button { font: inherit; }
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 280px 1fr 340px;
+  gap: 18px;
+  padding: 18px;
+}
+.panel {
+  background: rgba(17, 24, 44, 0.94);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 22px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.28);
+}
+.sidebar, .details { padding: 20px; }
+.brand { display:flex; align-items:center; justify-content:space-between; margin-bottom: 18px; }
+.brand h1 { font-size: 1.15rem; }
+.brand .pill { font-size: .8rem; color: var(--green); background: rgba(53,208,127,.12); border:1px solid rgba(53,208,127,.22); padding: 6px 10px; border-radius: 999px; }
+.section-title { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 10px; }
+.project-list, .status-list, .detail-list, .mini-list { display: grid; gap: 10px; }
+.project-item, .status-item, .detail-card, .mini-item {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+.project-item.active { border-color: rgba(79,140,255,.45); background: rgba(79,140,255,.14); }
+.project-item strong, .detail-card strong, .node strong, .card-title { display:block; margin-bottom:4px; }
+.project-item small, .status-item small, .detail-card small, .mini-item small { color: var(--muted); line-height: 1.45; }
+.workspace { padding: 18px; display:flex; flex-direction:column; }
+.topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom: 14px; gap: 12px; }
+.topbar h2 { font-size: 1.35rem; }
+.topbar p { color: var(--muted); margin-top: 4px; }
+.actions, .tabs { display:flex; gap: 10px; flex-wrap:wrap; }
+.btn {
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.btn.primary { background: linear-gradient(135deg, var(--blue), #3464ff); border-color: transparent; }
+.btn.active { background: rgba(79,140,255,.18); border-color: rgba(79,140,255,.45); }
+.meta-strip { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 16px; }
+.meta {
+  background: rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius: 16px; padding: 14px;
+}
+.meta .label { color: var(--muted); font-size: .8rem; margin-bottom: 8px; }
+.meta .value { font-size: 1.25rem; font-weight: 700; }
+.canvas, .board, .timeline { flex:1; min-height: 640px; background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015)); border:1px solid rgba(255,255,255,.06); border-radius: 22px; position: relative; overflow: hidden; }
+.hidden { display:none; }
+.tag { display:inline-flex; align-items:center; gap:6px; font-size:.76rem; color:var(--muted); padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); }
+.status-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+.dot-green { background: var(--green); } .dot-yellow { background: var(--yellow); } .dot-red { background: var(--red); } .dot-blue { background: var(--blue); }
+.node {
+  position:absolute; width: 210px; background: rgba(17,24,44,.95); border:1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 14px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.24); cursor:pointer; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.node:hover { transform: translateY(-2px); border-color: rgba(79,140,255,.45); box-shadow: 0 16px 34px rgba(0,0,0,.28); }
+.node.active { border-color: rgba(61,217,255,.48); box-shadow: 0 0 0 1px rgba(61,217,255,.25), 0 16px 34px rgba(0,0,0,.28); }
+.node .type { color: var(--cyan); font-size:.76rem; text-transform: uppercase; letter-spacing:.12em; margin-bottom: 8px; }
+.node .footer { display:flex; justify-content:space-between; align-items:center; margin-top: 12px; color: var(--muted); font-size:.78rem; }
+svg.lines { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.board-grid { display:grid; grid-template-columns: repeat(5, minmax(220px, 1fr)); gap: 14px; padding: 16px; min-height: 100%; }
+.column { background: rgba(255,255,255,.025); border:1px solid rgba(255,255,255,.06); border-radius: 18px; padding: 12px; }
+.column h3 { font-size: .95rem; margin-bottom: 10px; }
+.column .count { color: var(--muted); font-size: .8rem; margin-left: 6px; }
+.card { background: rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.07); border-radius: 14px; padding: 12px; margin-bottom: 10px; cursor:pointer; }
+.card.active { border-color: rgba(79,140,255,.46); background: rgba(79,140,255,.14); }
+.card p { color: var(--muted); font-size: .84rem; line-height: 1.45; margin-top: 6px; }
+.timeline-wrap { padding: 20px; }
+.timeline-row { display:grid; grid-template-columns: 180px 1fr; gap: 18px; align-items:center; margin-bottom: 18px; }
+.timeline-bar { position:relative; height: 24px; background: rgba(255,255,255,.04); border-radius: 999px; overflow:hidden; border:1px solid rgba(255,255,255,.06); }
+.timeline-bar span { position:absolute; inset:0 auto 0 0; border-radius:999px; }
+.notice { margin-top: 16px; padding: 12px 14px; border-radius: 14px; border:1px solid rgba(61,217,255,.22); background: rgba(61,217,255,.08); color: #c8f8ff; font-size:.9rem; }
+.detail-card ul { margin-top: 10px; padding-left: 18px; color: var(--muted); }
+.compare-link { color: var(--cyan); text-decoration: none; font-size: .88rem; }
+@media (max-width: 1300px) {
+  .app { grid-template-columns: 240px 1fr; }
+  .details { grid-column: 1 / -1; }
+}
+</style>
+</head>
+<body>
+<div style="padding:32px; max-width:1200px; margin:0 auto; font-family:Inter, sans-serif; color:#eef4ff;">
+      <h1 style="margin-bottom:10px;">Eidolon Projects — Mockup Varianten</h1>
+      <p style="color:#9eb0d1; margin-bottom:24px;">Drei Richtungen, um dir das bildlich vorzustellen: Graph-first, Board-first und Hybrid.</p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:18px;">
+        <a href="001-graph-first/index.html" style="display:block; text-decoration:none; color:inherit; background:#11182c; border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:20px;">
+          <strong style="font-size:1.1rem; display:block; margin-bottom:8px;">1. Graph-first</strong><span style="color:#9eb0d1;">Ideal, wenn du Projektdenken, Architektur und Abhängigkeiten zuerst sehen willst.</span>
+        </a>
+        <a href="002-board-first/index.html" style="display:block; text-decoration:none; color:inherit; background:#11182c; border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:20px;">
+          <strong style="font-size:1.1rem; display:block; margin-bottom:8px;">2. Board-first</strong><span style="color:#9eb0d1;">Ideal, wenn du primär tägliche Arbeit, Prioritäten und Status führen willst.</span>
+        </a>
+        <a href="003-hybrid-workspace/index.html" style="display:block; text-decoration:none; color:inherit; background:#11182c; border:1px solid rgba(79,140,255,.35); border-radius:18px; padding:20px; box-shadow:0 10px 24px rgba(0,0,0,.25);">
+          <strong style="font-size:1.1rem; display:block; margin-bottom:8px; color:#3dd9ff;">3. Hybrid Workspace</strong><span style="color:#9eb0d1;">Meine Empfehlung für Eidolon: visuell denken und gleichzeitig operativ arbeiten.</span>
+        </a>
+      </div>
+    </div>
+<script></script>
+</body>
+</html>

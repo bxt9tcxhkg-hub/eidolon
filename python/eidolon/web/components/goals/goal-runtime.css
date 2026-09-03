@@ -1,0 +1,127 @@
+.status-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+    gap: 9px;
+    margin-bottom: 14px;
+}
+.status-tile {
+    padding: 12px 13px;
+    background: var(--bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    border-left-width: 3px;
+}
+.status-tile .num {
+    font-size: 1.55rem;
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+.status-tile .lbl {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.status-tile[data-t="active"] { border-left-color: var(--accent); }
+.status-tile[data-t="active"] .num { color: var(--accent); }
+.status-tile[data-t="planned"] { border-left-color: var(--text-dim); }
+.status-tile[data-t="done"] { border-left-color: var(--success); }
+.status-tile[data-t="done"] .num { color: var(--success); }
+.status-tile[data-t="failed"] { border-left-color: var(--danger); }
+.status-tile[data-t="failed"] .num { color: var(--danger); }
+.status-tile[data-t="total"] { border-left-color: var(--border); }
+.overall-progress { margin-top: 4px; }
+.overall-progress .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 7px;
+}
+.overall-progress .head .lbl {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+.overall-progress .head .val {
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.progress-track {
+    height: 8px;
+    background: var(--border-subtle);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.55s cubic-bezier(0.4,0,0.2,1), background 0.3s;
+}
+.progress-fill.done { background: var(--success); }
+.progress-fill.pulsing { animation: pulseBar 1s ease-in-out infinite; }
+@keyframes pulseBar { 50% { opacity: 0.5; } }
+.spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: -1px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn.is-busy { pointer-events: none; opacity: 0.75; }
+.btn:disabled { pointer-events: none; opacity: 0.45; }
+.skeleton {
+    background: linear-gradient(90deg, var(--border-subtle) 25%, var(--surface-hover) 50%, var(--border-subtle) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.3s ease-in-out infinite;
+    border-radius: 4px;
+}
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+.skeleton-card {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 12px;
+}
+.skeleton-line { height: 11px; margin-bottom: 8px; }
+.activity-bar {
+    display: none;
+    align-items: center;
+    gap: 9px;
+    margin-top: 13px;
+    padding: 11px 13px;
+    background: var(--accent-subtle);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+    font-size: 0.83rem;
+    font-weight: 500;
+    color: var(--accent);
+}
+.activity-bar.visible { display: flex; }
+.value-changed { animation: flashVal 0.9s ease; }
+@keyframes flashVal {
+    0% { color: var(--accent); transform: scale(1.15); }
+    100% { color: inherit; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .spinner, .busy-bar::before, .skeleton,
+    .progress-fill.pulsing, .status-chip[data-s="active"] { animation: none; }
+    .progress-fill, .progress-ring .bar { transition: none; }
+}
+@media (max-width: 560px) {
+    .goal-head { flex-direction: column-reverse; align-items: flex-start; }
+    .progress-ring { width: 46px; height: 46px; }
+}

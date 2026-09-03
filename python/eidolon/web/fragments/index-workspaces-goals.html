@@ -1,0 +1,304 @@
+            <div id="panel-workspaces" class="tab-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Projektüberblick</h3>
+                        <button class="btn btn-sm" data-ui-action="loadWorkspaces">Aktualisieren</button>
+                    </div>
+                    <div id="ws-context-summary"><div class="empty">Lade…</div></div>
+                </div>
+
+                <div class="card" id="project-create-panel" style="display:none;">
+                    <div class="card-header">
+                        <h3>Projekt direkt anlegen</h3>
+                        <div style="display:flex;gap:6px;">
+                            <button class="btn btn-sm" data-ui-action="resetProjectForm">Abbrechen</button>
+                            <button class="btn btn-sm btn-primary" data-ui-action="submitProjectForm">Anlegen</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Titel</label>
+                        <input type="text" id="project-title" placeholder="z.B. Eidolon UI-Refactor">
+                    </div>
+                    <div class="form-group">
+                        <label>Beschreibung</label>
+                        <textarea id="project-description" rows="3" placeholder="Worum geht es konkret?"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Domäne</label>
+                        <input type="text" id="project-domain" value="general" placeholder="general, product, research ...">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Projekte</h3>
+                        <div style="display:flex;gap:6px;">
+                            <input type="text" id="ws-project-search" placeholder="Projekte durchsuchen..." style="padding:4px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.78rem;width:140px;">
+                            <button class="btn btn-sm btn-primary" data-ui-action="toggleProjectComposer" data-ui-args='[true]'>+ Neues Projekt</button>
+                        </div>
+                    </div>
+                    <div id="ws-projects-list"><div class="empty">Lade…</div></div>
+                </div>
+
+                <div id="ws-project-detail" style="display:none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 id="ws-detail-title">Projekt</h3>
+                            <div style="display:flex;gap:6px;">
+                                <select id="ws-view-mode" style="padding:4px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.78rem;">
+                                    <option value="canvas">Canvas</option>
+                                    <option value="board">Board</option>
+                                    <option value="timeline">Timeline</option>
+                                    <option value="list">Liste</option>
+                                </select>
+                                <input type="text" id="ws-element-filter" placeholder="Elemente filtern..." style="padding:4px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.78rem;width:120px;">
+                                <button class="btn btn-sm" data-ui-action="openElementForm">+ Element</button>
+                                <button class="btn btn-sm" data-ui-action="showProjectList">Zurück</button>
+                            </div>
+                        </div>
+                        <div id="ws-project-stats"></div>
+                    </div>
+
+                    <div class="card" id="ws-element-composer" style="display:none;">
+                        <div class="card-header">
+                            <h3 id="ws-element-composer-title">Element direkt anlegen</h3>
+                            <div style="display:flex;gap:6px;">
+                                <button class="btn btn-sm" id="task-delete-btn" style="display:none;color:var(--danger);" data-ui-action="deleteCurrentComposerElement">Löschen</button>
+                                <button class="btn btn-sm" data-ui-action="closeTaskForm">Abbrechen</button>
+                                <button class="btn btn-sm btn-primary" data-ui-action="submitTaskForm">Speichern</button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="task-id">
+                        <input type="hidden" id="task-x">
+                        <input type="hidden" id="task-y">
+                        <div class="form-group">
+                            <label>Titel</label>
+                            <input type="text" id="task-title" placeholder="Element beschreiben…">
+                        </div>
+                        <div class="form-group">
+                            <label>Beschreibung</label>
+                            <textarea id="task-description" rows="3" placeholder="Details…"></textarea>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="form-group">
+                                <label>Typ</label>
+                                <select id="task-domain">
+                                    <option value="idea">Idee</option>
+                                    <option value="task">Aufgabe</option>
+                                    <option value="note">Notiz</option>
+                                    <option value="decision">Entscheidung</option>
+                                    <option value="deliverable">Ergebnis</option>
+                                    <option value="milestone">Meilenstein</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Priorität</label>
+                                <select id="task-priority">
+                                    <option value="0">Keine</option>
+                                    <option value="1">Niedrig</option>
+                                    <option value="2">Normal</option>
+                                    <option value="3">Erhöht</option>
+                                    <option value="4">Hoch</option>
+                                    <option value="5">Kritisch</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select id="task-status">
+                                    <option value="idea">Idee</option>
+                                    <option value="planned">Geplant</option>
+                                    <option value="in_progress">In Arbeit</option>
+                                    <option value="blocked">Blockiert</option>
+                                    <option value="done">Erledigt</option>
+                                    <option value="archived">Archiviert</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Zuständig</label>
+                                <input type="text" id="task-assigned-to" placeholder="z.B. eidolon-core oder user">
+                            </div>
+                            <div class="form-group">
+                                <label>Fällig am</label>
+                                <input type="date" id="task-due-at">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" id="ws-canvas-card" style="padding:0;overflow:hidden;position:relative;">
+                        <div id="canvas-container" style="width:100%;height:500px;position:relative;overflow:hidden;background:#0d1117;cursor:grab;">
+                            <div id="canvas-world" style="position:absolute;top:0;left:0;width:100%;height:100%;transform-origin:0 0;">
+                                <svg id="canvas-edges" style="position:absolute;top:0;left:0;width:5000px;height:5000px;pointer-events:none;z-index:1;overflow:visible;"></svg>
+                                <div id="canvas-nodes" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;"></div>
+                            </div>
+                        </div>
+                        <div id="canvas-toolbar" style="position:absolute;top:12px;left:12px;display:flex;gap:6px;z-index:100;">
+                            <button class="btn btn-sm btn-primary" data-ui-action="setCanvasMode" data-ui-args='["move"]' id="btn-mode-move">Verschieben</button>
+                            <button class="btn btn-sm" data-ui-action="setCanvasMode" data-ui-args='["link"]' id="btn-mode-link">Verknüpfen</button>
+                            <button class="btn btn-sm" data-ui-action="setCanvasMode" data-ui-args='["hierarchy"]' id="btn-mode-hierarchy">Hierarchie</button>
+                        </div>
+                        <div id="canvas-zoom" style="position:absolute;bottom:12px;right:12px;display:flex;gap:6px;z-index:100;">
+                            <button class="btn btn-sm" data-ui-action="canvasZoomOut">-</button>
+                            <span id="canvas-zoom-level" style="padding:6px 10px;color:var(--text-muted);font-size:0.78rem;">100%</span>
+                            <button class="btn btn-sm" data-ui-action="canvasZoomIn">+</button>
+                            <button class="btn btn-sm" data-ui-action="canvasResetView">⟲</button>
+                        </div>
+                        <div id="canvas-statusbar" style="position:absolute;bottom:12px;left:12px;z-index:100;color:var(--text-muted);font-size:0.72rem;"></div>
+                    </div>
+
+                    <div class="card" id="ws-elements-card" style="display:none;">
+                        <div class="card-header">
+                            <h3 id="ws-elements-title">Elemente</h3>
+                            <span id="ws-elements-count" class="tag info"></span>
+                        </div>
+                        <div id="ws-elements-view"><div class="empty">Keine Elemente</div></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="panel-mesh" class="tab-panel">
+                <div class="card">
+                    <div class="card-header"><h3>Status</h3><button class="btn btn-sm" data-ui-action="scanMeshPeers">🔄 Scan</button></div>
+                    <div id="mesh-status"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Verbindung herstellen</h3></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                        <div>
+                            <h4 style="margin-bottom:12px;color:var(--text-muted);">QR-Code</h4>
+                            <div id="mesh-qr" style="background:#fff;padding:12px;border-radius:8px;display:inline-block;"></div>
+                            <div id="mesh-pairing-code" style="margin-top:12px;font-size:1.2rem;font-weight:600;letter-spacing:2px;"></div>
+                            <div id="mesh-pairing-info" style="margin-top:6px;font-size:0.8rem;color:var(--text-dim);"></div>
+                            <button class="btn btn-primary btn-sm" style="margin-top:12px;" data-ui-action="createPairing">Neues Pairing</button>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom:12px;color:var(--text-muted);">Code eingeben</h4>
+                            <div class="form-group">
+                                <input type="text" id="mesh-input-code" placeholder="Pairing-Code eingeben..." style="text-transform:uppercase;">
+                            </div>
+                            <button class="btn btn-primary btn-sm" data-ui-action="acceptPairing">Verbinden</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Verbundene Peers</h3></div>
+                    <div id="mesh-peers"><div class="empty">Keine Peers verbunden</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Ausstehende Anfragen</h3></div>
+                    <div id="mesh-pending"><div class="empty">Keine ausstehenden Anfragen</div></div>
+                </div>
+            </div>
+            
+            <div id="panel-goals" class="tab-panel">
+                <div class="card">
+                    <div class="card-header"><h3>Wozu diese Seite da ist</h3></div>
+                    <div class="empty">Autonomie-Ziele sind nicht normale To-dos. Hier steht, welche Systemprobleme Eidolon selbst verfolgt, welche Schritte dazu gehören und ob ein Ziel durch Revalidierung wirklich erledigt ist.</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Übersicht</h3>
+                        <div style="display:flex;gap:6px;">
+                            <button class="btn btn-sm" data-ui-action="revalidateGoals" data-ui-pass="element">Prüfen &amp; aufräumen</button>
+                            <button class="btn btn-sm" data-ui-action="deriveGoals" data-ui-pass="element">Aus Systemzustand ableiten</button>
+                            <button class="btn btn-sm" data-ui-action="runAutonomyCycle" data-ui-pass="element">Zyklus ausführen</button>
+                            <button class="btn btn-sm btn-primary" data-ui-action="toggleGoalComposer" data-ui-args='[true]'>+ Neues Ziel</button>
+                        </div>
+                    </div>
+                    <div id="goals-stats"></div>
+                    <div id="goals-nba" style="margin-top:12px;padding:10px 12px;background:var(--accent-subtle);border-radius:6px;font-size:0.82rem;color:var(--accent);"></div>
+                    <div id="goals-action-result" style="margin-top:12px;"></div>
+                    <div class="activity-bar" id="goals-activity"><span class="spinner"></span><span id="goals-activity-text"></span></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Ziele</h3>
+                        <select id="goals-filter" style="width:auto;padding:5px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem;">
+                            <option value="">Alle Status</option>
+                            <option value="active">Aktiv</option>
+                            <option value="planned">Geplant</option>
+                            <option value="paused">Pausiert</option>
+                            <option value="done">Erledigt</option>
+                            <option value="failed">Fehlgeschlagen</option>
+                        </select>
+                    </div>
+                    <div id="goals-list"><div class="empty">Lade Ziele...</div></div>
+                </div>
+                <div class="card" id="goal-composer-card" style="display:none;">
+                    <div class="card-header">
+                        <h3 id="goal-composer-title">Neues Ziel</h3>
+                        <div style="display:flex;gap:6px;">
+                            <button class="btn btn-sm" data-ui-action="toggleGoalComposer" data-ui-args='[false]'>Abbrechen</button>
+                            <button class="btn btn-sm btn-primary" data-ui-action="submitGoalForm">Speichern</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Titel</label>
+                        <input type="text" id="goal-inline-title" placeholder="z.B. Latenz unter 50ms bringen">
+                    </div>
+                    <div class="form-group">
+                        <label>Beschreibung</label>
+                        <textarea id="goal-inline-description" rows="2" placeholder="Was soll erreicht werden?"></textarea>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div class="form-group">
+                            <label>Kategorie</label>
+                            <select id="goal-inline-category">
+                                <option value="system">System</option>
+                                <option value="documentation">Dokumentation</option>
+                                <option value="monitoring">Monitoring</option>
+                                <option value="development">Entwicklung</option>
+                                <option value="research">Forschung</option>
+                                <option value="maintenance">Wartung</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Priorität</label>
+                            <select id="goal-inline-priority">
+                                <option value="1">1 — Niedrig</option>
+                                <option value="2">2 — Normal</option>
+                                <option value="3" selected>3 — Erhöht</option>
+                                <option value="4">4 — Hoch</option>
+                                <option value="5">5 — Kritisch</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Schritte (eine Zeile pro Schritt)</label>
+                        <textarea id="goal-inline-steps" rows="4" placeholder="Messung aufsetzen&#10;Engstelle finden&#10;Fix verifizieren"></textarea>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Verlauf</h3><button class="btn btn-sm" data-ui-action="loadGoalLog">Aktualisieren</button></div>
+                    <div id="goals-log"><div class="empty">Kein Verlauf</div></div>
+                </div>
+            </div>
+            
+            <div id="panel-identity" class="tab-panel">
+                <div class="card">
+                    <div class="card-header"><h3>Selbstbeschreibung</h3></div>
+                    <div id="identity-text"><div class="empty">Lade...</div></div>
+                </div>
+            </div>
+            
+            <div id="panel-code" class="tab-panel">
+                <div class="card">
+                    <div class="card-header"><h3>Wozu diese Seite da ist</h3></div>
+                    <div class="empty">Code-Reparatur ist eine technische Wartungsfläche für Eidolon selbst. Sie analysiert lokale Projektdateien und erzeugt konkrete Reparaturvorschläge; sie ist kein Chat und kein allgemeiner Einstellungsbereich.</div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Code-Analyse</h3><button class="btn btn-sm" data-ui-action="analyzeCode">Analysieren</button></div>
+                    <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:10px;">
+                        <input type="text" id="code-file-path" value="python/agent_server.py" placeholder="Relativer Datei-Pfad, z.B. python/agent_server.py">
+                        <button class="btn btn-sm" data-ui-action="loadCodeRepair">Dateien laden</button>
+                    </div>
+                    <div id="code-analysis" class="code-block" style="display:none;"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Code-Reparatur</h3><button class="btn btn-sm" data-ui-action="fixCode">Reparieren</button></div>
+                    <textarea id="code-issue" rows="3" placeholder="Konkrete Issue-Beschreibung für einen Vorschlag eingeben..." style="width:100%;margin-bottom:10px;"></textarea>
+                    <div id="code-fix" class="code-block" style="display:none;"></div>
+                </div>
+            </div>
+            

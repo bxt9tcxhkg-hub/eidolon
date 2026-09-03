@@ -1,0 +1,101 @@
+            <div id="panel-healing" class="tab-panel">
+                <div class="card">
+                    <div class="card-header"><h3>Healing-Status</h3><div style="display:flex;gap:8px;"><button class="btn btn-sm" data-ui-action="loadHealing">Aktualisieren</button><button class="btn btn-sm" data-ui-action="runHealingCheck">Check ausführen</button></div></div>
+                    <div id="healing-status"><div class="empty">Lade...</div></div>
+                </div>
+            </div>
+            
+            <div id="panel-skills" class="tab-panel">
+                <div class="card">
+                    <div class="card-header"><h3>Übersicht</h3></div>
+                    <div id="skills-summary"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Alle Skills</h3></div>
+                    <div id="skills-list"><div class="empty">Lade Skills...</div></div>
+                </div>
+            </div>
+            
+            <div id="panel-backups" class="tab-panel">
+                <div class="card">
+                    <div class="card-header"><h3>Status</h3><button class="btn btn-sm btn-primary" data-ui-action="createBackup">+ Neues Backup</button></div>
+                    <div id="backups-stats"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Verfügbare Backups</h3></div>
+                    <div id="backups-list"><div class="empty">Lade Backups...</div></div>
+                </div>
+            </div>
+            
+            <div id="panel-settings" class="tab-panel">
+                <div class="card">
+                    <div class="card-header"><h3>🌐 Netzwerk</h3><button class="btn btn-sm" data-ui-action="resetSettingsArea" data-ui-args='["network"]'>Zurücksetzen</button></div>
+                    <div id="settings-network"><div class="empty">Lade...</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>🧠 KI-Verbindung</h3><button class="btn btn-sm" data-ui-action="resetSettingsArea" data-ui-args='["llm"]'>Zurücksetzen</button></div>
+                    <div class="empty" style="margin-bottom:10px;">OpenAI wird hier ehrlich per API-Key angebunden. OAuth ist in diesem lokalen Runtime-Pfad nicht implementiert.</div>
+                    <div id="settings-llm"><div class="empty">Lade...</div></div>
+                    <div id="llm-connection-status" class="empty" style="margin-top:10px;"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>🤖 Autonomie</h3><button class="btn btn-sm" data-ui-action="resetSettingsArea" data-ui-args='["autonomy"]'>Zurücksetzen</button></div>
+                    <div id="settings-autonomy"><div class="empty">Lade...</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>🔒 Datenschutz</h3><button class="btn btn-sm" data-ui-action="resetSettingsArea" data-ui-args='["privacy"]'>Zurücksetzen</button></div>
+                    <div id="settings-privacy"><div class="empty">Lade...</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>🎨 Darstellung</h3><button class="btn btn-sm" data-ui-action="resetSettingsArea" data-ui-args='["ui"]'>Zurücksetzen</button></div>
+                    <div id="settings-ui"><div class="empty">Lade...</div></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="mobile-bar">
+        <div class="mitem active" data-tab="chat" data-tab-target="chat"><span class="icon">•</span><span>Chat</span></div>
+        <div class="mitem" data-tab="workspaces" data-tab-target="workspaces"><span class="icon">•</span><span>Projekte</span></div>
+        <div class="mitem" data-tab="dashboard" data-tab-target="dashboard"><span class="icon">•</span><span>Status</span></div>
+        <div class="mitem" data-tab="more" data-ui-action="toggleMobileMore"><span class="icon">⋯</span><span>Mehr</span></div>
+    </div>
+    <div class="mobile-more-sheet" id="mobile-more-sheet">
+        <div class="mobile-more-grid">
+            <div class="mobile-more-item" data-tab-target="identity">🪞 Identität</div>
+            <div class="mobile-more-item" data-tab-target="skills">⚡ Fähigkeiten</div>
+            <div class="mobile-more-item" data-tab-target="code">🔧 Code-Reparatur</div>
+            <div class="mobile-more-item" data-tab-target="healing">🩹 Stabilität</div>
+            <div class="mobile-more-item" data-tab-target="mesh">📡 Mesh & Geräte</div>
+            <div class="mobile-more-item" data-tab-target="execution">🧭 Execution</div>
+            <div class="mobile-more-item" data-tab-target="backups">💾 Sicherungen</div>
+            <div class="mobile-more-item" data-tab-target="settings">⚙️ Einstellungen</div>
+        </div>
+    </div>
+
+    <div class="ws-status" id="ws-status"><span class="dot"></span> Verbinde...</div>
+
+    <!-- Task modal removed: direct inline composer in project detail -->
+
+    <script src="/assets/app-shell.js"></script>
+<script src="/assets/chat-ui.js"></script>
+<script src="/assets/dashboard-ui.js"></script>
+<script src="/assets/goals-ui.js"></script>
+<script src="/assets/admin-ui.js"></script>
+<script src="/assets/code-repair-ui.js"></script>
+<script src="/assets/healing-ui.js"></script>
+<script src="/assets/skills-backups-ui.js"></script>
+<script src="/assets/settings-ui.js"></script>
+<script src="/assets/workspace-ui.js"></script>
+<script src="/assets/workspace-project-ui.js"></script>
+<script src="/assets/workspace-canvas-ui.js"></script>
+<script src="/assets/workspace-views-ui.js"></script>
+<script src="/assets/workspace-element-composer-ui.js"></script>
+<script src="/assets/operate-ui.js"></script>
+<script src="/assets/operate-render-ui.js"></script>
+<script src="/assets/operate-actions-ui.js"></script>
+<script src="/assets/operate-view-ui.js"></script>
+<script src="/assets/pods-ui.js"></script>
+<script src="/assets/execution-ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+        
+        html { font-size: 14px; -webkit-font-smoothing: antialiased; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        
+        /* Layout */
+        .app { display: flex; min-height: 100vh; width: 100%; overflow-x: hidden; }
+        
+        .sidebar {
+            width: 240px;
+            background: var(--bg-elevated);
+            border-right: 1px solid var(--border-subtle);
+            padding: 20px 0;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            display: flex; flex-direction: column;
+            z-index: 50;
+            transition: transform var(--transition);
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 12px;
+        }
+
+        .brand-lockup {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        
+        .sidebar-header h1 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .presence-meta {
+            margin-top: 12px;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            line-height: 1.45;
+        }
+
+        .eidolon-signature {
+            position: relative;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            flex: 0 0 42px;
+            background:
+                radial-gradient(circle at 50% 48%, rgba(245, 248, 255, 0.96), rgba(245, 248, 255, 0.18) 18%, transparent 52%),
+                radial-gradient(circle at 50% 50%, rgba(74, 124, 255, 0.24), rgba(74, 124, 255, 0.05) 48%, transparent 75%),
+                linear-gradient(180deg, rgba(10, 14, 22, 0.96), rgba(15, 22, 34, 0.92));
+            border: 1px solid rgba(132, 162, 255, 0.2);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 30px rgba(4, 8, 20, 0.34);
+            overflow: hidden;
+        }
+
+        .eidolon-signature.hero {
+            width: 56px;
+            height: 56px;
+            flex-basis: 56px;
+        }
+
+        .signature-ring,
+        .signature-core {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+        }
+
+        .signature-ring-outer {
+            inset: 5px;
+            border: 1px solid rgba(170, 194, 255, 0.14);
+            opacity: 0.8;
+        }
+
+        .signature-ring-inner {
+            inset: 11px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            opacity: 0.75;
+        }
+
+        .signature-core {
+            inset: 15px;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.95), rgba(194,212,255,0.78) 45%, rgba(61,92,160,0.22) 75%, transparent 100%);
+            box-shadow: 0 0 20px rgba(117, 154, 255, 0.42);
+        }
+
+        .eidolon-signature[data-presence-state="thinking"] .signature-ring-outer,
+        .eidolon-signature[data-presence-state="thinking"] .signature-ring-inner {
+            animation: signature-breathe 3.4s ease-in-out infinite;
+        }
+
+        .eidolon-signature[data-presence-state="acting"] .signature-ring-outer,
+        .eidolon-signature[data-presence-state="acting"] .signature-ring-inner {
+            animation: signature-pulse 1.7s ease-in-out infinite;
+        }
+
+        .eidolon-signature[data-presence-state="waiting"] .signature-ring-outer,
+        .eidolon-signature[data-presence-state="waiting"] .signature-ring-inner {
+            animation: signature-pulse 2.2s ease-in-out infinite;
+            border-color: rgba(245, 158, 11, 0.36);
+        }
+
+        .eidolon-signature[data-presence-state="blocked"] {
+            border-color: rgba(239, 68, 68, 0.4);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 30px rgba(43, 8, 8, 0.42);
+        }
+
+        .eidolon-signature[data-presence-state="blocked"] .signature-ring-outer,
+        .eidolon-signature[data-presence-state="blocked"] .signature-ring-inner {
+            border-color: rgba(239, 68, 68, 0.42);
+            animation: signature-alert 1.4s ease-in-out infinite;
+        }
+
+        .eidolon-signature[data-presence-state="done"] .signature-core {
+            box-shadow: 0 0 22px rgba(34, 197, 94, 0.34);
+        }
+
+        .eidolon-signature[data-presence-state="done"] .signature-ring-outer,
+        .eidolon-signature[data-presence-state="done"] .signature-ring-inner {
+            border-color: rgba(34, 197, 94, 0.28);
+        }
+
+        @keyframes signature-breathe {
+            0%, 100% { transform: scale(0.96); opacity: 0.68; }
+            50% { transform: scale(1.02); opacity: 1; }
+        }
+
+        @keyframes signature-pulse {
+            0%, 100% { transform: scale(0.97); opacity: 0.78; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        @keyframes signature-alert {
+            0%, 100% { transform: scale(0.98); opacity: 0.7; }
+            50% { transform: scale(1.06); opacity: 1; }
+        }
+        
+        .sidebar-header .version {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+        
+        .nav-group-title {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--text-dim);
+            padding: 16px 20px 6px;
+            font-weight: 600;
+        }
+        
+        .nav-list { list-style: none; }
+
+        .nav-list-subtle {
+            margin-top: 6px;
+            padding-bottom: 4px;
+        }
+
+        .nav-disclosure {
+            margin: 10px 12px 0;
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 8px;
+        }
+
+        .nav-disclosure summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 8px 8px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-disclosure summary::-webkit-details-marker { display: none; }
+        .nav-disclosure summary::after {
+            content: '▾';
+            color: var(--text-dim);
+            transition: transform var(--transition);
+        }
+        .nav-disclosure[open] summary::after { transform: rotate(180deg); }
+        
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.88rem;
+            border-left: 2px solid transparent;
+            transition: all var(--transition);
+            user-select: none;
+        }
+        
+        .nav-item:hover {
+            background: var(--surface-hover);
+            color: var(--text);
+        }
+        
+        .nav-item.active {
+            background: var(--accent-subtle);
+            color: var(--accent);
+            border-left-color: var(--accent);
+            font-weight: 500;
+        }
+        
+        .nav-item .icon {
+            width: 12px;
+            text-align: center;
+            font-size: 0;
+            position: relative;
+            flex: 0 0 12px;
+        }
+        .nav-item .icon::before {
+            content: '';
+            display: block;
+            width: 5px;
+            height: 5px;
+            margin: 6px auto 0;
+            border-radius: 999px;
+            background: currentColor;
+            opacity: 0.55;
+        }
