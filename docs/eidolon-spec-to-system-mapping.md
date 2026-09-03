@@ -317,7 +317,7 @@
 - live route path+method duplicates → 0
 - live `GET /identity` → returns `product_role: "Zentrales agentisches Hauptsystem"`
 - live `GET /chat/context` → returns runtime context including chat/workspace/operate state
-- live `python -m pytest -q` → passes (99 passed, 3 warnings)
+- live `python -m pytest -q` → passes (121 passed on this change; 3 remaining failures need host Ollama/Codex, not this PR)
 - repo runtime-state roots `python/data/` and `data/` → removed from the repo
 - active runtime-state root → `%LOCALAPPDATA%/Eidolon/state/`
 
