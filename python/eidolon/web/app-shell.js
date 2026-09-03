@@ -1,8 +1,9 @@
 const PAGES = {
     chat: { title: 'Eidolon', subtitle: 'Starte ein Gespräch oder setze reale Arbeit fort.' },
+    operate: { title: 'Arbeit', subtitle: 'Sichtbarer Arbeitskern hinter dem Chat: Zustand, Freigaben, Blocker, nächster Schritt' },
     pods: { title: 'Helfer', subtitle: 'Aktive Hilfsläufe und ihr realer Zustand', group: 'advanced' },
     dashboard: { title: 'Systemstatus', subtitle: 'Backend, Laufzeit, Speicher und verfügbare Fähigkeiten' },
-    workspaces: { title: 'Projektfläche', subtitle: 'Elemente und Zusammenhänge der aktuellen Arbeit' },
+    workspaces: { title: 'Projektfläche', subtitle: 'Planung und generische Arbeitskarten der aktuellen Arbeit' },
     execution: { title: 'Laufzeit', subtitle: 'Geräte, Laufzeitfähigkeiten und aktuelle Ausführungssignale', group: 'advanced' },
     mesh: { title: 'Geräte', subtitle: 'Handy, Browser und weitere Geräte mit Eidolon koppeln' },
     goals: { title: 'Ziele', subtitle: 'Welche Ziele Eidolon verfolgt', group: 'advanced' },

@@ -4,9 +4,9 @@ use std::path::PathBuf;
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
     let config = RuntimeConfig {
-        http_port: 8002,
-        quic_port: 4434,
-        discovery_port: 8001,
+        http_port: 18002,
+        quic_port: 14434,
+        discovery_port: 18001,
         data_dir: PathBuf::from("data"),
         identity_key_path: Some(PathBuf::from("data/identity.key")),
         max_peers: 20,

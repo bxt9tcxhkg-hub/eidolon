@@ -3,7 +3,7 @@
 > Status: aktuelles Implementierungsbild des aktiven Produktkerns. Diese Datei beschreibt **Ist-Architektur**, nicht Wunschdenken.
 
 ## Architektur in einem Satz
-Eidolon ist derzeit ein **Python-zentriertes agentisches System** mit FastAPI-Server, gemeinsamem Work-Context-Kern für Chat und Operate, Workspace-/Projektlogik, Rollenregister und modularisierter Web-Oberfläche; technische Nebenflächen wie Mesh, Healing und Code-Mutation existieren, sind aber produktlogisch nachgeordnet.
+Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gemeinsamem Work-Context-Kern für Chat und Operate, Workspace-/Projektlogik, Rollenregister und modularisierter Web-Oberfläche; technische Nebenflächen wie Mesh, Healing und Code-Mutation existieren, sind aber produktlogisch nachgeordnet. Rust-Crates sind quarantiniert und teilen nicht die Live-Ports.
 
 ## Primäre Ebenen
 
@@ -36,15 +36,24 @@ Eidolon ist derzeit ein **Python-zentriertes agentisches System** mit FastAPI-Se
 ### 5. Application Layer
 - `python/agent_server.py`
 - Integrationspunkt für API, Produktlogik und UI-Auslieferung
+- **Einzige live Runtime:** Python FastAPI auf `EIDOLON_HTTP_PORT` (Standard `8002`)
 - Runtime-Service-Erzeugung läuft über kleine Contracts-/Bootstrap-/Auth-Module statt über eine dichte Einzeldatei
 - Live geprüft: 148 Routes im aktuellen App-Objekt
+
+### 5b. Rust-Quarantäne
+- `crates/` bleiben im Repo (CLI gegen FastAPI, experimentelle Runtime, Bibliotheken)
+- Nicht löschen, nicht als zweiten Produktserver starten
+- `eidolon-runtime` darf `8002` / `4434` / `8001` nicht binden; Defaults sind `18002` / `14434` / `18001`
+- `Runtime::new` bricht ab, wenn ein Python-Live-Port gesetzt wird
 
 ### 6. Web UI Layer
 - `python/eidolon/web/index.html`
 - `python/eidolon/web/app-shell.css`
 - `python/eidolon/web/components/app-components.css`
 - CSS ist nach Shell-, Chat- und Goals-Slices in Importdateien aufgeteilt
-- Chat zeigt Runtime-Kontext
+- Default-Einstieg ist Chat (`/#chat`); Operate ist über `#operate` / Nav „Arbeit“ erreichbar
+- Projektfläche zeigt ein generisches Slot-Gerüst plus Planungsboard (Zusammengehörig / Geplant / In Arbeit / Fertig)
+- Keine fest verdrahteten Domänen-Pakete (kein Training-/Instagram-/Reise-UI)
 - Operate zeigt Run-/Approval-/Blocker-/Evidence-/Transition-Sicht
 
 ## Aktuelle Hauptschulden

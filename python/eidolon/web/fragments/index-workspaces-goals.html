@@ -46,8 +46,8 @@
                             <h3 id="ws-detail-title">Projekt</h3>
                             <div style="display:flex;gap:6px;">
                                 <select id="ws-view-mode" style="padding:4px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.78rem;">
+                                    <option value="board" selected>Planung</option>
                                     <option value="canvas">Canvas</option>
-                                    <option value="board">Board</option>
                                     <option value="timeline">Timeline</option>
                                     <option value="list">Liste</option>
                                 </select>
@@ -56,7 +56,36 @@
                                 <button class="btn btn-sm" data-ui-action="showProjectList">Zurück</button>
                             </div>
                         </div>
+                        <div class="form-group" style="margin-top:8px;">
+                            <label>Projekttitel</label>
+                            <div style="display:flex;gap:6px;">
+                                <input type="text" id="ws-project-title-edit" placeholder="Projekt umbenennen…">
+                                <button class="btn btn-sm" data-ui-action="saveProjectTitle">Umbenennen</button>
+                            </div>
+                        </div>
                         <div id="ws-project-stats"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Generisches Arbeitsgerüst</h3>
+                            <span class="tag info">Slots, keine Domänen-Pakete</span>
+                        </div>
+                        <div class="empty" style="text-align:left;padding:0 0 12px 0;">Karten und Slots sind ein generisches Gerüst. Der Kernel/Workspace füllt sie. Es gibt keine fest verdrahteten Training-, Instagram- oder Reise-Flächen.</div>
+                        <div id="ws-project-slots" class="project-slot-grid">
+                            <section class="project-slot" data-slot="context">
+                                <div class="project-slot-label">Kontext</div>
+                                <div id="ws-slot-context" class="project-slot-body"><div class="empty">Kein geladener Projektkontext.</div></div>
+                            </section>
+                            <section class="project-slot" data-slot="next">
+                                <div class="project-slot-label">Nächster Schritt</div>
+                                <div id="ws-slot-next" class="project-slot-body"><div class="empty">Kein nächster Schritt aus dem Kernel.</div></div>
+                            </section>
+                            <section class="project-slot" data-slot="inbox">
+                                <div class="project-slot-label">Unsortiert</div>
+                                <div id="ws-slot-inbox" class="project-slot-body"><div class="empty">Keine offenen Eingänge.</div></div>
+                            </section>
+                        </div>
                     </div>
 
                     <div class="card" id="ws-element-composer" style="display:none;">
@@ -124,6 +153,19 @@
                                 <input type="date" id="task-due-at">
                             </div>
                         </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header"><h3>Bausteine ergänzen</h3></div>
+                        <div class="form-group">
+                            <label>Beschreibung für Vorschläge</label>
+                            <textarea id="brainstorm-text" rows="3" placeholder="Beschreibe das Vorhaben. Vorschläge kommen aus dem bestehenden Projekt-Kernel, nicht aus einem Domänen-Paket."></textarea>
+                        </div>
+                        <div style="display:flex;gap:6px;margin-bottom:10px;">
+                            <button class="btn btn-sm btn-primary" data-ui-action="generateBrainstorm">Vorschläge holen</button>
+                            <button class="btn btn-sm" data-ui-action="clearBrainstorm">Leeren</button>
+                        </div>
+                        <div id="brainstorm-suggestions"><div class="empty">Noch keine Vorschläge. Der Kernel erfindet keine Domänen-Karten.</div></div>
                     </div>
 
                     <div class="card" id="ws-canvas-card" style="padding:0;overflow:hidden;position:relative;">

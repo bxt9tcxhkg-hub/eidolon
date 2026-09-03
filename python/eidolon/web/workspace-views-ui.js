@@ -3,11 +3,11 @@
     const state = ws.state;
 
     function switchView() {
-        const view = document.getElementById('ws-view-mode')?.value || 'canvas';
+        const view = document.getElementById('ws-view-mode')?.value || 'board';
         document.getElementById('ws-canvas-card').style.display = view === 'canvas' ? 'block' : 'none';
         document.getElementById('ws-elements-card').style.display = view !== 'canvas' ? 'block' : 'none';
         const title = document.getElementById('ws-elements-title');
-        if (title) title.textContent = view === 'board' ? 'Board' : view === 'timeline' ? 'Timeline' : 'Liste';
+        if (title) title.textContent = view === 'board' ? 'Planung' : view === 'timeline' ? 'Timeline' : 'Liste';
         if (view === 'canvas') renderCanvas();
         else if (view === 'board') renderBoardView();
         else if (view === 'timeline') renderTimelineView();
@@ -16,7 +16,7 @@
         if (filter && !filter.dataset.bound) {
             filter.dataset.bound = '1';
             filter.addEventListener('input', () => {
-                const currentView = document.getElementById('ws-view-mode')?.value || 'canvas';
+                const currentView = document.getElementById('ws-view-mode')?.value || 'board';
                 if (currentView === 'board') renderBoardView();
                 else if (currentView === 'timeline') renderTimelineView();
                 else if (currentView === 'list') renderListView();
@@ -24,9 +24,56 @@
         }
     }
 
+    const PLANNING_COLUMNS = [
+        ['idea', 'Zusammengehörig'],
+        ['planned', 'Geplant'],
+        ['in_progress', 'In Arbeit'],
+        ['blocked', 'Blockiert'],
+        ['done', 'Fertig'],
+    ];
+    const PLANNING_STATUS_OPTIONS = [
+        ['idea', 'Zusammengehörig'],
+        ['planned', 'Geplant'],
+        ['in_progress', 'In Arbeit'],
+        ['blocked', 'Blockiert'],
+        ['done', 'Fertig'],
+        ['archived', 'Archiviert'],
+    ];
+
+    function planningColumnFor(status) {
+        if (status === 'ready') return 'planned';
+        if (PLANNING_COLUMNS.some(([key]) => key === status)) return status;
+        return 'idea';
+    }
+
+    function statusOptions(selected) {
+        return PLANNING_STATUS_OPTIONS.map(([value, label]) =>
+            '<option value="' + value + '"' + (value === selected ? ' selected' : '') + '>' + escapeHtml(label) + '</option>'
+        ).join('');
+    }
+
+    function priorityOptions(selected) {
+        return [0, 1, 2, 3, 4, 5].map((value) =>
+            '<option value="' + value + '"' + (Number(selected || 0) === value ? ' selected' : '') + '>' + escapeHtml(ws.priorityLabel(value)) + '</option>'
+        ).join('');
+    }
+
+    function relatedLabel(item, elements) {
+        if (!item.parent_id) return '';
+        const parent = (elements || []).find((entry) => entry.id === item.parent_id);
+        return parent ? ('Gehört zu: ' + parent.title) : ('Gehört zu: ' + item.parent_id);
+    }
+
     function elementCard(item) {
-        return '<div class="goal-card" data-status="' + escapeHtml(item.status || 'idea') + '" style="margin-bottom:8px;cursor:pointer;">' +
-            '<div class="goal-stripe"></div><div class="goal-body"><div class="goal-title">' + escapeHtml(item.title) + '</div><div class="comp-detail" style="margin-top:6px;">' + escapeHtml(ws.elementTypeLabel(item.element_type)) + (item.priority > 0 ? ' · ' + escapeHtml(ws.priorityLabel(item.priority)) : '') + '</div></div></div>';
+        const related = relatedLabel(item, state.currentProject?.elements || []);
+        return '<div class="goal-card plan-card" data-status="' + escapeHtml(item.status || 'idea') + '" data-element-id="' + escapeHtml(item.id) + '" draggable="true">' +
+            '<div class="goal-stripe"></div><div class="goal-body">' +
+            '<div class="comp-detail">' + escapeHtml(ws.elementTypeLabel(item.element_type)) + (related ? ' · ' + escapeHtml(related) : '') + '</div>' +
+            '<input class="plan-card-title" data-plan-field="title" data-element-id="' + escapeHtml(item.id) + '" value="' + escapeHtml(item.title || '') + '">' +
+            '<select class="plan-card-status" data-plan-field="status" data-element-id="' + escapeHtml(item.id) + '">' + statusOptions(item.status || 'idea') + '</select>' +
+            '<select class="plan-card-priority" data-plan-field="priority" data-element-id="' + escapeHtml(item.id) + '">' + priorityOptions(item.priority) + '</select>' +
+            '<button class="btn btn-sm" style="margin-top:8px;" data-open-element-id="' + escapeHtml(item.id) + '" data-x="' + Number(item.position?.x || 0) + '" data-y="' + Number(item.position?.y || 0) + '">Details</button>' +
+            '</div></div>';
     }
 
     function bindOpenElementTargets(root) {
@@ -52,16 +99,91 @@
             ? elements.filter(item => item.title.toLowerCase().includes(filterText) || (item.description || '').toLowerCase().includes(filterText))
             : elements;
 
-        const columns = [['idea', 'Ideen'], ['planned', 'Geplant'], ['in_progress', 'In Arbeit'], ['blocked', 'Blockiert'], ['done', 'Erledigt']];
-        el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">' + columns.map(([status, label]) => {
-            const items = filteredElements.filter((item) => item.status === status);
+        const columns = PLANNING_COLUMNS;
+        el.innerHTML = '<div class="planning-board">' + columns.map(([status, label]) => {
+            const items = filteredElements.filter((item) => planningColumnFor(item.status) === status);
             const body = items.length
-                ? items.map((item) => '<div data-open-element-id="' + escapeHtml(item.id) + '" data-x="' + Number(item.position?.x || 0) + '" data-y="' + Number(item.position?.y || 0) + '">' + elementCard(item) + '</div>').join('')
+                ? items.map((item) => elementCard(item)).join('')
                 : '<div class="empty">Leer</div>';
-            return '<div class="card" style="padding:10px;"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">' + escapeHtml(label) + '</h3><span class="tag info">' + items.length + '</span></div>' + body + '</div>';
+            return '<div class="card planning-column" data-plan-column="' + status + '"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">' + escapeHtml(label) + '</h3><span class="tag info">' + items.length + '</span></div>' + body + '</div>';
         }).join('') + '</div>';
         bindOpenElementTargets(el);
+        bindPlanningBoard(el);
         document.getElementById('ws-elements-count').textContent = String(filteredElements.length);
+    }
+
+    async function persistPlanElement(elementId, patch) {
+        if (!state.currentProjectId || !elementId) return false;
+        const response = await api('PUT', '/projects/' + state.currentProjectId + '/elements/' + elementId, patch);
+        if (response?.ok === false) { showNotice(response.error || 'Element speichern fehlgeschlagen', 'error'); return false; }
+        return true;
+    }
+
+    async function persistPlanOrder(elementIds) {
+        if (!state.currentProjectId || !Array.isArray(elementIds)) return false;
+        const response = await api('POST', '/projects/' + state.currentProjectId + '/elements/reorder', { element_ids: elementIds });
+        if (response?.ok === false) { showNotice(response.error || 'Reihenfolge speichern fehlgeschlagen', 'error'); return false; }
+        return true;
+    }
+
+    async function updatePlanElement(elementId, patch) {
+        try {
+            if (await persistPlanElement(elementId, patch)) await openProject(state.currentProjectId);
+        } catch (e) { showNotice(e.message, 'error'); }
+    }
+
+    async function reorderPlanElements(elementIds) {
+        try {
+            if (await persistPlanOrder(elementIds)) await openProject(state.currentProjectId);
+        } catch (e) { showNotice(e.message, 'error'); }
+    }
+
+    function collectBoardOrder() {
+        const ids = [];
+        document.querySelectorAll('.planning-column .plan-card').forEach((card) => {
+            if (card.dataset.elementId) ids.push(card.dataset.elementId);
+        });
+        (state.currentProject?.elements || []).forEach((item) => {
+            if (!ids.includes(item.id)) ids.push(item.id);
+        });
+        return ids;
+    }
+
+    function bindPlanningBoard(root) {
+        root.querySelectorAll('[data-plan-field]').forEach((field) => {
+            const eventName = field.tagName === 'INPUT' ? 'change' : 'change';
+            field.addEventListener(eventName, () => {
+                const key = field.dataset.planField;
+                const value = key === 'priority' ? parseInt(field.value, 10) || 0 : field.value;
+                updatePlanElement(field.dataset.elementId, { [key]: value });
+            });
+        });
+        root.querySelectorAll('.plan-card').forEach((card) => {
+            card.addEventListener('dragstart', (event) => {
+                event.dataTransfer.setData('text/plain', card.dataset.elementId || '');
+                event.dataTransfer.effectAllowed = 'move';
+            });
+        });
+        root.querySelectorAll('.planning-column').forEach((column) => {
+            column.addEventListener('dragover', (event) => {
+                event.preventDefault();
+                column.classList.add('drop-target');
+            });
+            column.addEventListener('dragleave', () => column.classList.remove('drop-target'));
+            column.addEventListener('drop', async (event) => {
+                event.preventDefault();
+                column.classList.remove('drop-target');
+                const elementId = event.dataTransfer.getData('text/plain');
+                const nextStatus = column.dataset.planColumn;
+                const card = root.querySelector('.plan-card[data-element-id="' + elementId + '"]');
+                if (card) column.appendChild(card);
+                try {
+                    if (elementId && nextStatus) await persistPlanElement(elementId, { status: nextStatus });
+                    await persistPlanOrder(collectBoardOrder());
+                    await openProject(state.currentProjectId);
+                } catch (e) { showNotice(e.message, 'error'); }
+            });
+        });
     }
 
     function renderTimelineView() {
@@ -101,4 +223,6 @@
         bindOpenElementTargets(el);
         document.getElementById('ws-elements-count').textContent = String(elements.length);
     }
+
+    Object.assign(window, { switchView, renderBoardView, renderTimelineView, renderListView, updatePlanElement, reorderPlanElements });
 })();

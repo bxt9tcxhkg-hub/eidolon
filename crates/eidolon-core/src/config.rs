@@ -14,7 +14,7 @@ impl Default for AgentConfig {
         Self {
             agent_name: "eidolon".to_string(),
             model_endpoint: "http://localhost:11434".to_string(),
-            mesh_port: 4434,
+            mesh_port: 14434,
             persistence_dir: "data/persistence".to_string(),
             log_level: "info".to_string(),
         }

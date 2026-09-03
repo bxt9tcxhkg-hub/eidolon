@@ -141,4 +141,6 @@
         });
         renderCanvas();
     }
+
+    Object.assign(window, { renderCanvas, canvasMouseDown, canvasMouseMove, canvasMouseUp, canvasWheel, canvasZoomIn, canvasZoomOut, canvasResetView, canvasDoubleClick, setCanvasMode });
 })();

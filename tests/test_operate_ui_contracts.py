@@ -33,13 +33,17 @@ WORKSPACE_WEB_JS = '\n'.join([p.read_text(encoding='utf-8') for p in [ROOT / 'py
 def test_operate_ui_panel_and_anchors_exist():
     html = INDEX_HTML.read_text(encoding='utf-8')
     assert 'id="panel-chat"' in html
+    assert 'id="panel-operate"' in html
     assert 'id="panel-workspaces"' in html
     assert 'id="panel-dashboard"' in html
     assert 'id="panel-mesh"' in html
     assert 'data-tab="chat"' in html
+    assert 'data-tab="operate"' in html
     assert 'data-tab="workspaces"' in html
     assert 'data-tab="dashboard"' in html
     assert 'data-tab="mesh"' in html
+    assert 'id="operate-state-bar"' in html
+    assert 'id="operate-next-action"' in html
     assert 'id="chat-active-summary"' in html
     assert 'id="chat-decision-summary"' in html
     assert 'id="chat-recent-summary"' in html
@@ -58,6 +62,7 @@ def test_operate_ui_panel_and_anchors_exist():
     assert "let currentTab = 'chat';" in shell
     assert "#chat" in shell
     assert "function showTab(tabId)" in shell
+    assert "operate: () => loadOperateView()" in shell
 
 
 def test_operate_ui_script_targets_api_v1_contracts():
@@ -89,6 +94,8 @@ def test_operate_ui_asset_and_page_are_served():
     root = client.get('/')
     assert root.status_code == 200
     assert 'panel-chat' in root.text
+    assert 'panel-operate' in root.text
+    assert 'operate-state-bar' in root.text
     assert 'panel-workspaces' in root.text
     assert 'panel-dashboard' in root.text
     assert 'panel-mesh' in root.text

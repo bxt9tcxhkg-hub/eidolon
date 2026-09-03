@@ -89,9 +89,11 @@
             ['Status', ws.statusLabel(project.status || 'active')],
             ['Domäne', project.domain || '—'],
             ['Elemente', String(elements.length)],
+            ['Zusammengehörig', String(elements.filter((item) => item.status === 'idea').length)],
+            ['Geplant', String(elements.filter((item) => item.status === 'planned' || item.status === 'ready').length)],
             ['In Arbeit', String(elements.filter((item) => item.status === 'in_progress').length)],
             ['Blockiert', String(elements.filter((item) => item.status === 'blocked').length)],
-            ['Erledigt', String(elements.filter((item) => item.status === 'done').length)],
+            ['Fertig', String(elements.filter((item) => item.status === 'done').length)],
             ['Terminiert', String(elements.filter((item) => item.due_at).length)],
             ['Inbox offen', String(inboxOpen)],
         ];
@@ -147,7 +149,7 @@
             const titleEl = document.getElementById('ws-detail-title');
             if (titleEl) titleEl.textContent = 'Lade Projekt…';
             const viewMode = document.getElementById('ws-view-mode');
-            if (viewMode) viewMode.value = 'canvas';
+            if (viewMode) viewMode.value = 'board';
             renderProjectStats({title: 'Lade…', elements: [], inbox: [], status: 'active', domain: '—'});
             ws.closeElementComposer();
             window.switchView();
@@ -159,9 +161,52 @@
             state.currentProjectId = project.id;
             state.currentProject = project;
             if (titleEl) titleEl.textContent = project.title || 'Unbenannt';
+            const titleEdit = document.getElementById('ws-project-title-edit');
+            if (titleEdit) titleEdit.value = project.title || '';
             renderProjectStats(project);
+            renderProjectSlots(project);
             window.switchView();
         } catch (e) { showNotice(e.message || 'Projekt öffnen fehlgeschlagen', 'error'); }
+    }
+
+    function renderProjectSlots(project) {
+        const contextEl = document.getElementById('ws-slot-context');
+        const nextEl = document.getElementById('ws-slot-next');
+        const inboxEl = document.getElementById('ws-slot-inbox');
+        if (!project) return;
+        const elements = project.elements || [];
+        const inbox = (project.inbox || []).filter((item) => !item.processed);
+        const inProgress = elements.find((item) => item.status === 'in_progress');
+        const planned = elements.find((item) => item.status === 'planned' || item.status === 'ready');
+        if (contextEl) {
+            contextEl.innerHTML = '<div class="comp-row"><span class="comp-name">Titel</span><span class="comp-detail">' + escapeHtml(project.title || '—') + '</span></div>' +
+                '<div class="comp-row"><span class="comp-name">Status</span><span class="comp-detail">' + escapeHtml(ws.statusLabel(project.status || 'active')) + '</span></div>' +
+                '<div class="comp-row"><span class="comp-name">Beschreibung</span><span class="comp-detail">' + escapeHtml(project.description || 'Keine Beschreibung') + '</span></div>';
+        }
+        if (nextEl) {
+            const next = inProgress || planned;
+            nextEl.innerHTML = next
+                ? '<div class="comp-row"><span class="comp-name">' + escapeHtml(ws.statusLabel(next.status)) + '</span><span class="comp-detail">' + escapeHtml(next.title) + '</span></div>'
+                : '<div class="empty">Kein nächster Schritt im Projekt modelliert.</div>';
+        }
+        if (inboxEl) {
+            inboxEl.innerHTML = inbox.length
+                ? inbox.map((item) => '<div class="comp-row"><span class="comp-name">Eingang</span><span class="comp-detail">' + escapeHtml(item.text || item.id) + '</span></div>').join('')
+                : '<div class="empty">Keine offenen Eingänge.</div>';
+        }
+    }
+
+    async function saveProjectTitle() {
+        if (!state.currentProjectId) return;
+        const title = (document.getElementById('ws-project-title-edit')?.value || '').trim();
+        if (!title) { showNotice('Projekttitel erforderlich', 'warning'); return; }
+        try {
+            const response = await api('PUT', '/projects/' + state.currentProjectId, { title });
+            if (response?.ok === false) { showNotice(response.error || 'Projekt umbenennen fehlgeschlagen', 'error'); return; }
+            showNotice('Projekt umbenannt', 'success');
+            await openProject(state.currentProjectId);
+            await loadWorkspaces();
+        } catch (e) { showNotice(e.message, 'error'); }
     }
 
     function showProjectList() {
@@ -254,5 +299,5 @@
         state.brainstormData = [];
     }
 
-    Object.assign(window, { loadWorkspaces, toggleProjectComposer, resetProjectForm, submitProjectForm, openProject, showProjectList, deleteProject, generateBrainstorm, acceptSuggestion, rejectSuggestion, clearBrainstorm });
+    Object.assign(window, { loadWorkspaces, toggleProjectComposer, resetProjectForm, submitProjectForm, openProject, showProjectList, deleteProject, generateBrainstorm, acceptSuggestion, rejectSuggestion, clearBrainstorm, saveProjectTitle });
 })();
