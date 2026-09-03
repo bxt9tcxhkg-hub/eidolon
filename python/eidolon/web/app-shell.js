@@ -31,6 +31,14 @@ const TAB_SETTINGS_MAP = {
     settings: 'ui'
 };
 
+const LANDING_TAB = 'chat';
+
+function resolveInitialTab() {
+    const raw = String(window.location.hash || '').replace(/^#/, '').trim();
+    if (!raw || raw === 'operate' || !PAGES[raw]) return LANDING_TAB;
+    return raw;
+}
+
 // Tabs
 let currentTab = 'chat';
 let currentGoalId = null;
@@ -235,12 +243,12 @@ function bindShellEvents() {
 document.addEventListener('DOMContentLoaded', function() {
     loadTheme();
     chatMessages = loadStoredChatMessages();
-    const initialTab = (window.location.hash || '#chat').replace('#', '');
-    if (PAGES[initialTab]) showTab(initialTab);
+    const initialTab = resolveInitialTab();
+    showTab(initialTab);
     setEidolonPresence(lastPresenceSnapshot.state, lastPresenceSnapshot.title, lastPresenceSnapshot.detail);
     ensureChatSession().catch(e => showNotice(e.message, 'error'));
     bindShellEvents();
-    renderChat(); loadOperateView(); loadPodsView(); loadWorkspaces(); loadGoals(); loadGoalLog(); loadHealth(); loadCapabilities(); loadSystemMetrics(); loadSystemStorage(); loadExecutionView(); loadIdentity(); loadMesh(); loadMeshPending(); loadHealing(); loadSkills(); loadBackups(); loadSettings(); loadMobileDeviceState();
+    loadMobileDeviceState();
 });
 
 

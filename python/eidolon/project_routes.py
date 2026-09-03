@@ -45,7 +45,7 @@ def register_project_routes(app: FastAPI, *, get_project_service, get_workspace_
 
     @app.post('/projects/{project_id}/elements')
     async def add_element(project_id: str, request: dict):
-        element = project_service().add_element(project_id, title=request.get('title', ''), description=request.get('description', ''), status=request.get('status', 'idea'), priority=request.get('priority', 0), element_type=request.get('element_type', 'task'), tags=request.get('tags', []), dependencies=request.get('dependencies', []), assigned_to=request.get('assigned_to', ''), due_at=request.get('due_at', ''), domain=request.get('domain', ''), domain_data=request.get('domain_data', {}), position=request.get("position", {"x": 0, "y": 0}), parent_id=request.get("parent_id"))
+        element = project_service().add_element(project_id, title=request.get('title', ''), description=request.get('description', ''), status=request.get('status', 'idea'), priority=request.get('priority', 0), element_type=request.get('element_type', 'task'), tags=request.get('tags', []), dependencies=request.get('dependencies', []), assigned_to=request.get('assigned_to', ''), due_at=request.get('due_at', ''), domain=request.get('domain', ''), domain_data=request.get('domain_data', {}), position=request.get("position", {"x": 0, "y": 0}), parent_id=request.get("parent_id"), sort_order=request.get('sort_order'))
         if not element:
             raise HTTPException(status_code=404, detail='Projekt nicht gefunden')
         payload = workspace_ui_service().get_runtime_payload()

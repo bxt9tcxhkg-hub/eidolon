@@ -24,7 +24,10 @@ def indexed_element(elements: list[ProjectElement], payload: dict[str, Any]) -> 
 
 
 def create_element(project_service, project_id: str, payload: dict[str, Any], default_title: str, default_notes: str):
-    return project_service.add_element(project_id, title=str(payload.get('label') or default_title), description=str(payload.get('notes') or default_notes), status=str(payload.get('status') or 'planned'), priority=int(payload.get('priority', 0) or 0), element_type=str(payload.get('kind') or 'task'), assigned_to=str(payload.get('owner') or ''), dependencies=list(payload.get('dependency_ids') or []), position=payload.get('position') or {'x': 0, 'y': 0})
+    extras = {}
+    if payload.get('sort_order') is not None:
+        extras['sort_order'] = int(payload.get('sort_order') or 0)
+    return project_service.add_element(project_id, title=str(payload.get('label') or default_title), description=str(payload.get('notes') or default_notes), status=str(payload.get('status') or 'planned'), priority=int(payload.get('priority', 0) or 0), element_type=str(payload.get('kind') or 'task'), assigned_to=str(payload.get('owner') or ''), dependencies=list(payload.get('dependency_ids') or []), position=payload.get('position') or {'x': 0, 'y': 0}, **extras)
 
 
 def clean_selection_payload(payload: dict[str, Any]) -> tuple[dict[str, Any], str, Any, str]:

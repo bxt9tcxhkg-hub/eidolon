@@ -19,7 +19,7 @@ Eidolon ist ein **arbeitsführendes agentisches Hauptsystem**, das Gespräch, Pr
 - Chat-Session-System mit Runtime-Context vorhanden
 - Operate-Kernel mit Run-/Objective-/Approval-/Blocker-/Evidence-Modell vorhanden
 - Workspace-Bridge in Operate vorhanden
-- Web-UI mit Tabs für Chat, Leitstand, Projekte, Ziele, System, Mesh, Sicherungen, Stabilität, Fähigkeiten, Einstellungen, Code, Identität vorhanden
+- Web-UI startet in Chat; primäre Flächen sind Unterhaltung, Projektfläche und Essentials. Operate bleibt Arbeitskern hinter Chat, nicht die Startseite. Projektplanung zeigt echte Kernel-Buckets mit speicherbaren Eingriffen. Utility-Flächen liegen hinter „Weitere Flächen“.
 - `/identity` liefert Produktrolle und aktive/definierte Rollen getrennt
 - Runtime-State liegt außerhalb des Repos unter `%LOCALAPPDATA%/Eidolon/state/`
 - `python -m pytest -q` besteht

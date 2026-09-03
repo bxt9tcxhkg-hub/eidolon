@@ -44,8 +44,10 @@ Eidolon ist derzeit ein **Python-zentriertes agentisches System** mit FastAPI-Se
 - `python/eidolon/web/app-shell.css`
 - `python/eidolon/web/components/app-components.css`
 - CSS ist nach Shell-, Chat- und Goals-Slices in Importdateien aufgeteilt
-- Chat zeigt Runtime-Kontext
-- Operate zeigt Run-/Approval-/Blocker-/Evidence-/Transition-Sicht
+- Chat ist die Startfläche und zeigt Runtime-Kontext plus Operate-Zusammenfassung
+- Projektfläche öffnet zuerst die Planungsansicht (verwandt / geplant / in Arbeit / erledigt) und schreibt Umbenennen, Priorität, Reihenfolge, Erledigt und Löschen gegen echte Projekt-Mutationen
+- Operate bleibt der Arbeitskern hinter Chat, nicht eine eigene Startseite
+- Situationskarten existieren nur als leere generische Slots, ohne erfundene Domänenfeatures
 
 ## Aktuelle Hauptschulden
 - `python/agent_server.py` ist weiter ein großer Integrationspunkt

@@ -4,7 +4,10 @@
                         <h3>Projektüberblick</h3>
                         <button class="btn btn-sm" data-ui-action="loadWorkspaces">Aktualisieren</button>
                     </div>
-                    <div id="ws-context-summary"><div class="empty">Lade…</div></div>
+                    <details class="context-disclosure">
+                        <summary>Operate- und Kontextkern</summary>
+                        <div id="ws-context-summary"><div class="empty">Lade…</div></div>
+                    </details>
                 </div>
 
                 <div class="card" id="project-create-panel" style="display:none;">
@@ -46,8 +49,8 @@
                             <h3 id="ws-detail-title">Projekt</h3>
                             <div style="display:flex;gap:6px;">
                                 <select id="ws-view-mode" style="padding:4px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.78rem;">
+                                    <option value="board" selected>Planung</option>
                                     <option value="canvas">Canvas</option>
-                                    <option value="board">Board</option>
                                     <option value="timeline">Timeline</option>
                                     <option value="list">Liste</option>
                                 </select>
@@ -58,6 +61,14 @@
                         </div>
                         <div id="ws-project-stats"></div>
                     </div>
+
+                    <section class="situation-slots" id="ws-situation-slots" aria-label="Situationskarten">
+                        <div class="situation-slot" data-slot-kind="generic">
+                            <div class="situation-slot-kicker">Kartenplatz</div>
+                            <div class="situation-slot-title">Situationskarte</div>
+                            <p class="situation-slot-copy">Platzhalter für kontextabhängige Karten. Dieser Slot bleibt leer, bis der Kernel eine echte Karte liefert — keine Trainings-, Posting- oder Reise-Demodaten.</p>
+                        </div>
+                    </section>
 
                     <div class="card" id="ws-element-composer" style="display:none;">
                         <div class="card-header">

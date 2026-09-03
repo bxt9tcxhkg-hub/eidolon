@@ -907,7 +907,9 @@ def test_chat_ui_does_not_fall_back_to_fake_success_copy():
     assert "'Antwort erhalten'" not in html
     assert "Fehler: Keine Modellantwort erhalten" in js
     assert 'Noch kein Gesprächskontext.' in js
-    assert 'renderChat(); loadOperateView(); loadPodsView(); loadWorkspaces();' in js
+    assert 'const initialTab = resolveInitialTab();' in js
+    assert 'showTab(initialTab);' in js
+    assert 'loadOperateView(); loadPodsView(); loadWorkspaces();' not in js
 
 
 def test_chat_ui_renders_live_runtime_context_contract():
@@ -930,7 +932,9 @@ def test_chat_is_initial_active_surface_and_header():
     assert '<div id="panel-dashboard" class="tab-panel">' in html
     assert '<div id="panel-mesh" class="tab-panel">' in html
     assert "let currentTab = 'chat';" in APP_SHELL_JS.read_text(encoding='utf-8')
-    assert "const initialTab = (window.location.hash || '#chat').replace('#', '');" in APP_SHELL_JS.read_text(encoding='utf-8')
+    assert 'function resolveInitialTab()' in APP_SHELL_JS.read_text(encoding='utf-8')
+    assert "if (!raw || raw === 'operate' || !PAGES[raw]) return LANDING_TAB;" in APP_SHELL_JS.read_text(encoding='utf-8')
+    assert "const initialTab = resolveInitialTab();" in APP_SHELL_JS.read_text(encoding='utf-8')
 
 
 def test_doc_hierarchy_declares_spec_as_product_truth():

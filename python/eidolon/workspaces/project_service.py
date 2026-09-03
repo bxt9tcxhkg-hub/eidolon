@@ -31,6 +31,10 @@ class ProjectService:
         project = self._store.get_project(project_id)
         if not project:
             return None
+        if kwargs.get('sort_order') is None:
+            kwargs['sort_order'] = len(project.elements)
+        else:
+            kwargs['sort_order'] = int(kwargs['sort_order'])
         element = ProjectElement(id=str(uuid.uuid4())[:8], title=title, **kwargs)
         project.elements.append(element)
         project.updated_at = now_iso()
@@ -41,6 +45,11 @@ class ProjectService:
         project = self._store.get_project(project_id)
         if not project:
             return None
+        if 'sort_order' in kwargs:
+            if kwargs['sort_order'] is None:
+                kwargs.pop('sort_order')
+            else:
+                kwargs['sort_order'] = int(kwargs['sort_order'])
         for element in project.elements:
             if element.id == element_id:
                 for key, value in kwargs.items():

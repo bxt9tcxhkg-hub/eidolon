@@ -24,6 +24,7 @@ class ProjectElement:
     domain: str = ''
     domain_data: dict = field(default_factory=dict)
     position: dict = field(default_factory=lambda: {'x': 0, 'y': 0})
+    sort_order: int = 0
 
     def to_dict(self) -> dict:
         return {
@@ -44,6 +45,7 @@ class ProjectElement:
             'domain_data': self.domain_data,
             'position': self.position,
             'parent_id': self.parent_id,
+            'sort_order': self.sort_order,
         }
 
     @classmethod

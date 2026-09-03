@@ -89,6 +89,7 @@
             ['Status', ws.statusLabel(project.status || 'active')],
             ['Domäne', project.domain || '—'],
             ['Elemente', String(elements.length)],
+            ['Geplant', String(elements.filter((item) => item.status === 'idea' || item.status === 'planned').length)],
             ['In Arbeit', String(elements.filter((item) => item.status === 'in_progress').length)],
             ['Blockiert', String(elements.filter((item) => item.status === 'blocked').length)],
             ['Erledigt', String(elements.filter((item) => item.status === 'done').length)],
@@ -147,7 +148,7 @@
             const titleEl = document.getElementById('ws-detail-title');
             if (titleEl) titleEl.textContent = 'Lade Projekt…';
             const viewMode = document.getElementById('ws-view-mode');
-            if (viewMode) viewMode.value = 'canvas';
+            if (viewMode) viewMode.value = 'board';
             renderProjectStats({title: 'Lade…', elements: [], inbox: [], status: 'active', domain: '—'});
             ws.closeElementComposer();
             window.switchView();

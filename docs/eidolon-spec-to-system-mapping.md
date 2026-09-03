@@ -368,9 +368,9 @@ Eidolon is the central agentic main system, not primarily a generic assistant or
 Chat is fixed entry; Eidolon understands, structures, classifies, organizes, executes, verifies, and continues.
 
 ### Current evidence
-- chat is the active initial panel
+- chat is the active initial panel; empty, unknown, and `#operate` hashes resolve to Chat
 - chat runtime compiles context and enforces direction/recommendation/next step
-- operate snapshot provides run/objective/blocker/approval/evidence state
+- operate snapshot provides run/objective/blocker/approval/evidence state and is summarized in Chat, not as a landing tab
 
 ### Remaining mismatch
 - the full conversation→operate→workspace loop is still distributed across several modules rather than one explicit kernel boundary
@@ -411,11 +411,14 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 ## Area 6 — UI/workspace architecture
 ### Current evidence
 - chat runtime context is visible in UI
-- operate page shows approvals, blockers, subagents, evidence, next action, history, work graph
+- operate state is shown inside Chat (active work, decisions) rather than as a Mission-Control landing page
+- project detail defaults to a planning board with related / planned / in-progress / done buckets
+- board controls persist through `PUT`/`DELETE /projects/{id}/elements/{element_id}` (`title`, `priority`, `status`, `sort_order`)
+- situation-specific cards exist only as empty generic slots
 
 ### Remaining mismatch
 - the root component stylesheet is now segmented, but the goals component slice remains comparatively large
-- product entry and project surfaces are more coherent, but still not yet a compact unified interaction grammar everywhere
+- product entry and project surfaces are tighter, but utility pages still exist behind a disclosure instead of being fully absorbed
 
 ### Verdict
 **Semantically improved, structural pressure moved upward into larger UI/Core surfaces instead of the old runtime support hotspots.**

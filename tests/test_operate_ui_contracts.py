@@ -56,7 +56,8 @@ def test_operate_ui_panel_and_anchors_exist():
     assert '/assets/execution-ui.js' in html
     shell = APP_WEB_JS
     assert "let currentTab = 'chat';" in shell
-    assert "#chat" in shell
+    assert "const LANDING_TAB = 'chat';" in shell
+    assert 'function resolveInitialTab()' in shell
     assert "function showTab(tabId)" in shell
 
 

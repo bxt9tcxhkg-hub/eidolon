@@ -21,7 +21,10 @@
 - `workspace_payloads.py`, `bridge_workspace.py`, `service_support.py`, `runtime_support.py`, `runtime_service_factory.py`, `auth_logic.py`, `module_runtime_actions.py`, `mesh_pairing_routes.py`, `mesh/inbox.py`, `store_schema.py`, `settings_validation.py`, `semantic_clustering.py`, `topic_attention_analysis.py` und `memory/graph.py` erneut entlang echter Verantwortungsgrenzen mit kompatiblen Fassaden zerlegt
 - Chat-POST `/chat` und Chat-GET `/chat/context` erzeugen ihren Runtime-Kontext jetzt über denselben `chat_route_support.session_payload`-Pfad auf Basis des `work_context_kernel`
 - Goals-, Chat- und Shell-CSS werden über importierte Slice-Dateien statt über große Einzelfiles ausgeliefert
-- Chat ist jetzt auch in der Web-UI die echte Startoberfläche; die Shell priorisiert Unterhaltung, aktive Arbeit und Projekte vor Utility-Flächen
+- Chat ist die echte Startoberfläche; Hash `#operate` und unbekannte Hashes landen in Chat
+- Die Shell hat weniger Primärflächen: Unterhaltung, Projektfläche, Essentials; der Rest liegt hinter „Weitere Flächen“
+- Projektplanung ist die Standardansicht und erlaubt echte Eingriffe (Umbenennen, Priorität, Reihenfolge, Streichen, Löschen) gegen den Projekt-Kernel
+- Situationskarten sind nur generisches Slot-Gerüst, keine Trainings-/Posting-/Reise-Features
 - Ein kleines zustandsfähiges Eidolon-Signature-Object transportiert reale Arbeitszustände statt bloßes Dekor
 - Findings- und Root-History-Dokumentation haben jetzt explizite Supersession-/Archiv-Readmes
 - `/identity` liefert konsistente Produktrolle

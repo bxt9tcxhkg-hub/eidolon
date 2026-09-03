@@ -10,7 +10,7 @@ def apply_project_workspace_action(project_service, project, module_id: str, act
             created = create_element(project_service, project.id, payload, 'Neue Aufgabe', '')
             result['element_id'] = created.id if created else None
             changed = created is not None
-        elif action in {'set_status', 'complete_card', 'rename_card', 'assign_owner', 'set_priority', 'set_note'}:
+        elif action in {'set_status', 'complete_card', 'rename_card', 'assign_owner', 'set_priority', 'set_note', 'reorder_card'}:
             element = indexed_element(elements, payload)
             updates = {}
             if action == 'set_status':
@@ -27,6 +27,8 @@ def apply_project_workspace_action(project_service, project, module_id: str, act
                 updates['priority'] = int(payload.get('priority', element.priority) or 0)
             elif action == 'set_note':
                 updates['description'] = str(payload.get('notes') or '')
+            elif action == 'reorder_card':
+                updates['sort_order'] = int(payload.get('sort_order', element.sort_order) or 0)
             updated = project_service.update_element(project.id, element.id, **updates)
             result['element_id'] = element.id
             changed = updated is not None
