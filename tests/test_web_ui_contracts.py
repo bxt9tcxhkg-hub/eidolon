@@ -958,7 +958,8 @@ def test_project_planning_surface_is_generic_and_editable():
     assert 'data-slot="inbox"' in html
     assert 'id="ws-project-title-edit"' in html
     assert 'data-ui-action="saveProjectTitle"' in html
-    assert 'Keine fest verdrahteten Training-, Instagram- oder Reise-Flächen' in html
+    assert 'Slots, keine Domänen-Pakete' in html
+    assert 'keine fest verdrahteten Training-, Instagram- oder Reise-Flächen' in html
     assert 'data-tab="training"' not in html
     assert 'data-tab="instagram"' not in html
     assert 'data-tab="reise"' not in html
