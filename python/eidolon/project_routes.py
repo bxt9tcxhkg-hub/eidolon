@@ -50,7 +50,8 @@ def register_project_routes(app: FastAPI, *, get_project_service, get_workspace_
             raise HTTPException(status_code=404, detail='Projekt nicht gefunden')
         payload = workspace_ui_service().get_runtime_payload()
         operate = record_workspace_action(operate_service(), payload, workspace_id=f'project_{project_id}', module_id='board', action='add_card', mutation_payload={'element_id': element.id, 'status': request.get('status', 'idea')}, changed=True, before_summary={}, after_summary=None, element_id=element.id, selection_reason='Project element created via project endpoint')
-        return truth_payload(workspace_ui_service, {'element': element.to_dict(), 'operate': operate}, element=element.to_dict())
+        project = project_service().get_project(project_id)
+        return truth_payload(workspace_ui_service, {'element': element.to_dict(), 'operate': operate}, project=project.to_dict() if project else None)
 
     @app.post('/projects/{project_id}/elements/reorder')
     async def reorder_elements(project_id: str, request: dict):

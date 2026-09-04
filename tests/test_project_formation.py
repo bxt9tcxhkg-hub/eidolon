@@ -31,6 +31,7 @@ def test_candidate_to_active_requires_visible_confirmation():
         raise AssertionError('silent promotion must fail')
     except FormationError as exc:
         assert 'Bestätigung' in str(exc)
+        assert 'confirmed=true' in str(exc)
     promoted = apply_transition('project_candidate', 'active_project', confirmed=True, reason='user_ok')
     assert promoted['creates_durable_project'] is True
     assert promoted['formation_source'] == 'user_confirmed_promotion'
@@ -66,6 +67,7 @@ def test_formation_api_promotes_topic_candidate_only_when_confirmed(tmp_path, mo
     ui._operate_service = OperateService(tmp_path)
     monkeypatch.setattr(agent_server, 'workspace_ui_service', ui, raising=False)
     monkeypatch.setattr(agent_server, 'project_service', ui._project_service, raising=False)
+    monkeypatch.setattr(agent_server, 'operate_service', ui._operate_service, raising=False)
     client = TestClient(agent_server.app)
 
     denied = client.post('/workspaces/formation', json={
@@ -75,6 +77,7 @@ def test_formation_api_promotes_topic_candidate_only_when_confirmed(tmp_path, mo
     })
     assert denied.status_code == 400
     assert 'Bestätigung' in denied.json()['detail']
+    assert 'confirmed=true' in denied.json()['detail']
 
     accepted = client.post('/workspaces/formation', json={
         'workspace_id': 'ws_candidate_demo',
@@ -98,7 +101,13 @@ def test_formation_api_promotes_topic_candidate_only_when_confirmed(tmp_path, mo
 def test_chat_and_project_mutations_share_work_truth_operate(tmp_path, monkeypatch):
     service = ProjectService(tmp_path)
     project = service.create_project('Gemeinsame Wahrheit', 'Chat und Projektfläche', 'general')
+    ui = WorkspaceUIService(tmp_path)
+    ui._project_service = service
+    from eidolon.operate.service import OperateService
+    ui._operate_service = OperateService(tmp_path)
     monkeypatch.setattr(agent_server, 'project_service', service, raising=False)
+    monkeypatch.setattr(agent_server, 'workspace_ui_service', ui, raising=False)
+    monkeypatch.setattr(agent_server, 'operate_service', ui._operate_service, raising=False)
     client = TestClient(agent_server.app)
     created = client.post(f'/projects/{project.id}/elements', json={'title': 'Nächster Schritt', 'status': 'planned'})
     assert created.status_code == 200

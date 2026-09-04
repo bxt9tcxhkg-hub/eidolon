@@ -75,7 +75,7 @@ def apply_transition(from_state: str, to_state: str, *, confirmed: bool = False,
     if not transition_allowed(from_state, to_state):
         raise FormationError(f'Übergang {from_state} → {to_state} ist nicht erlaubt')
     if requires_confirmation(from_state, to_state) and not confirmed:
-        raise FormationError('active_project braucht eine sichtbare Nutzerbestätigung; stille dauerhafte Projekt-Bots sind nicht erlaubt')
+        raise FormationError('Übergang nach active_project braucht sichtbare Bestätigung (confirmed=true); stille dauerhafte Projekt-Bots sind nicht erlaubt')
     return {
         'ok': True,
         'from_state': from_state,
