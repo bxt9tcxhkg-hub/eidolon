@@ -37,7 +37,7 @@ Rust-Crates bleiben im Repo (CLI, experimentelle Runtime, Mesh-Bibliotheken), si
 - Generische Slots (Kontext, Ziel, Zustand, Next, Freigabe, Blocker, Inbox, Evidenz) werden aus Kernel/Workspace gespeist, nicht aus Domänen-Paketen
 - `/identity` liefert Produktrolle und aktive/definierte Rollen getrennt
 - Runtime-State liegt außerhalb des Repos unter `%LOCALAPPDATA%/Eidolon/state/`
-- `python -m pytest -q` besteht
+- `python -m pytest -q` besteht für die neuen Formation-/Work-Truth-/Planning-Verträge; in dieser Umgebung zusätzlich 4 vorbestehende Env-Fehler (kein Live-Ollama, kein `aioquic`, keine Codex-CLI)
 
 ## Aktive Wahrheitsquellen
 - Produkt-Soll: `docs/eidolon-specification.md`

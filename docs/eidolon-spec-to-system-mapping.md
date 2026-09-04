@@ -5,7 +5,7 @@
 
 ## Fresh evidence basis
 - `python/agent_server.py` → 70 lines
-- `python/eidolon/runtime_bootstrap.py` → 99 lines
+- `python/eidolon/runtime_bootstrap.py` → 102 lines
 - `python/eidolon/runtime_service_factory.py` → 11 lines
 - `python/eidolon/runtime_service_contracts.py` → 36 lines
 - `python/eidolon/runtime_service_bootstrap.py` → 61 lines
@@ -36,8 +36,8 @@
 - `python/eidolon/autonomy_compat_status.py` → 39 lines
 - `python/eidolon/autonomy_compat_runtime_routes.py` → 60 lines
 - `python/eidolon/certificate_routes.py` → 42 lines
-- `python/eidolon/project_routes.py` → 93 lines
-- `python/eidolon/project_route_support.py` → 94 lines
+- `python/eidolon/project_routes.py` → 114 lines
+- `python/eidolon/project_route_support.py` → 107 lines
 - `python/eidolon/workspace_routes.py` → 15 lines
 - `python/eidolon/workspace_route_helpers.py` → 16 lines
 - `python/eidolon/workspace_context_routes.py` → 52 lines
@@ -296,7 +296,7 @@
 - `python/eidolon/web/app-canvas.css` → 187 lines
 - `python/eidolon/web/app-mobile.css` → 83 lines
 - `python/eidolon/web/app-shell.js` → 219 lines
-- `python/eidolon/web/chat-ui.js` → 295 lines
+- `python/eidolon/web/chat-ui.js` → 538 lines
 - `python/eidolon/web/dashboard-ui.js` → 176 lines
 - `python/eidolon/web/goals-ui.js` → 164 lines
 - `python/eidolon/web/admin-ui.js` → 27 lines
@@ -305,19 +305,19 @@
 - `python/eidolon/web/skills-backups-ui.js` → 81 lines
 - `python/eidolon/web/settings-ui.js` → 215 lines
 - `python/eidolon/web/workspace-ui.js` → 82 lines
-- `python/eidolon/web/workspace-project-ui.js` → 241 lines
+- `python/eidolon/web/workspace-project-ui.js` → 377 lines
 - `python/eidolon/web/workspace-canvas-ui.js` → 144 lines
 - `python/eidolon/web/workspace-views-ui.js` → 86 lines
 - `python/eidolon/web/workspace-element-composer-ui.js` → 115 lines
 - `python/eidolon/web/operate-ui.js` → 13 lines
 - `python/eidolon/web/operate-render-ui.js` → 94 lines
-- `python/eidolon/web/operate-actions-ui.js` → 34 lines
+- `python/eidolon/web/operate-actions-ui.js` → 43 lines
 - `python/eidolon/web/operate-view-ui.js` → 61 lines
 - live app object → 152 routes
 - live route path+method duplicates → 0
 - live `GET /identity` → returns `product_role: "Zentrales agentisches Hauptsystem"`
 - live `GET /chat/context` → returns runtime context including chat/workspace/operate state
-- live `python -m pytest -q` → passes (99 passed, 3 warnings)
+- live `python -m pytest -q` → passes for new formation/work-truth/planning contracts (127 passed, 2 warnings); this Cloud-Agent environment additionally failed 4 pre-existing checks: no live Ollama (`test_chat_endpoint_returns_real_model_response`), missing `aioquic`, and `oauth_supported is False` without Codex CLI. `EIDOLON_STATE_DIR` collapses tmp_path stores; tests here used `LOCALAPPDATA` so AppData layout stayed untouched.
 - repo runtime-state roots `python/data/` and `data/` → removed from the repo
 - active runtime-state root → `%LOCALAPPDATA%/Eidolon/state/`
 
