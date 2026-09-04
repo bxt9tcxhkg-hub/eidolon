@@ -31,7 +31,8 @@ def register_workspace_mutation_routes(app: FastAPI, *, workspace_ui_service, wo
             return {'ok': False, 'error': 'Learning deaktiviert'}
         data = state.get('state_data') or {}
         runtime.record_outcome(workspace_type=data.get('workspace_type', 'workspace'), module_id=str(request.get('module_id') or 'unknown'), action=str(request.get('action') or 'unknown'), success=bool(request.get('success', True)), metadata={'workspace_id': workspace_id, 'note': str(request.get('note') or '')})
-        return {'ok': True, 'data': {'workspace_id': workspace_id, 'operate': workspace_ui_service().get_runtime_payload().get('operate', {}), 'work_kernel': workspace_ui_service().get_unified_work_context(source='workspace')}}
+        truth = workspace_ui_service().get_work_truth()
+        return {'ok': True, 'data': {'workspace_id': workspace_id, **truth}}
 
     @app.post('/workspaces/{workspace_id}/activate')
     async def workspaces_activate(workspace_id: str):

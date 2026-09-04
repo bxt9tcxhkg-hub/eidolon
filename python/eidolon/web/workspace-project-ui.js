@@ -10,15 +10,19 @@
             return;
         }
         const operate = ctx.operate || {};
+        const kernel = ctx.work_kernel || {};
+        const operateCtx = kernel.operate_context || {};
+        const formation = ctx.formation || kernel.formation || {};
         const run = operate.run || {};
         const objective = operate.objective || {};
         const rows = [
-            ['Operate-Zustand', run.state || '—'],
-            ['Operate-Ziel', objective.title || ctx.current_focus_label || '—'],
-            ['Operate-Blocker', String((operate.blockers || []).filter(item => item.status === 'open').length)],
-            ['Operate-Freigaben', String((operate.approvals || []).filter(item => item.status === 'pending').length)],
-            ['Aktueller Fokus', ctx.current_focus_label || '—'],
-            ['Nächster Schritt', ctx.next_step || '—'],
+            ['Operate-Zustand', operateCtx.run_state || run.state || '—'],
+            ['Operate-Ziel', operateCtx.objective_title || objective.title || ctx.current_focus_label || '—'],
+            ['Operate-Blocker', String((operateCtx.open_blocker_count != null ? operateCtx.open_blocker_count : (operate.blockers || []).filter(item => item.status === 'open').length))],
+            ['Operate-Freigaben', String((operateCtx.pending_approval_count != null ? operateCtx.pending_approval_count : (operate.approvals || []).filter(item => item.status === 'pending').length))],
+            ['Formationszustand', formation.current_state || ctx.current_context_state || '—'],
+            ['Aktueller Fokus', ctx.current_focus_label || formation.label || '—'],
+            ['Nächster Schritt', (operateCtx.next_action || {}).summary || ctx.next_step || '—'],
         ];
         el.innerHTML = rows.map(([label, value]) => '<div class="comp-row"><span class="comp-name">' + escapeHtml(label) + '</span><span class="comp-detail">' + escapeHtml(value) + '</span></div>').join('');
     }
@@ -102,7 +106,13 @@
             description: item.metadata?.project_description || item.overview || '',
             status: item.metadata?.project_status || item.state || 'active',
         })));
-        renderWorkspaceContext({ ...contextData, operate });
+        renderWorkspaceContext({ ...contextData, operate, work_kernel: overview.work_kernel, formation: overview.formation });
+        state.lastWorkTruth = {
+            operate,
+            work_kernel: overview.work_kernel,
+            formation: overview.formation,
+            generic_slots: overview.generic_slots,
+        };
     }
 
     function toggleProjectComposer(forceVisible) {
@@ -164,12 +174,27 @@
                 }
             }
             renderProjectStats(project);
-            renderProjectSlots(project);
+            renderProjectSlots(project, response);
             window.switchView();
         } catch (e) { showNotice(e.message || 'Projekt öffnen fehlgeschlagen', 'error'); }
     }
 
-    function renderProjectSlots(project) {
+    function renderProjectSlots(project, extras) {
+        const root = document.getElementById('ws-project-slots');
+        const slots = (extras && extras.generic_slots) || (project && project.generic_slots) || (state.lastWorkTruth && state.lastWorkTruth.generic_slots) || [];
+        if (root && slots.length) {
+            root.innerHTML = slots.map((slot) => {
+                const body = (slot.rows && slot.rows.length)
+                    ? slot.rows.map((row) => '<div class="comp-row"><span class="comp-name">' + escapeHtml(row.label) + '</span><span class="comp-detail">' + escapeHtml(row.value) + '</span></div>').join('')
+                    : '<div class="empty">' + escapeHtml(slot.empty || 'Keine Daten') + '</div>';
+                const source = slot.source ? '<span class="tag info">' + escapeHtml(slot.source) + '</span>' : '';
+                return '<section class="project-slot" data-slot="' + escapeHtml(slot.kind) + '">'
+                    + '<div class="project-slot-label">' + escapeHtml(slot.title || slot.kind) + ' ' + source + '</div>'
+                    + '<div id="ws-slot-' + escapeHtml(slot.kind) + '" class="project-slot-body">' + body + '</div>'
+                    + '</section>';
+            }).join('');
+            return;
+        }
         const contextEl = document.getElementById('ws-slot-context');
         const nextEl = document.getElementById('ws-slot-next');
         const inboxEl = document.getElementById('ws-slot-inbox');

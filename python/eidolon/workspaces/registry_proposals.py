@@ -17,7 +17,15 @@ def propose_from_topics(registry) -> dict:
         contract = registry.generator.propose(topic, user).to_dict()
         prior = previous.get(contract['workspace_id'], {})
         runtime_state = prior.get('state', 'suggested')
-        contract.update({'state': runtime_state, 'product_state': map_workspace_state_to_product_state(runtime_state, topic), 'health': 'ok', 'last_updated': datetime.now(timezone.utc).isoformat()})
+        metadata = {**(contract.get('metadata') or {}), **(prior.get('metadata') or {})}
+        topic_signals = {**topic, **metadata}
+        contract.update({
+            'state': runtime_state,
+            'metadata': metadata,
+            'product_state': map_workspace_state_to_product_state(runtime_state, topic_signals),
+            'health': 'ok',
+            'last_updated': datetime.now(timezone.utc).isoformat(),
+        })
         proposed.append(contract)
     enriched = []
     topic_map = {topic.get('topic_id'): topic for topic in topics}

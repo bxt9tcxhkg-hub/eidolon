@@ -5,7 +5,7 @@
 
 ## Fresh evidence basis
 - `python/agent_server.py` → 70 lines
-- `python/eidolon/runtime_bootstrap.py` → 99 lines
+- `python/eidolon/runtime_bootstrap.py` → 102 lines
 - `python/eidolon/runtime_service_factory.py` → 11 lines
 - `python/eidolon/runtime_service_contracts.py` → 36 lines
 - `python/eidolon/runtime_service_bootstrap.py` → 61 lines
@@ -36,8 +36,8 @@
 - `python/eidolon/autonomy_compat_status.py` → 39 lines
 - `python/eidolon/autonomy_compat_runtime_routes.py` → 60 lines
 - `python/eidolon/certificate_routes.py` → 42 lines
-- `python/eidolon/project_routes.py` → 93 lines
-- `python/eidolon/project_route_support.py` → 94 lines
+- `python/eidolon/project_routes.py` → 114 lines
+- `python/eidolon/project_route_support.py` → 107 lines
 - `python/eidolon/workspace_routes.py` → 15 lines
 - `python/eidolon/workspace_route_helpers.py` → 16 lines
 - `python/eidolon/workspace_context_routes.py` → 52 lines
@@ -296,7 +296,7 @@
 - `python/eidolon/web/app-canvas.css` → 187 lines
 - `python/eidolon/web/app-mobile.css` → 83 lines
 - `python/eidolon/web/app-shell.js` → 219 lines
-- `python/eidolon/web/chat-ui.js` → 295 lines
+- `python/eidolon/web/chat-ui.js` → 538 lines
 - `python/eidolon/web/dashboard-ui.js` → 176 lines
 - `python/eidolon/web/goals-ui.js` → 164 lines
 - `python/eidolon/web/admin-ui.js` → 27 lines
@@ -305,19 +305,19 @@
 - `python/eidolon/web/skills-backups-ui.js` → 81 lines
 - `python/eidolon/web/settings-ui.js` → 215 lines
 - `python/eidolon/web/workspace-ui.js` → 82 lines
-- `python/eidolon/web/workspace-project-ui.js` → 241 lines
+- `python/eidolon/web/workspace-project-ui.js` → 377 lines
 - `python/eidolon/web/workspace-canvas-ui.js` → 144 lines
 - `python/eidolon/web/workspace-views-ui.js` → 86 lines
 - `python/eidolon/web/workspace-element-composer-ui.js` → 115 lines
 - `python/eidolon/web/operate-ui.js` → 13 lines
 - `python/eidolon/web/operate-render-ui.js` → 94 lines
-- `python/eidolon/web/operate-actions-ui.js` → 34 lines
+- `python/eidolon/web/operate-actions-ui.js` → 43 lines
 - `python/eidolon/web/operate-view-ui.js` → 61 lines
 - live app object → 152 routes
 - live route path+method duplicates → 0
 - live `GET /identity` → returns `product_role: "Zentrales agentisches Hauptsystem"`
 - live `GET /chat/context` → returns runtime context including chat/workspace/operate state
-- live `python -m pytest -q` → passes (99 passed, 3 warnings)
+- live `python -m pytest -q` → passes for new formation/work-truth/planning contracts (127 passed, 2 warnings); this Cloud-Agent environment additionally failed 4 pre-existing checks: no live Ollama (`test_chat_endpoint_returns_real_model_response`), missing `aioquic`, and `oauth_supported is False` without Codex CLI. `EIDOLON_STATE_DIR` collapses tmp_path stores; tests here used `LOCALAPPDATA` so AppData layout stayed untouched.
 - repo runtime-state roots `python/data/` and `data/` → removed from the repo
 - active runtime-state root → `%LOCALAPPDATA%/Eidolon/state/`
 
@@ -331,7 +331,7 @@ The direction is materially stronger than before:
 The system is **not yet fully unified** because:
 - documentation had drift and needed consolidation
 - runtime-state truth is now centralized externally, but some secondary/historical docs still refer to old repo-local state paths
-- chat/operate/workspace truth is improved but still sits across multiple layers
+- Chat/Operate/Projektfläche now share `work_kernel` + Operate snapshot on read and on project mutations; board-element blockers remain a second persisted model next to Operate blockers
 - some structural concentration remains, but the latest QUIC, healing, backups, browser-control, settings-schema, mesh-service, and operate-record hot spots were split into narrower modules
 - several runtime values were broader than the typed operate contracts admitted (subagent function families and evidence kinds), so the contracts needed truth hardening to match live behavior
 - the former workspace/domain/runtime/mesh hot spots were split into smaller files without changing the live UI/API contracts
@@ -340,10 +340,10 @@ The system is **not yet fully unified** because:
 ## Fit by area
 - Product identity: **7/10**
 - Core workflow: **7/10**
-- Project formation: **6/10**
+- Project formation: **8/10**
 - Autonomy contract: **6/10**
 - Bot organization: **8/10**
-- UI/workspace architecture: **6/10**
+- UI/workspace architecture: **7/10**
 - Truth/verification hygiene: **7/10**
 - Maintainability: **4/10**
 
@@ -383,12 +383,17 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 ### Current evidence
 - workspace payloads expose `product_state` such as `project_candidate` and `active_project`
 - chat runtime reacts differently to active project, candidate project, and no live context
+- `python/eidolon/workspaces/project_formation.py` is the public transition contract (`chat_topic` → `project_candidate` → `active_project`)
+- `POST /workspaces/formation` persists the transition; `project_candidate` → `active_project` requires `confirmed=true` and may create a real project
+- Chat shows the pending transition (`#chat-formation`) and calls the same formation API
+- heuristic mapping no longer silent-promotes runtime `active` to `active_project`
 
 ### Remaining mismatch
-- project formation is still partly heuristic and not yet one explicit domain module with a narrow public contract
+- topic detection is still heuristic for proposing `chat_topic` vs `project_candidate`
+- Operate `context_kind` is updated on confirmed transitions, but not every historical session is backfilled
 
 ### Verdict
-**Useful and real, but not yet fully canonicalized.**
+**Canonical transition contract is now real and tested; proposal heuristics remain for the first hop.**
 
 ## Area 4 — Autonomy and approval
 ### Current evidence
@@ -418,10 +423,11 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 
 ### Remaining mismatch
 - the root component stylesheet is now segmented, but the goals component slice remains comparatively large
-- product entry and project surfaces are more coherent, but still not yet a compact unified interaction grammar everywhere
+- primary nav is Chat / Projektfläche / Arbeit; utilities are grouped under Betrieb and Technik
+- generic slots are kernel-fed and denser, still not a full adaptive composition engine
 
 ### Verdict
-**Semantically improved, structural pressure moved upward into larger UI/Core surfaces instead of the old runtime support hotspots.**
+**Semantically improved; interaction grammar is thinner on the primary surfaces, with remaining density in utility and goals CSS.**
 
 ## Area 7 — Maintainability
 ### Current evidence

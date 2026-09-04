@@ -11,8 +11,10 @@ def require_workspace(workspace_ui_service, workspace_id: str):
 
 
 def kernel_payload(workspace_ui_service, result):
-    return {**result, 'data': {'result': result, 'operate': workspace_ui_service().get_runtime_payload().get('operate', {}), 'work_kernel': workspace_ui_service().get_unified_work_context(source='workspace')}}
+    truth = workspace_ui_service().get_work_truth()
+    return {**result, 'data': {'result': result, **truth}}
 
 
 def execution_payload(workspace_ui_service, result):
-    return {**result, 'data': {'workspace_execution': result, 'operate': result.get('operate'), 'work_kernel': workspace_ui_service().get_unified_work_context(source='workspace')}}
+    truth = workspace_ui_service().get_work_truth()
+    return {**result, 'data': {'workspace_execution': result, 'operate': result.get('operate') or truth.get('operate'), 'work_kernel': truth.get('work_kernel'), 'formation': truth.get('formation'), 'generic_slots': truth.get('generic_slots')}}

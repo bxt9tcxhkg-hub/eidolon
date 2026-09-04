@@ -6,7 +6,7 @@
         brainstormData: [],
         armedDeleteElementId: null,
         armedDeleteProjectId: null,
-        armedDropElementId: null,
+        lastWorkTruth: null,
         canvas: {
             zoom: 1,
             panX: 0,

@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from eidolon.domain.mission.product_phases import build_phase_preservation_payload
 from eidolon.operate.bridge_snapshot import build_compact_operate_snapshot
 from eidolon.routes.api_response import api_v1_ok
+from eidolon.workspaces.generic_slots import build_generic_slots
 
 
 def register_operate_overview_routes(app: FastAPI, *, runtime, get_operate_service, workspace_ui_service) -> None:
@@ -27,4 +28,6 @@ def register_operate_overview_routes(app: FastAPI, *, runtime, get_operate_servi
                 has_approval=bool(snapshot.get('counts', {}).get('approvals')),
                 result_status=snapshot['run'].get('result_status'),
             )
-        return api_v1_ok({**snapshot, 'work_kernel': work_kernel})
+        formation = (work_kernel or {}).get('formation')
+        slots = build_generic_slots(work_kernel=work_kernel, operate=snapshot)
+        return api_v1_ok({**snapshot, 'work_kernel': work_kernel, 'formation': formation, 'generic_slots': slots})

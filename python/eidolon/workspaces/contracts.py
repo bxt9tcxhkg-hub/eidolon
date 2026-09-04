@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
+from eidolon.workspaces.project_formation import map_workspace_state_to_product_state, propose_product_state
+
 CORE_LOCKED_AREAS = [
     'core-nav',
     'core-topbar',
@@ -16,21 +18,10 @@ PRODUCT_CONTEXT_STATES = ['chat_topic', 'project_candidate', 'active_project']
 CONTEXT_SHIFT_STATES = ['same_project', 'possible_project_shift', 'confirmed_project_shift']
 
 
-def map_workspace_state_to_product_state(runtime_state: str | None, topic: dict[str, Any] | None = None) -> str:
-    state = str(runtime_state or 'suggested')
-    if state == 'active':
-        return 'active_project'
-    topic = topic or {}
-    action = float(topic.get('action_relevance', 0) or 0)
-    recurrence = float(topic.get('recurrence_score', 0) or 0)
-    if action >= 0.45 or recurrence >= 0.3:
-        return 'project_candidate'
-    return 'chat_topic'
-
-
 def build_workspace_semantic_frame(workspace: dict[str, Any], state_data: dict[str, Any]) -> dict[str, Any]:
     metadata = workspace.get('metadata') or {}
-    product_state = map_workspace_state_to_product_state(workspace.get('state'), metadata)
+    stored = workspace.get('product_state') or metadata.get('product_state') or metadata.get('stored_product_state')
+    product_state = stored if stored in PRODUCT_CONTEXT_STATES else propose_product_state(workspace.get('state'), metadata, stored_product_state=stored)
     orchestration = (state_data or {}).get('orchestration') or {}
     next_best = orchestration.get('next_best_action') or {}
     details = ((state_data or {}).get('module_data') or {}).get('details') or {}
@@ -69,3 +60,14 @@ class WorkspaceModuleContract:
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+__all__ = [
+    'CORE_LOCKED_AREAS',
+    'PRODUCT_CONTEXT_STATES',
+    'CONTEXT_SHIFT_STATES',
+    'map_workspace_state_to_product_state',
+    'propose_product_state',
+    'build_workspace_semantic_frame',
+    'WorkspaceModuleContract',
+]

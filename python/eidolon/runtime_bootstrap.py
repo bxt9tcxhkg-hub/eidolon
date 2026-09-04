@@ -11,7 +11,7 @@ from eidolon.chat_runtime import build_chat_prompts, build_grounded_fallback_rep
 from eidolon.core.capabilities import get_capability_registry
 from eidolon.core.cert_manager import get_certificate_manager
 from eidolon.core.config import HTTP_PORT, PROJECT_ROOT
-from eidolon.operate.bridge import build_operate_snapshot
+from eidolon.operate.bridge import build_operate_snapshot, sync_operate_with_workspace_payload
 from eidolon.runtime_lifecycle import build_lifespan, quic_runtime_status, start_runtime, stop_runtime
 from eidolon.runtime_route_registry import register_routes
 from eidolon.runtime_service_factory import RuntimeServices, create_runtime_services
@@ -78,12 +78,15 @@ class RuntimeApp:
         return quic_runtime_status(self)
 
     def chat_runtime_payload(self, message: str, source: str, session: dict[str, Any] | None) -> dict[str, Any]:
-        workspace_payload = self._ns('workspace_ui_service', self.services.workspace_ui_service).get_runtime_payload()
+        workspace_ui = self._ns('workspace_ui_service', self.services.workspace_ui_service)
+        workspace_payload = workspace_ui.get_runtime_payload()
         capability_payload = get_capability_registry().list()
         user_model = self._ns('user_model_store', self.services.user_model_store).get()
         llm_backend = self._ns('llm_backend', self.services.llm_backend)
         llm_status = llm_backend.status()
         operate_service = self._ns('operate_service', self.services.operate_service)
+        sync_fn = self._ns('sync_operate_with_workspace_payload', sync_operate_with_workspace_payload)
+        sync_fn(operate_service, workspace_payload)
         build_snapshot = self._ns('build_operate_snapshot', build_operate_snapshot)
         operate_snapshot = build_snapshot(operate_service)
         return build_runtime_context(message=message, session=session, source=source, workspace_payload=workspace_payload, llm_status=llm_status, capability_payload=capability_payload, user_model=user_model, operate_snapshot=operate_snapshot)

@@ -57,9 +57,26 @@ def project_to_workspace(project, orchestrator) -> dict:
     }
     workspace = {
         'workspace_id': f'project_{project.id}', 'topic_label': project.title, 'workspace_type': 'project_workspace', 'layout_template': 'hybrid', 'modules': modules, 'render_slot': 'adaptive-workspace-host', 'feature_flag': 'workspace_adaptive_modules', 'safe_mode': 'sandboxed', 'mutable_core_areas': [],
-        'metadata': {'project_id': project.id, 'project_status': project.status, 'project_domain': project.domain, 'project_description': project.description, 'source': 'project_model', 'needs': state_data['needs']},
+        'metadata': {
+            'project_id': project.id,
+            'project_status': project.status,
+            'project_domain': project.domain,
+            'project_description': project.description,
+            'source': 'project_model',
+            'needs': state_data['needs'],
+            'formation_confirmed': (project.metadata or {}).get('formation_confirmed', True),
+            'formation_source': (project.metadata or {}).get('formation_source', 'user_created_project'),
+            'product_state': (project.metadata or {}).get('product_state') or 'active_project',
+            'stored_product_state': (project.metadata or {}).get('product_state') or 'active_project',
+        },
         'state': state,
-        'product_state': map_workspace_state_to_product_state(state, {'action_relevance': 1.0, 'recurrence_score': 1.0}),
+        'product_state': map_workspace_state_to_product_state(state, {
+            'action_relevance': 1.0,
+            'recurrence_score': 1.0,
+            'formation_confirmed': (project.metadata or {}).get('formation_confirmed', True),
+            'formation_source': (project.metadata or {}).get('formation_source', 'user_created_project'),
+            'stored_product_state': (project.metadata or {}).get('product_state') or 'active_project',
+        }),
         'health': 'ok', 'last_updated': now, 'state_data': state_data,
     }
     orchestration = orchestrator.evaluate(workspace)
