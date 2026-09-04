@@ -38,7 +38,9 @@ def test_chat_empty_state_is_radically_slim():
     assert 'id="chat-context-summary"' in html
     assert 'id="chat-formation"' in html
     assert 'id="chat-operate-actions"' in html
+    assert 'function chatHasUserMessage' in js
     assert 'function syncChatIdleLayout' in js
+    assert 'const idle = !chatHasUserMessage();' in js
     assert "panel.classList.toggle('chat-is-idle', idle)" in js
     assert '.chat-is-idle .chat-home-hero' in css
     assert '.chat-is-idle #chat-landing-panels' in css

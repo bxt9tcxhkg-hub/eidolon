@@ -2,26 +2,10 @@ function chatHasUserMessage() {
     return (chatMessages || []).some((m) => m && m.role === 'user' && String(m.content || '').trim());
 }
 
-function hasRealChatWorkContext(runtimeContext) {
-    const ctx = runtimeContext || lastChatRuntimeContext || {};
-    const operate = ctx.operate_context || {};
-    const formation = ctx.formation || {};
-    const workflow = ctx.workflow_state || {};
-    const contextState = String(workflow.current_context_state || '');
-    const hasLiveContext = Boolean(contextState && contextState !== 'no_live_context' && contextState !== 'await_input');
-    return Boolean(
-        operate.run_id
-        || (typeof pendingOperateApprovals === 'function' && pendingOperateApprovals(operate.pending_approvals).length)
-        || (typeof openOperateBlockers === 'function' && openOperateBlockers(operate.open_blockers).length)
-        || (formation.visible && formation.workspace_id && formation.to_state)
-        || hasLiveContext
-    );
-}
-
 function syncChatIdleLayout(runtimeContext) {
     const panel = document.getElementById('panel-chat');
     if (!panel) return;
-    const idle = !chatHasUserMessage() && !hasRealChatWorkContext(runtimeContext);
+    const idle = !chatHasUserMessage();
     panel.classList.toggle('chat-is-idle', idle);
     const prompt = document.getElementById('chat-idle-prompt');
     if (prompt) {
