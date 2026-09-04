@@ -31,7 +31,16 @@ impl Runtime {
             .with_env_filter("info,eidolon_runtime=debug")
             .init();
 
-        info!("Starting Eidolon Runtime v{}", env!("CARGO_PKG_VERSION"));
+        if config.uses_python_live_port() {
+            anyhow::bail!(
+                "Rust runtime is quarantined from the live Python FastAPI ports (HTTP {}, QUIC {}, discovery {}). Use 18002/14434/18001.",
+                crate::config::PYTHON_LIVE_HTTP_PORT,
+                crate::config::PYTHON_LIVE_QUIC_PORT,
+                crate::config::PYTHON_LIVE_DISCOVERY_PORT
+            );
+        }
+
+        info!("Starting Eidolon Runtime v{} (quarantined, not the live product server)", env!("CARGO_PKG_VERSION"));
         info!("HTTP port: {}, QUIC port: {}", config.http_port, config.quic_port);
 
         let keypair = if let Some(ref key_path) = config.identity_key_path {

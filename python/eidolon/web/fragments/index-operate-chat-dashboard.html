@@ -26,6 +26,10 @@
                                     <div class="chat-home-status-pill" id="chat-presence-badge">Bereit für neue Arbeit</div>
                                     <div class="chat-home-status-note" id="chat-presence-note">Noch keine laufende Arbeit erkannt.</div>
                                 </div>
+                                <div class="chat-home-actions">
+                                    <button class="btn btn-sm btn-primary" data-tab-target="operate">Arbeit öffnen</button>
+                                    <button class="btn btn-sm" data-tab-target="workspaces">Projektfläche</button>
+                                </div>
                                 <div class="chat-home-grid">
                                     <div class="chat-home-card-block">
                                         <div class="chat-panel-title">Gerade aktiv</div>
@@ -66,6 +70,56 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div id="panel-operate" class="tab-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Arbeitskern</h3>
+                        <div style="display:flex;gap:6px;">
+                            <button class="btn btn-sm" data-ui-action="loadOperateView">Aktualisieren</button>
+                            <button class="btn btn-sm" data-ui-mode="syncOperateAndReload">Aus Projektfläche übernehmen</button>
+                        </div>
+                    </div>
+                    <div class="empty" style="text-align:left;padding:0 0 12px 0;">Operate ist der sichtbare Arbeitskern hinter dem Chat — nicht die Starttür. Hier stehen nur reale Kernel-Daten.</div>
+                    <div id="operate-state-bar"><div class="empty">Lade Arbeitskern…</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Ziel</h3></div>
+                    <div id="operate-objective-card"><div class="empty">Kein Ziel geladen.</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Nächster Schritt</h3></div>
+                    <div id="operate-next-action"><div class="empty">Kein nächster Schritt geladen.</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Freigaben</h3></div>
+                    <div id="operate-approvals"><div class="empty">Keine Freigaben geladen.</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Blocker</h3></div>
+                    <div id="operate-blockers"><div class="empty">Keine Blocker geladen.</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Helfer</h3></div>
+                    <div id="operate-subagents"><div class="empty">Keine Pods geladen.</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Evidenz</h3></div>
+                    <div id="operate-evidence"><div class="empty">Keine Evidenz geladen.</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Verlauf</h3></div>
+                    <div id="operate-history"><div class="empty">Kein Verlauf geladen.</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Work-Graph</h3></div>
+                    <div id="operate-workgraph"><div class="empty">Kein Work-Graph geladen.</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>Übergänge</h3></div>
+                    <div id="operate-transitions"><div class="empty">Keine Übergänge geladen.</div></div>
                 </div>
             </div>
 

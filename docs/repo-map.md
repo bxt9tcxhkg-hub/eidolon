@@ -20,9 +20,10 @@ Diese Dokumente definieren Soll, Istbild und Prioritäten:
 - `python/eidolon/` — Produktlogik, Routen, Operate, Workspaces, Rollen, Core
 - `python/eidolon/web/` — aktive Weboberfläche
 
-### Rust-Produktpfade
-- `crates/` — Runtime-, CLI-, Mesh-, Memory-, Eval-, Skills-, Core-Crates
+### Rust-Pfade (quarantiniert, nicht live)
+- `crates/` — CLI (Client gegen FastAPI), experimentelle Runtime, Mesh-/Memory-/Eval-/Skills-/Core-Bibliotheken
 - `Cargo.toml`, `Cargo.lock` — Workspace-Root
+- Rust ist **nicht** die live Produktserver-Runtime und darf die Python-Ports `8002` / `4434` / `8001` nicht belegen
 
 ### Verifikation
 - `tests/` — aktive Python-Verifikation

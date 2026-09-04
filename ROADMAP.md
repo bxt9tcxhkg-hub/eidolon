@@ -22,6 +22,10 @@
 - Chat-POST `/chat` und Chat-GET `/chat/context` erzeugen ihren Runtime-Kontext jetzt über denselben `chat_route_support.session_payload`-Pfad auf Basis des `work_context_kernel`
 - Goals-, Chat- und Shell-CSS werden über importierte Slice-Dateien statt über große Einzelfiles ausgeliefert
 - Chat ist jetzt auch in der Web-UI die echte Startoberfläche; die Shell priorisiert Unterhaltung, aktive Arbeit und Projekte vor Utility-Flächen
+- Operate-Panel ist wieder verdrahtet und über `#operate` erreichbar, ohne Default zu sein
+- Projektfläche öffnet in der Planungsansicht (Zusammengehörig / Geplant / In Arbeit / Fertig) mit Umbenennen, Status und Reihenfolge gegen echte APIs
+- Generisches Karten-/Slot-Gerüst ohne Domänen-Pakete
+- Python FastAPI ist dokumentiert und durch Port-Wächter als einzige live Runtime gegenüber Rust abgegrenzt
 - Ein kleines zustandsfähiges Eidolon-Signature-Object transportiert reale Arbeitszustände statt bloßes Dekor
 - Findings- und Root-History-Dokumentation haben jetzt explizite Supersession-/Archiv-Readmes
 - `/identity` liefert konsistente Produktrolle

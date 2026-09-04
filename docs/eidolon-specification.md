@@ -32,6 +32,7 @@ Diese Spezifikation definiert Eidolon als Produktgrundlage ohne Placebos, Fake-F
 - keine Implementierungsdetails erfinden, die nicht geklärt wurden
 - keine UI-Mockups als fertige Produktwahrheit ausgeben
 - keine Domänen-Hubs hart vorschreiben
+- keine fest verdrahteten Domänen-Pakete (Training, Instagram, Reise und vergleichbare Beispiele sind nur Illustrationsfälle)
 
 ## Verbindlicher Prüfsatz
 Wenn eine spätere Produkt- oder Implementierungsentscheidung diesen Dokumenten widerspricht, gilt:

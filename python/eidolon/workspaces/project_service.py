@@ -52,6 +52,26 @@ class ProjectService:
                 return element
         return None
 
+    def reorder_elements(self, project_id: str, element_ids: list[str]) -> Project | None:
+        project = self._store.get_project(project_id)
+        if not project:
+            return None
+        known = {element.id: element for element in project.elements}
+        seen: set[str] = set()
+        ordered: list[ProjectElement] = []
+        for element_id in element_ids:
+            element = known.get(element_id)
+            if element and element_id not in seen:
+                ordered.append(element)
+                seen.add(element_id)
+        for element in project.elements:
+            if element.id not in seen:
+                ordered.append(element)
+        project.elements = ordered
+        project.updated_at = now_iso()
+        self._store.save_project(project)
+        return project
+
     def delete_element(self, project_id: str, element_id: str) -> bool:
         project = self._store.get_project(project_id)
         if not project:

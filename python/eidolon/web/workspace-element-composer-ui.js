@@ -110,6 +110,5 @@
         } catch (e) { showNotice(e.message, 'error'); }
     }
 
-    Object.assign(window, { switchView, renderBoardView, renderTimelineView, renderListView, renderCanvas, canvasMouseDown, canvasMouseMove, canvasMouseUp, canvasWheel, canvasZoomIn, canvasZoomOut, canvasResetView, canvasDoubleClick, setCanvasMode, openElementForm, submitTaskForm, deleteElement, deleteCurrentComposerElement, assignHierarchy });
-})();
+    Object.assign(window, { renderCanvas, canvasMouseDown, canvasMouseMove, canvasMouseUp, canvasWheel, canvasZoomIn, canvasZoomOut, canvasResetView, canvasDoubleClick, setCanvasMode, openElementForm, submitTaskForm, deleteElement, deleteCurrentComposerElement, assignHierarchy });
 })();

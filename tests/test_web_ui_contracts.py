@@ -885,6 +885,9 @@ def test_primary_inline_handlers_exist():
         'closeTaskForm',
         'submitTaskForm',
         'deleteCurrentComposerElement',
+        'saveProjectTitle',
+        'updatePlanElement',
+        'reorderPlanElements',
     }
     defined = set(re.findall(r'function\s+([A-Za-z0-9_]+)\s*\(', all_code))
     missing = sorted(expected - defined)
@@ -926,11 +929,78 @@ def test_chat_is_initial_active_surface_and_header():
     assert '<h2 id="page-title">Eidolon</h2>' in html
     assert 'Starte ein Gespräch oder setze reale Arbeit fort.' in html
     assert '<div id="panel-chat" class="tab-panel active">' in html
+    assert '<div id="panel-operate" class="tab-panel">' in html
+    assert '<div id="panel-operate" class="tab-panel active">' not in html
     assert '<div id="panel-workspaces" class="tab-panel">' in html
     assert '<div id="panel-dashboard" class="tab-panel">' in html
     assert '<div id="panel-mesh" class="tab-panel">' in html
     assert "let currentTab = 'chat';" in APP_SHELL_JS.read_text(encoding='utf-8')
     assert "const initialTab = (window.location.hash || '#chat').replace('#', '');" in APP_SHELL_JS.read_text(encoding='utf-8')
+    assert "operate: { title: 'Arbeit'" in APP_SHELL_JS.read_text(encoding='utf-8')
+    assert 'data-tab="operate" data-tab-target="operate">' in html
+    assert 'data-tab-target="operate">Arbeit öffnen' in html
+
+
+def test_project_planning_surface_is_generic_and_editable():
+    html = INDEX_HTML.read_text(encoding='utf-8')
+    js = WORKSPACE_WEB_JS
+    assert '<option value="board" selected>Planung</option>' in html
+    assert "if (viewMode) viewMode.value = 'board';" in js
+    assert "['in_progress', 'In Arbeit']" in js
+    assert "['planned', 'Geplant']" in js
+    assert "['done', 'Fertig']" in js
+    assert 'data-plan-field="title"' in js
+    assert 'data-plan-field="status"' in js
+    assert "/projects/' + state.currentProjectId + '/elements/reorder'" in js
+    assert 'id="ws-project-slots"' in html
+    assert 'data-slot="context"' in html
+    assert 'data-slot="next"' in html
+    assert 'data-slot="inbox"' in html
+    assert 'id="ws-project-title-edit"' in html
+    assert 'data-ui-action="saveProjectTitle"' in html
+    assert 'Slots, keine Domänen-Pakete' in html
+    assert 'keine fest verdrahteten Training-, Instagram- oder Reise-Flächen' in html
+    assert 'data-tab="training"' not in html
+    assert 'data-tab="instagram"' not in html
+    assert 'data-tab="reise"' not in html
+    assert 'data-tab="travel"' not in html
+
+
+def test_rust_runtime_is_quarantined_from_python_live_ports():
+    runtime_config = (ROOT / 'crates' / 'eidolon-runtime' / 'src' / 'config' / 'mod.rs').read_text(encoding='utf-8')
+    runtime_main = (ROOT / 'crates' / 'eidolon-runtime' / 'src' / 'main.rs').read_text(encoding='utf-8')
+    runtime_lib = (ROOT / 'crates' / 'eidolon-runtime' / 'src' / 'lib.rs').read_text(encoding='utf-8')
+    readme = (ROOT / 'README.md').read_text(encoding='utf-8')
+    architecture = (ROOT / 'ARCHITECTURE.md').read_text(encoding='utf-8')
+    assert 'PYTHON_LIVE_HTTP_PORT: u16 = 8002' in runtime_config
+    assert 'fn uses_python_live_port' in runtime_config
+    assert 'http_port: 18002' in runtime_config
+    assert 'http_port: 18002' in runtime_main
+    assert 'uses_python_live_port()' in runtime_lib
+    assert 'Einzige live Runtime' in architecture or 'einzige live Runtime' in architecture
+    assert 'Python FastAPI ist der einzige live Produktserver' in readme
+    cli = (ROOT / 'crates' / 'eidolon-cli' / 'src' / 'main.rs').read_text(encoding='utf-8')
+    assert 'default_value = "8002"' in cli
+
+
+def test_project_element_reorder_persists_list_order(tmp_path, monkeypatch):
+    from eidolon.workspaces.project_service import ProjectService
+
+    service = ProjectService(tmp_path)
+    project = service.create_project('Reorder', 'List order is modeled', 'general')
+    first = service.add_element(project.id, title='Alpha', status='planned')
+    second = service.add_element(project.id, title='Beta', status='planned')
+    third = service.add_element(project.id, title='Gamma', status='in_progress')
+    monkeypatch.setattr(agent_server, 'project_service', service, raising=False)
+    client = TestClient(agent_server.app)
+    response = client.post(f'/projects/{project.id}/elements/reorder', json={'element_ids': [third.id, first.id, second.id]})
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload['ok'] is True
+    titles = [item['title'] for item in payload['project']['elements']]
+    assert titles == ['Gamma', 'Alpha', 'Beta']
+    persisted = service.get_project(project.id)
+    assert [item.title for item in persisted.elements] == ['Gamma', 'Alpha', 'Beta']
 
 
 def test_doc_hierarchy_declares_spec_as_product_truth():

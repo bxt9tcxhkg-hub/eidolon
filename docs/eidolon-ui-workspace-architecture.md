@@ -24,6 +24,7 @@ Nicht erlaubt ist:
 
 ## Arbeitsmodi statt Domänen-Hubs
 Eidolon soll Oberflächen nicht primär nach Themenkatalogen bauen, sondern nach Arbeitsmodi.
+Training, Instagram oder Reise sind nur Beispiele für beliebige Vorhaben. Es darf **keine** fest verdrahteten Domänen-Pakete, Domänen-Tabs oder Spezial-UIs dafür geben. Karten und Widgets sind ein **generisches Gerüst** (Slots und Typen), das Kernel und Workspace speisen.
 
 Verbindliche Arbeitsmodi sind:
 1. Gespräch / Einstieg

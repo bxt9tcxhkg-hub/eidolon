@@ -116,3 +116,69 @@
 .tab-panel { display: none; animation: fadeIn 0.15s ease; }
 .tab-panel.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.chat-home-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.project-slot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.project-slot {
+    background: var(--bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+}
+
+.project-slot-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.project-slot-body {
+    font-size: 0.84rem;
+    color: var(--text);
+}
+
+.planning-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.planning-column {
+    min-height: 140px;
+    padding: 10px;
+}
+
+.planning-column.drop-target {
+    outline: 1px dashed var(--accent);
+}
+
+.plan-card {
+    margin-bottom: 8px;
+    cursor: grab;
+}
+
+.plan-card-title,
+.plan-card-status,
+.plan-card-priority {
+    width: 100%;
+    margin-top: 6px;
+    padding: 4px 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 0.78rem;
+}
