@@ -50,6 +50,7 @@
                 renderHistory([]);
                 renderWorkGraph({ nodes: [], edges: [] });
                 renderTransitions([]);
+                syncOperateEmptyLayout({ hasRun: false });
                 return;
             }
             const deep = await loadOperateDeepData(run.id);
@@ -69,6 +70,18 @@
             renderHistory(history);
             renderWorkGraph(workGraph);
             renderTransitions(transitions);
+            syncOperateEmptyLayout({
+                hasRun: true,
+                objective: Boolean(objective && (objective.title || objective.normalized_goal)),
+                next: Boolean(nextAction && nextAction.kind && nextAction.kind !== 'none'),
+                approvals: Array.isArray(approvals) && approvals.length > 0,
+                blockers: Array.isArray(blockers) && blockers.length > 0,
+                subagents: Array.isArray(activePods) && activePods.length > 0,
+                evidence: Array.isArray(evidence) && evidence.length > 0,
+                history: Array.isArray(history) && history.length > 0,
+                workgraph: Boolean((workGraph.nodes || []).length),
+                transitions: Array.isArray(transitions) && transitions.length > 0,
+            });
             if (typeof renderPodsOverview === 'function') {
                 renderPodsOverview(activePods);
                 renderPodDetail(window.EidolonOperate.pickSelectedPod(activePods));
@@ -85,6 +98,7 @@
             renderEmpty('operate-history', 'Operate-Historie konnte nicht geladen werden');
             renderEmpty('operate-workgraph', 'Operate-Work-Graph konnte nicht geladen werden');
             renderEmpty('operate-transitions', 'Operate-Übergänge konnten nicht geladen werden');
+            if (typeof syncOperateEmptyLayout === 'function') syncOperateEmptyLayout({ hasRun: false });
         }
     }
 

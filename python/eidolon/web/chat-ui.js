@@ -1,5 +1,23 @@
+function chatHasUserMessage() {
+    return (chatMessages || []).some((m) => m && m.role === 'user' && String(m.content || '').trim());
+}
+
+function syncChatIdleLayout(runtimeContext) {
+    const panel = document.getElementById('panel-chat');
+    if (!panel) return;
+    const idle = !chatHasUserMessage();
+    panel.classList.toggle('chat-is-idle', idle);
+    const prompt = document.getElementById('chat-idle-prompt');
+    if (prompt) {
+        prompt.textContent = idle
+            ? 'Woran sollen wir arbeiten?'
+            : 'Sag mir, was du erreichen willst oder woran ich weiterarbeiten soll.';
+    }
+}
+
 function renderChatRuntimeContext(runtimeContext) {
     lastChatRuntimeContext = runtimeContext || null;
+    syncChatIdleLayout(runtimeContext);
     const stateEl = document.getElementById('chat-context-state');
     const intentEl = document.getElementById('chat-intent-mode');
     const nextEl = document.getElementById('chat-next-step');
@@ -12,6 +30,7 @@ function renderChatRuntimeContext(runtimeContext) {
             setEidolonPresence('idle', 'Bereit für neue Arbeit', 'Starte ein Gespräch oder setze bestehende Arbeit fort.');
         }
         if (typeof loadChatLandingSummary === 'function') loadChatLandingSummary();
+        syncChatIdleLayout(null);
         return;
     }
     const workflow = runtimeContext.workflow_state || {};
@@ -34,6 +53,7 @@ function renderChatRuntimeContext(runtimeContext) {
             setEidolonPresence('idle', 'Bereit für Gespräch', readableFocus && readableFocus !== 'Kein Fokus' ? (readableFocus + ' ist verfügbar, aber nicht erzwungen.') : 'Normale Unterhaltung ohne aktiven Arbeitslauf.');
         }
         if (typeof loadChatLandingSummary === 'function') loadChatLandingSummary();
+        syncChatIdleLayout(runtimeContext);
         return;
     }
 
@@ -47,6 +67,7 @@ function renderChatRuntimeContext(runtimeContext) {
     if (typeof loadChatLandingSummary === 'function') loadChatLandingSummary();
     renderChatOperateActionsFromContext(runtimeContext);
     renderChatFormation((runtimeContext && runtimeContext.formation) || null);
+    syncChatIdleLayout(runtimeContext);
 }
 
 function operateActionButton(label, action, args, primary) {
@@ -237,9 +258,11 @@ async function loadChatLandingSummary() {
                 ? '<div class="chat-panel-meta">Freigeben, Ablehnen und Weiter stehen oben in Gerade aktiv / Braucht deine Entscheidung.</div>'
                 : '<div class="empty">Keine ausführbare Operate-Aktion im aktuellen Kontext.</div>';
         }
+        syncChatIdleLayout(lastChatRuntimeContext);
     } catch (e) {
         activeEl.innerHTML = '<span class="tag err">' + escapeHtml(e.message || 'Aktive Arbeit konnte nicht geladen werden') + '</span>';
         decisionEl.innerHTML = '<span class="tag err">' + escapeHtml(e.message || 'Freigaben konnten nicht geladen werden') + '</span>';
+        syncChatIdleLayout(lastChatRuntimeContext);
     }
 }
 window.loadChatLandingSummary = loadChatLandingSummary;
@@ -371,7 +394,7 @@ function renderChatSessions(sessions) {
             const preview = escapeHtml((s.last_message_preview || 'Noch keine Nachrichten').slice(0, 140));
             const updated = escapeHtml(formatSessionTimestamp(s.updated_at || s.created_at));
             const count = Number(s.message_count || 0);
-            return '<div class="chat-session-item' + (active ? ' active' : '') + '" onclick="selectChatSession(\'' + s.session_id + '\')">'
+            return '<div class="chat-session-item' + (active ? ' active' : '') + '" onclick="openChatSession(\'' + s.session_id + '\')">'
                 + '<div class="chat-session-main">'
                 + '<div class="chat-session-name">' + title + '</div>'
                 + '<div class="chat-session-preview">' + preview + '</div>'
@@ -396,6 +419,10 @@ async function loadChatSessions() {
     renderChatSessions(chatSessions);
     loadChatLandingSummary().catch(() => {});
     return chatSessions;
+}
+async function openChatSession(sessionId) {
+    if (typeof showTab === 'function' && currentTab !== 'chat') showTab('chat');
+    return selectChatSession(sessionId);
 }
 async function selectChatSession(sessionId, options = {}) {
     const result = await api('GET', '/chat/sessions/' + encodeURIComponent(sessionId));
@@ -527,8 +554,10 @@ async function sendChat() {
 }
 function renderChat() {
     const el = document.getElementById('chat-messages');
+    if (!el) return;
+    syncChatIdleLayout(lastChatRuntimeContext);
     if (!chatMessages.length) {
-        el.innerHTML = '<div class="empty">Noch kein Gesprächskontext. Schreibe oben dein Ziel, damit Eidolon einen realen Arbeitskontext aufbauen kann.</div>';
+        el.innerHTML = '<div class="empty chat-idle-hint">Noch kein Gesprächskontext.</div>';
         return;
     }
     el.innerHTML = chatMessages.map(m => '<div class="msg ' + m.role + '"><div class="sender">' + escapeHtml(m.role === 'user' ? 'Du' : 'Eidolon') + '</div><div>' + escapeHtml(m.content) + '</div></div>').join('');

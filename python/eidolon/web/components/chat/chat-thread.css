@@ -134,6 +134,39 @@
     min-height: 520px;
     border: 1px solid var(--border-subtle);
 }
+.chat-is-idle .chat-home-hero,
+.chat-is-idle .chat-work-context,
+.chat-is-idle #chat-context-summary,
+.chat-is-idle #chat-landing-panels {
+    display: none;
+}
+.chat-is-idle .chat-shell,
+.chat-is-idle .chat-thread-panel {
+    min-height: 0;
+}
+.chat-is-idle .chat-messages {
+    min-height: 0;
+    flex: 0 1 auto;
+    padding: 4px 0 8px;
+    margin-bottom: 4px;
+    border: none;
+    background: transparent;
+}
+.chat-is-idle .chat-idle-hint {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    text-align: left;
+    padding: 0;
+}
+.chat-is-idle .chat-input-caption {
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+.chat-is-idle .chat-panel-header {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+}
 .msg {
     padding: 10px 14px;
     border-radius: 10px;

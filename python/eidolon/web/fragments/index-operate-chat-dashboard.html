@@ -1,15 +1,15 @@
-            <div id="panel-chat" class="tab-panel active">
-                <div class="card">
+            <div id="panel-chat" class="tab-panel active chat-is-idle">
+                <div class="card chat-entry-card">
                     <div class="chat-shell">
                         <div class="chat-thread-panel">
-                            <div class="chat-panel-header" style="margin-bottom:12px;">
+                            <div class="chat-panel-header chat-idle-header" style="margin-bottom:12px;">
                                 <div>
                                     <h3 id="chat-session-title" style="margin:0;">Neue Unterhaltung</h3>
                                     <div class="chat-panel-meta" id="chat-session-meta">Wähle links eine Unterhaltung oder starte eine neue.</div>
                                 </div>
                                 <button class="btn btn-sm btn-primary" data-ui-action="createChatSession">Neue Unterhaltung</button>
                             </div>
-                            <div class="chat-home-hero">
+                            <div class="chat-home-hero" id="chat-landing-panels">
                                 <div class="chat-home-brand">
                                     <div class="eidolon-signature hero" data-presence-state="idle" aria-hidden="true">
                                         <span class="signature-ring signature-ring-outer"></span>
@@ -45,7 +45,7 @@
                                     <div id="chat-recent-summary" class="chat-home-summary"><div class="empty">Lade letzte Unterhaltungen…</div></div>
                                 </details>
                             </div>
-                            <div class="card" id="chat-context-summary" style="margin:0 0 12px 0;padding:12px 14px;">
+                            <div class="card chat-work-context" id="chat-context-summary" style="margin:0 0 12px 0;padding:12px 14px;">
                                 <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
                                     <div>
                                         <div class="chat-panel-title">Arbeitskontext</div>
@@ -63,9 +63,9 @@
                             <div class="chat-layout">
                                 <div class="chat-messages" id="chat-messages"></div>
                                 <div class="chat-input-shell">
-                                    <div class="chat-input-caption">Sag mir, was du erreichen willst oder woran ich weiterarbeiten soll.</div>
+                                    <div class="chat-input-caption" id="chat-idle-prompt">Woran sollen wir arbeiten?</div>
                                     <div class="chat-input">
-                                        <input type="text" id="chat-input" placeholder="Beschreibe Ziel, Problem oder nächsten Schritt…" data-enter-action="sendChat">
+                                        <input type="text" id="chat-input" placeholder="Nachricht schreiben…" data-enter-action="sendChat">
                                         <button class="btn btn-primary" data-ui-action="sendChat">Senden</button>
                                     </div>
                                 </div>
@@ -75,8 +75,8 @@
                 </div>
             </div>
 
-            <div id="panel-operate" class="tab-panel">
-                <div class="card">
+            <div id="panel-operate" class="tab-panel operate-is-idle">
+                <div class="card operate-core-card">
                     <div class="card-header">
                         <h3>Arbeitskern</h3>
                         <div style="display:flex;gap:6px;">
@@ -84,45 +84,48 @@
                             <button class="btn btn-sm" data-ui-mode="syncOperateAndReload">Aus Projektfläche übernehmen</button>
                         </div>
                     </div>
-                    <div class="empty" style="text-align:left;padding:0 0 12px 0;">Operate ist der sichtbare Arbeitskern hinter dem Chat — nicht die Starttür. Hier stehen nur reale Kernel-Daten.</div>
+                    <div id="operate-idle-empty" class="operate-idle-empty">
+                        <div class="empty">Kein aktiver Lauf. Starte im Chat oder übernimm reale Arbeit aus der Projektfläche.</div>
+                    </div>
                     <div id="operate-state-bar"><div class="empty">Lade Arbeitskern…</div></div>
+                    <div id="operate-next-action" class="operate-next-in-core"><div class="empty">Kein nächster Schritt geladen.</div></div>
                 </div>
-                <div class="card">
+                <div class="card operate-section" data-operate-section="objective">
                     <div class="card-header"><h3>Ziel</h3></div>
                     <div id="operate-objective-card"><div class="empty">Kein Ziel geladen.</div></div>
                 </div>
-                <div class="card">
-                    <div class="card-header"><h3>Nächster Schritt</h3></div>
-                    <div id="operate-next-action"><div class="empty">Kein nächster Schritt geladen.</div></div>
-                </div>
-                <div class="card">
+                <div class="card operate-section" data-operate-section="approvals">
                     <div class="card-header"><h3>Freigaben</h3></div>
                     <div id="operate-approvals"><div class="empty">Keine Freigaben geladen.</div></div>
                 </div>
-                <div class="card">
+                <div class="card operate-section" data-operate-section="blockers">
                     <div class="card-header"><h3>Blocker</h3></div>
                     <div id="operate-blockers"><div class="empty">Keine Blocker geladen.</div></div>
                 </div>
-                <div class="card">
+                <div class="card operate-section" data-operate-section="subagents">
                     <div class="card-header"><h3>Helfer</h3></div>
                     <div id="operate-subagents"><div class="empty">Keine Pods geladen.</div></div>
                 </div>
-                <div class="card">
+                <div class="card operate-section" data-operate-section="evidence">
                     <div class="card-header"><h3>Evidenz</h3></div>
                     <div id="operate-evidence"><div class="empty">Keine Evidenz geladen.</div></div>
                 </div>
-                <div class="card">
+                <div class="card operate-section" data-operate-section="history">
                     <div class="card-header"><h3>Verlauf</h3></div>
                     <div id="operate-history"><div class="empty">Kein Verlauf geladen.</div></div>
                 </div>
-                <div class="card">
+                <div class="card operate-section" data-operate-section="workgraph">
                     <div class="card-header"><h3>Work-Graph</h3></div>
                     <div id="operate-workgraph"><div class="empty">Kein Work-Graph geladen.</div></div>
                 </div>
-                <div class="card">
+                <div class="card operate-section" data-operate-section="transitions">
                     <div class="card-header"><h3>Übergänge</h3></div>
                     <div id="operate-transitions"><div class="empty">Keine Übergänge geladen.</div></div>
                 </div>
+                <details id="operate-empty-details" class="operate-empty-details" hidden>
+                    <summary>Details</summary>
+                    <div id="operate-empty-details-body" class="empty">Leere Kernel-Bereiche ohne Daten.</div>
+                </details>
             </div>
 
             <div id="panel-pods" class="tab-panel">
