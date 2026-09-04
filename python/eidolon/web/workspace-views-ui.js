@@ -30,6 +30,7 @@
         ['in_progress', 'In Arbeit'],
         ['blocked', 'Blockiert'],
         ['done', 'Fertig'],
+        ['archived', 'Archiv'],
     ];
     const PLANNING_STATUS_OPTIONS = [
         ['idea', 'Zusammengehörig'],
@@ -64,15 +65,32 @@
         return parent ? ('Gehört zu: ' + parent.title) : ('Gehört zu: ' + item.parent_id);
     }
 
+    function relatedOptions(item, elements) {
+        const choices = [['', 'Keine Gruppe']].concat(
+            (elements || [])
+                .filter((entry) => entry.id !== item.id)
+                .map((entry) => [entry.id, entry.title || entry.id])
+        );
+        return choices.map(([value, label]) =>
+            '<option value="' + escapeHtml(value) + '"' + (String(item.parent_id || '') === String(value) ? ' selected' : '') + '>' + escapeHtml(label) + '</option>'
+        ).join('');
+    }
+
     function elementCard(item) {
-        const related = relatedLabel(item, state.currentProject?.elements || []);
+        const elements = state.currentProject?.elements || [];
+        const related = relatedLabel(item, elements);
         return '<div class="goal-card plan-card" data-status="' + escapeHtml(item.status || 'idea') + '" data-element-id="' + escapeHtml(item.id) + '" draggable="true">' +
             '<div class="goal-stripe"></div><div class="goal-body">' +
             '<div class="comp-detail">' + escapeHtml(ws.elementTypeLabel(item.element_type)) + (related ? ' · ' + escapeHtml(related) : '') + '</div>' +
             '<input class="plan-card-title" data-plan-field="title" data-element-id="' + escapeHtml(item.id) + '" value="' + escapeHtml(item.title || '') + '">' +
             '<select class="plan-card-status" data-plan-field="status" data-element-id="' + escapeHtml(item.id) + '">' + statusOptions(item.status || 'idea') + '</select>' +
+            '<select class="plan-card-related" data-plan-field="parent_id" data-element-id="' + escapeHtml(item.id) + '">' + relatedOptions(item, elements) + '</select>' +
             '<select class="plan-card-priority" data-plan-field="priority" data-element-id="' + escapeHtml(item.id) + '">' + priorityOptions(item.priority) + '</select>' +
-            '<button class="btn btn-sm" style="margin-top:8px;" data-open-element-id="' + escapeHtml(item.id) + '" data-x="' + Number(item.position?.x || 0) + '" data-y="' + Number(item.position?.y || 0) + '">Details</button>' +
+            '<div class="plan-card-actions">' +
+            '<button class="btn btn-sm" data-open-element-id="' + escapeHtml(item.id) + '" data-x="' + Number(item.position?.x || 0) + '" data-y="' + Number(item.position?.y || 0) + '">Details</button>' +
+            '<button class="btn btn-sm" data-plan-archive="' + escapeHtml(item.id) + '">Ablegen</button>' +
+            '<button class="btn btn-sm" data-plan-drop="' + escapeHtml(item.id) + '">' + (state.armedDropElementId === item.id ? 'Nochmal streichen' : 'Streichen') + '</button>' +
+            '</div>' +
             '</div></div>';
     }
 
@@ -128,13 +146,44 @@
 
     async function updatePlanElement(elementId, patch) {
         try {
-            if (await persistPlanElement(elementId, patch)) await openProject(state.currentProjectId);
+            const nextPatch = { ...patch };
+            if (Object.prototype.hasOwnProperty.call(nextPatch, 'parent_id') && !nextPatch.parent_id) {
+                nextPatch.parent_id = null;
+            }
+            if (await persistPlanElement(elementId, nextPatch)) await openProject(state.currentProjectId);
         } catch (e) { showNotice(e.message, 'error'); }
     }
 
     async function reorderPlanElements(elementIds) {
         try {
             if (await persistPlanOrder(elementIds)) await openProject(state.currentProjectId);
+        } catch (e) { showNotice(e.message, 'error'); }
+    }
+
+    async function archivePlanElement(elementId) {
+        await updatePlanElement(elementId, { status: 'archived' });
+    }
+
+    async function dropPlanElement(elementId) {
+        if (!state.currentProjectId || !elementId) return;
+        if (state.armedDropElementId !== elementId) {
+            state.armedDropElementId = elementId;
+            renderBoardView();
+            showNotice('Streichen ist scharf gestellt — zweiter Klick löscht dauerhaft.', 'warning', 2200);
+            setTimeout(() => {
+                if (state.armedDropElementId === elementId) {
+                    state.armedDropElementId = null;
+                    if (document.getElementById('ws-view-mode')?.value === 'board') renderBoardView();
+                }
+            }, 2200);
+            return;
+        }
+        state.armedDropElementId = null;
+        try {
+            const response = await api('DELETE', '/projects/' + state.currentProjectId + '/elements/' + elementId);
+            if (response?.ok === false) { showNotice(response.error || 'Element streichen fehlgeschlagen', 'error'); return; }
+            showNotice('Element gestrichen', 'success');
+            await openProject(state.currentProjectId);
         } catch (e) { showNotice(e.message, 'error'); }
     }
 
@@ -151,11 +200,24 @@
 
     function bindPlanningBoard(root) {
         root.querySelectorAll('[data-plan-field]').forEach((field) => {
-            const eventName = field.tagName === 'INPUT' ? 'change' : 'change';
-            field.addEventListener(eventName, () => {
+            field.addEventListener('change', () => {
                 const key = field.dataset.planField;
-                const value = key === 'priority' ? parseInt(field.value, 10) || 0 : field.value;
+                let value = field.value;
+                if (key === 'priority') value = parseInt(value, 10) || 0;
+                if (key === 'parent_id') value = value || null;
                 updatePlanElement(field.dataset.elementId, { [key]: value });
+            });
+        });
+        root.querySelectorAll('[data-plan-archive]').forEach((btn) => {
+            btn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                archivePlanElement(btn.dataset.planArchive);
+            });
+        });
+        root.querySelectorAll('[data-plan-drop]').forEach((btn) => {
+            btn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                dropPlanElement(btn.dataset.planDrop);
             });
         });
         root.querySelectorAll('.plan-card').forEach((card) => {
@@ -224,5 +286,5 @@
         document.getElementById('ws-elements-count').textContent = String(elements.length);
     }
 
-    Object.assign(window, { switchView, renderBoardView, renderTimelineView, renderListView, updatePlanElement, reorderPlanElements });
+    Object.assign(window, { switchView, renderBoardView, renderTimelineView, renderListView, updatePlanElement, reorderPlanElements, archivePlanElement, dropPlanElement });
 })();

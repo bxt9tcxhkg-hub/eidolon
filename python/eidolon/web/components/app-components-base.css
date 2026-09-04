@@ -172,6 +172,7 @@
 
 .plan-card-title,
 .plan-card-status,
+.plan-card-related,
 .plan-card-priority {
     width: 100%;
     margin-top: 6px;
@@ -181,4 +182,41 @@
     border-radius: 4px;
     color: var(--text);
     font-size: 0.78rem;
+}
+
+.plan-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.chat-operate-actions,
+.chat-operate-item {
+    margin-top: 10px;
+}
+
+.chat-operate-item + .chat-operate-item {
+    padding-top: 10px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.chat-operate-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.chat-home-recent {
+    margin-top: 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 8px 12px;
+}
+
+.chat-home-recent summary {
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 0.8rem;
 }

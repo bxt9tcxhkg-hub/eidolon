@@ -33,7 +33,56 @@ def session_context(session: dict[str, Any] | None, source: str, operate_session
     }
 
 
+def _record_value(item: Any, key: str, default: Any = None) -> Any:
+    if isinstance(item, dict):
+        return item.get(key, default)
+    return getattr(item, key, default)
+
+
+def _is_pending_approval(item: Any) -> bool:
+    status = _record_value(item, 'status')
+    if status == 'pending':
+        return True
+    if status in {None, ''} and _record_value(item, 'id'):
+        return _record_value(item, 'is_pending', True) is not False
+    return False
+
+
+def _is_open_blocker(item: Any) -> bool:
+    status = _record_value(item, 'status')
+    if status == 'open':
+        return True
+    if status in {None, ''} and _record_value(item, 'id'):
+        return _record_value(item, 'is_open', True) is not False
+    return False
+
+
+def _approval_action_view(item: Any) -> dict[str, Any]:
+    return {
+        'id': _record_value(item, 'id'),
+        'title': _record_value(item, 'title'),
+        'summary': _record_value(item, 'summary'),
+        'status': _record_value(item, 'status') or 'pending',
+        'action_type': _record_value(item, 'action_type'),
+        'is_pending': True,
+    }
+
+
+def _blocker_action_view(item: Any) -> dict[str, Any]:
+    return {
+        'id': _record_value(item, 'id'),
+        'title': _record_value(item, 'title'),
+        'summary': _record_value(item, 'summary'),
+        'status': _record_value(item, 'status') or 'open',
+        'requires_user_action': bool(_record_value(item, 'requires_user_action')),
+        'resolution_hint': _record_value(item, 'resolution_hint'),
+        'is_open': True,
+    }
+
+
 def operate_context(operate_session: dict[str, Any], operate_objective: dict[str, Any], operate_run: dict[str, Any], operate_next_action: dict[str, Any], operate_blockers: list[dict], operate_approvals: list[dict], operate_subagents: list[dict]) -> dict[str, Any]:
+    pending_approvals = [_approval_action_view(item) for item in operate_approvals if _is_pending_approval(item)]
+    open_blockers = [_blocker_action_view(item) for item in operate_blockers if _is_open_blocker(item)]
     return {
         'session_id': operate_session.get('id'),
         'session_title': operate_session.get('title'),
@@ -45,6 +94,10 @@ def operate_context(operate_session: dict[str, Any], operate_objective: dict[str
         'next_action': operate_next_action,
         'approval_count': len(operate_approvals),
         'blocker_count': len(operate_blockers),
+        'pending_approvals': pending_approvals,
+        'open_blockers': open_blockers,
+        'pending_approval_count': len(pending_approvals),
+        'open_blocker_count': len(open_blockers),
         'subagent_count': len(operate_subagents),
     }
 

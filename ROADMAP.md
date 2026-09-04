@@ -23,7 +23,9 @@
 - Goals-, Chat- und Shell-CSS werden über importierte Slice-Dateien statt über große Einzelfiles ausgeliefert
 - Chat ist jetzt auch in der Web-UI die echte Startoberfläche; die Shell priorisiert Unterhaltung, aktive Arbeit und Projekte vor Utility-Flächen
 - Operate-Panel ist wieder verdrahtet und über `#operate` erreichbar, ohne Default zu sein
-- Projektfläche öffnet in der Planungsansicht (Zusammengehörig / Geplant / In Arbeit / Fertig) mit Umbenennen, Status und Reihenfolge gegen echte APIs
+- Projektfläche öffnet in der Planungsansicht (Zusammengehörig / Geplant / In Arbeit / Fertig / Archiv) mit Umbenennen, Status, Gruppe, Reihenfolge, Ablegen und Streichen gegen echte Projekt-APIs
+- Projektstatus planned/in_progress/done/archived ist über `PUT /projects/{id}` editierbar
+- Chat zeigt ausstehende Freigaben, offene Blocker und den nächsten Schritt und löst dieselben Operate-APIs aus wie die Arbeitsfläche
 - Generisches Karten-/Slot-Gerüst ohne Domänen-Pakete
 - Python FastAPI ist dokumentiert und durch Port-Wächter als einzige live Runtime gegenüber Rust abgegrenzt
 - Ein kleines zustandsfähiges Eidolon-Signature-Object transportiert reale Arbeitszustände statt bloßes Dekor
@@ -45,8 +47,8 @@
 - historische Nebenachsen nur noch als sauber markierte Referenz erhalten
 
 ### P1 — Agentisches Produktmodell vertiefen
-- Chat nicht nur richtungsstark, sondern weiter als operativer Einstieg für Approvals, Interrupts und Next Actions ausbauen
-- direkte Bearbeitung der Arbeitswahrheit weiter an Operate/Workspaces anbinden
+- Chat-Operate-Tür um Interrupts und feinere Next-Action-Gründe weiter verdichten
+- direkte Bearbeitung der Arbeitswahrheit weiter an denselben Operate-/Workspace-Schreibpfad binden
 
 ## Verifizierungsbasis
 - `python -m pytest -q`

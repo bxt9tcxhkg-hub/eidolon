@@ -9,31 +9,16 @@
             el.innerHTML = '<div class="empty">Kein abgeleiteter Arbeitskontext verfügbar</div>';
             return;
         }
-        const listOrDash = (items) => Array.isArray(items) && items.length ? items.join(', ') : '—';
         const operate = ctx.operate || {};
         const run = operate.run || {};
         const objective = operate.objective || {};
         const rows = [
-            ['Workflow-Schleife', listOrDash(ctx.workflow_loop)],
             ['Operate-Zustand', run.state || '—'],
-            ['Operate-Phase', run.canonical_phase || run.current_phase || ctx.current_phase || '—'],
             ['Operate-Ziel', objective.title || ctx.current_focus_label || '—'],
-            ['Aktive Pods', String((operate.active_pods || operate.subagents || []).length)],
             ['Operate-Blocker', String((operate.blockers || []).filter(item => item.status === 'open').length)],
             ['Operate-Freigaben', String((operate.approvals || []).filter(item => item.status === 'pending').length)],
-            ['Kontextzustand', ctx.current_context_state || '—'],
             ['Aktueller Fokus', ctx.current_focus_label || '—'],
-            ['Aktiver Projektkontext', ctx.current_conversation_project || '—'],
-            ['Aktive Projektfläche', ctx.active_surface_project || '—'],
-            ['Projektkandidaten (Labels)', listOrDash(ctx.candidate_labels)],
-            ['Chat-Themen (Labels)', listOrDash(ctx.topic_labels)],
-            ['Projektkandidaten', String(ctx.project_candidate_count ?? 0)],
-            ['Chat-Themen', String(ctx.chat_topic_count ?? 0)],
-            ['Kontextwechsel', ctx.context_shift_state || 'same_project'],
-            ['Nächster Übergang', ctx.next_transition || '—'],
             ['Nächster Schritt', ctx.next_step || '—'],
-            ['Freigaberahmen', ctx.approval_state || '—'],
-            ['Verantwortliche Rolle', ctx.responsible_role || 'eidolon-core'],
         ];
         el.innerHTML = rows.map(([label, value]) => '<div class="comp-row"><span class="comp-name">' + escapeHtml(label) + '</span><span class="comp-detail">' + escapeHtml(value) + '</span></div>').join('');
     }
@@ -64,13 +49,15 @@
         }
         window.__testProjectButtons = filtered.map((p) => p.id);
         el.innerHTML = filtered.map((p) =>
-            '<div class="goal-card" data-status="' + (p.status || 'active') + '">' +
+            '<div class="goal-card" data-status="' + escapeHtml(normalizeProjectStatus(p.status)) + '">' +
                 '<div class="goal-stripe"></div>' +
                 '<div class="goal-body">' +
-                    '<div class="goal-head"><div class="goal-headline"><span class="status-chip">' + escapeHtml(p.status || 'Aktiv') + '</span><div class="goal-title">' + escapeHtml(p.title) + '</div></div></div>' +
+                    '<div class="goal-head"><div class="goal-headline"><span class="status-chip">' + escapeHtml(ws.statusLabel(normalizeProjectStatus(p.status))) + '</span><div class="goal-title">' + escapeHtml(p.title) + '</div></div></div>' +
                     '<div class="comp-detail" style="margin:8px 0 12px 0;">' + escapeHtml(p.description || 'Keine Beschreibung') + '</div>' +
                     '<div class="goal-actions">' +
+                        '<select data-action="project-status" data-id="' + escapeHtml(p.id) + '">' + projectStatusOptions(p.status) + '</select>' +
                         '<button class="btn btn-sm btn-primary" data-action="open-project" data-id="' + escapeHtml(p.id) + '">Öffnen</button>' +
+                        '<button class="btn btn-sm" data-action="archive-project" data-id="' + escapeHtml(p.id) + '">' + (normalizeProjectStatus(p.status) === 'archived' ? 'Wiederöffnen' : 'Archivieren') + '</button>' +
                         '<button class="btn btn-sm" data-action="delete-project" data-id="' + escapeHtml(p.id) + '">' + (state.armedDeleteProjectId === p.id ? 'Nochmal löschen' : 'Löschen') + '</button>' +
                     '</div>' +
                 '</div>' +
@@ -78,6 +65,11 @@
         ).join('');
         el.querySelectorAll('[data-action="open-project"]').forEach((btn) => btn.addEventListener('click', () => openProject(btn.dataset.id)));
         el.querySelectorAll('[data-action="delete-project"]').forEach((btn) => btn.addEventListener('click', () => deleteProject(btn.dataset.id)));
+        el.querySelectorAll('[data-action="archive-project"]').forEach((btn) => btn.addEventListener('click', () => {
+            const current = btn.closest('.goal-card')?.dataset.status;
+            saveProjectStatus(btn.dataset.id, current === 'archived' ? 'planned' : 'archived');
+        }));
+        el.querySelectorAll('[data-action="project-status"]').forEach((field) => field.addEventListener('change', () => saveProjectStatus(field.dataset.id, field.value)));
     }
 
     function renderProjectStats(project) {
@@ -86,7 +78,7 @@
         const elements = project.elements || [];
         const inboxOpen = (project.inbox || []).filter((item) => !item.processed).length;
         const rows = [
-            ['Status', ws.statusLabel(project.status || 'active')],
+            ['Status', ws.statusLabel(normalizeProjectStatus(project.status))],
             ['Domäne', project.domain || '—'],
             ['Elemente', String(elements.length)],
             ['Zusammengehörig', String(elements.filter((item) => item.status === 'idea').length)],
@@ -163,6 +155,14 @@
             if (titleEl) titleEl.textContent = project.title || 'Unbenannt';
             const titleEdit = document.getElementById('ws-project-title-edit');
             if (titleEdit) titleEdit.value = project.title || '';
+            const statusEdit = document.getElementById('ws-project-status-edit');
+            if (statusEdit) {
+                statusEdit.value = normalizeProjectStatus(project.status);
+                if (!statusEdit.dataset.bound) {
+                    statusEdit.dataset.bound = '1';
+                    statusEdit.addEventListener('change', () => saveProjectStatus(state.currentProjectId, statusEdit.value));
+                }
+            }
             renderProjectStats(project);
             renderProjectSlots(project);
             window.switchView();
@@ -180,7 +180,7 @@
         const planned = elements.find((item) => item.status === 'planned' || item.status === 'ready');
         if (contextEl) {
             contextEl.innerHTML = '<div class="comp-row"><span class="comp-name">Titel</span><span class="comp-detail">' + escapeHtml(project.title || '—') + '</span></div>' +
-                '<div class="comp-row"><span class="comp-name">Status</span><span class="comp-detail">' + escapeHtml(ws.statusLabel(project.status || 'active')) + '</span></div>' +
+                '<div class="comp-row"><span class="comp-name">Status</span><span class="comp-detail">' + escapeHtml(ws.statusLabel(normalizeProjectStatus(project.status))) + '</span></div>' +
                 '<div class="comp-row"><span class="comp-name">Beschreibung</span><span class="comp-detail">' + escapeHtml(project.description || 'Keine Beschreibung') + '</span></div>';
         }
         if (nextEl) {
@@ -196,17 +196,66 @@
         }
     }
 
+    function normalizeProjectStatus(status) {
+        if (status === 'active' || status === 'prepared') return 'in_progress';
+        if (status === 'ready') return 'planned';
+        if (['planned', 'in_progress', 'done', 'archived'].includes(status)) return status;
+        return 'planned';
+    }
+
+    function projectStatusOptions(selected) {
+        const current = normalizeProjectStatus(selected);
+        return [
+            ['planned', 'Geplant'],
+            ['in_progress', 'In Arbeit'],
+            ['done', 'Fertig'],
+            ['archived', 'Archiviert'],
+        ].map(([value, label]) =>
+            '<option value="' + value + '"' + (value === current ? ' selected' : '') + '>' + escapeHtml(label) + '</option>'
+        ).join('');
+    }
+
+    async function persistProjectPatch(projectId, patch, successMessage) {
+        const response = await api('PUT', '/projects/' + projectId, patch);
+        if (response?.ok === false) { showNotice(response.error || 'Projekt speichern fehlgeschlagen', 'error'); return false; }
+        if (successMessage) showNotice(successMessage, 'success');
+        return true;
+    }
+
     async function saveProjectTitle() {
         if (!state.currentProjectId) return;
         const title = (document.getElementById('ws-project-title-edit')?.value || '').trim();
+        const status = normalizeProjectStatus(document.getElementById('ws-project-status-edit')?.value);
         if (!title) { showNotice('Projekttitel erforderlich', 'warning'); return; }
         try {
-            const response = await api('PUT', '/projects/' + state.currentProjectId, { title });
-            if (response?.ok === false) { showNotice(response.error || 'Projekt umbenennen fehlgeschlagen', 'error'); return; }
-            showNotice('Projekt umbenannt', 'success');
-            await openProject(state.currentProjectId);
-            await loadWorkspaces();
+            if (await persistProjectPatch(state.currentProjectId, { title, status }, 'Projekt gespeichert')) {
+                await openProject(state.currentProjectId);
+                await loadWorkspaces();
+            }
         } catch (e) { showNotice(e.message, 'error'); }
+    }
+
+    async function saveProjectStatus(projectId, status) {
+        const id = projectId || state.currentProjectId;
+        if (!id) return;
+        try {
+            if (await persistProjectPatch(id, { status: normalizeProjectStatus(status) }, 'Projektstatus gespeichert')) {
+                if (state.currentProjectId === id) await openProject(id);
+                await loadWorkspaces();
+            }
+        } catch (e) { showNotice(e.message, 'error'); }
+    }
+
+    async function archiveCurrentProject() {
+        if (!state.currentProjectId) return;
+        const current = normalizeProjectStatus(state.currentProject?.status);
+        await saveProjectStatus(state.currentProjectId, current === 'archived' ? 'planned' : 'archived');
+    }
+
+    async function toggleArchiveProject(projectId) {
+        const cardStatus = document.querySelector('[data-action="project-status"][data-id="' + projectId + '"]')?.value;
+        const next = normalizeProjectStatus(cardStatus) === 'archived' ? 'planned' : 'archived';
+        await saveProjectStatus(projectId, next);
     }
 
     function showProjectList() {
@@ -299,5 +348,5 @@
         state.brainstormData = [];
     }
 
-    Object.assign(window, { loadWorkspaces, toggleProjectComposer, resetProjectForm, submitProjectForm, openProject, showProjectList, deleteProject, generateBrainstorm, acceptSuggestion, rejectSuggestion, clearBrainstorm, saveProjectTitle });
+    Object.assign(window, { loadWorkspaces, toggleProjectComposer, resetProjectForm, submitProjectForm, openProject, showProjectList, deleteProject, generateBrainstorm, acceptSuggestion, rejectSuggestion, clearBrainstorm, saveProjectTitle, saveProjectStatus, archiveCurrentProject, toggleArchiveProject });
 })();

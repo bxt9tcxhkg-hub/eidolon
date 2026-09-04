@@ -47,9 +47,11 @@
                             <div style="display:flex;gap:6px;">
                                 <select id="ws-view-mode" style="padding:4px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.78rem;">
                                     <option value="board" selected>Planung</option>
-                                    <option value="canvas">Canvas</option>
-                                    <option value="timeline">Timeline</option>
-                                    <option value="list">Liste</option>
+                                    <optgroup label="Weitere Ansichten">
+                                        <option value="canvas">Canvas</option>
+                                        <option value="timeline">Timeline</option>
+                                        <option value="list">Liste</option>
+                                    </optgroup>
                                 </select>
                                 <input type="text" id="ws-element-filter" placeholder="Elemente filtern..." style="padding:4px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.78rem;width:120px;">
                                 <button class="btn btn-sm" data-ui-action="openElementForm">+ Element</button>
@@ -57,10 +59,17 @@
                             </div>
                         </div>
                         <div class="form-group" style="margin-top:8px;">
-                            <label>Projekttitel</label>
-                            <div style="display:flex;gap:6px;">
+                            <label>Projekt</label>
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
                                 <input type="text" id="ws-project-title-edit" placeholder="Projekt umbenennen…">
-                                <button class="btn btn-sm" data-ui-action="saveProjectTitle">Umbenennen</button>
+                                <select id="ws-project-status-edit">
+                                    <option value="planned">Geplant</option>
+                                    <option value="in_progress">In Arbeit</option>
+                                    <option value="done">Fertig</option>
+                                    <option value="archived">Archiviert</option>
+                                </select>
+                                <button class="btn btn-sm" data-ui-action="saveProjectTitle">Speichern</button>
+                                <button class="btn btn-sm" data-ui-action="archiveCurrentProject">Archivieren</button>
                             </div>
                         </div>
                         <div id="ws-project-stats"></div>
@@ -136,12 +145,18 @@
                             <div class="form-group">
                                 <label>Status</label>
                                 <select id="task-status">
-                                    <option value="idea">Idee</option>
+                                    <option value="idea">Zusammengehörig</option>
                                     <option value="planned">Geplant</option>
                                     <option value="in_progress">In Arbeit</option>
                                     <option value="blocked">Blockiert</option>
-                                    <option value="done">Erledigt</option>
+                                    <option value="done">Fertig</option>
                                     <option value="archived">Archiviert</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Gehört zu</label>
+                                <select id="task-parent-id">
+                                    <option value="">Kein übergeordnetes Element</option>
                                 </select>
                             </div>
                             <div class="form-group">

@@ -39,11 +39,11 @@
                                         <div class="chat-panel-title">Braucht deine Entscheidung</div>
                                         <div id="chat-decision-summary" class="chat-home-summary"><div class="empty">Prüfe Freigaben und Blocker…</div></div>
                                     </div>
-                                    <div class="chat-home-card-block">
-                                        <div class="chat-panel-title">Zuletzt aktiv</div>
-                                        <div id="chat-recent-summary" class="chat-home-summary"><div class="empty">Lade letzte Unterhaltungen…</div></div>
-                                    </div>
                                 </div>
+                                <details class="chat-home-recent">
+                                    <summary>Zuletzt aktiv</summary>
+                                    <div id="chat-recent-summary" class="chat-home-summary"><div class="empty">Lade letzte Unterhaltungen…</div></div>
+                                </details>
                             </div>
                             <div class="card" id="chat-context-summary" style="margin:0 0 12px 0;padding:12px 14px;">
                                 <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
@@ -57,6 +57,7 @@
                                     </div>
                                 </div>
                                 <div class="chat-panel-meta" id="chat-next-step" style="margin-top:10px;">Sobald ein echter Kontext da ist, erscheint hier der nächste sinnvolle Schritt.</div>
+                                <div id="chat-operate-actions" class="chat-operate-actions"><div class="empty">Keine ausführbare Operate-Aktion im aktuellen Kontext.</div></div>
                             </div>
                             <div class="chat-layout">
                                 <div class="chat-messages" id="chat-messages"></div>

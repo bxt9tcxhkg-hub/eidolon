@@ -886,8 +886,12 @@ def test_primary_inline_handlers_exist():
         'submitTaskForm',
         'deleteCurrentComposerElement',
         'saveProjectTitle',
+        'saveProjectStatus',
+        'archiveCurrentProject',
         'updatePlanElement',
         'reorderPlanElements',
+        'archivePlanElement',
+        'dropPlanElement',
     }
     defined = set(re.findall(r'function\s+([A-Za-z0-9_]+)\s*\(', all_code))
     missing = sorted(expected - defined)
@@ -949,15 +953,25 @@ def test_project_planning_surface_is_generic_and_editable():
     assert "['in_progress', 'In Arbeit']" in js
     assert "['planned', 'Geplant']" in js
     assert "['done', 'Fertig']" in js
+    assert "['archived', 'Archiv']" in js
     assert 'data-plan-field="title"' in js
     assert 'data-plan-field="status"' in js
+    assert 'data-plan-field="parent_id"' in js
+    assert 'data-plan-archive' in js
+    assert 'data-plan-drop' in js
     assert "/projects/' + state.currentProjectId + '/elements/reorder'" in js
+    assert "status: 'archived'" in js
     assert 'id="ws-project-slots"' in html
     assert 'data-slot="context"' in html
     assert 'data-slot="next"' in html
     assert 'data-slot="inbox"' in html
     assert 'id="ws-project-title-edit"' in html
+    assert 'id="ws-project-status-edit"' in html
     assert 'data-ui-action="saveProjectTitle"' in html
+    assert 'data-ui-action="archiveCurrentProject"' in html
+    assert 'id="task-parent-id"' in html
+    assert 'Mehr Flächen' in html
+    assert 'id="chat-operate-actions"' in html
     assert 'Slots, keine Domänen-Pakete' in html
     assert 'keine fest verdrahteten Training-, Instagram- oder Reise-Flächen' in html
     assert 'data-tab="training"' not in html
@@ -1001,6 +1015,60 @@ def test_project_element_reorder_persists_list_order(tmp_path, monkeypatch):
     assert titles == ['Gamma', 'Alpha', 'Beta']
     persisted = service.get_project(project.id)
     assert [item.title for item in persisted.elements] == ['Gamma', 'Alpha', 'Beta']
+
+
+def test_project_status_and_element_archive_persist(tmp_path, monkeypatch):
+    from eidolon.workspaces.project_service import ProjectService
+
+    service = ProjectService(tmp_path)
+    project = service.create_project('Status persist', 'Real project status', 'general')
+    first = service.add_element(project.id, title='Alpha', status='planned')
+    second = service.add_element(project.id, title='Related', status='idea')
+    monkeypatch.setattr(agent_server, 'project_service', service, raising=False)
+    client = TestClient(agent_server.app)
+
+    renamed = client.put(f'/projects/{project.id}', json={'title': 'Status persist renamed', 'status': 'in_progress'})
+    assert renamed.status_code == 200
+    assert renamed.json()['project']['title'] == 'Status persist renamed'
+    assert renamed.json()['project']['status'] == 'in_progress'
+
+    archived_project = client.put(f'/projects/{project.id}', json={'status': 'archived'})
+    assert archived_project.status_code == 200
+    assert archived_project.json()['project']['status'] == 'archived'
+    assert service.get_project(project.id).status == 'archived'
+
+    grouped = client.put(f'/projects/{project.id}/elements/{first.id}', json={'parent_id': second.id, 'status': 'in_progress'})
+    assert grouped.status_code == 200
+    assert grouped.json()['element']['parent_id'] == second.id
+    assert grouped.json()['element']['status'] == 'in_progress'
+
+    archived = client.put(f'/projects/{project.id}/elements/{first.id}', json={'status': 'archived'})
+    assert archived.status_code == 200
+    assert archived.json()['element']['status'] == 'archived'
+    assert service.get_project(project.id).elements[0].status == 'archived'
+
+    dropped = client.delete(f'/projects/{project.id}/elements/{first.id}')
+    assert dropped.status_code == 200
+    remaining = service.get_project(project.id)
+    assert [item.id for item in remaining.elements] == [second.id]
+
+
+def test_chat_is_operate_execute_door():
+    html = INDEX_HTML.read_text(encoding='utf-8')
+    js = APP_WEB_JS
+    operate_js = (ROOT / 'python' / 'eidolon' / 'web' / 'operate-actions-ui.js').read_text(encoding='utf-8')
+    assert 'id="chat-operate-actions"' in html
+    assert 'id="chat-decision-summary"' in html
+    assert 'function renderChatOperateDoor' in js
+    assert "resolveOperateApproval" in js
+    assert "advanceOperateRun" in js
+    assert "resolveOperateBlocker" in js
+    assert "'/api/v1/runs/' + runId + '/approval/'" in operate_js
+    assert "'/api/v1/runs/' + runId + '/advance'" in operate_js
+    assert 'refreshOperateSurfaces' in operate_js
+    assert 'loadChatLandingSummary' in operate_js
+    assert 'Mehr Flächen' in html
+    assert 'nav-group-title">System</div>' not in html
 
 
 def test_doc_hierarchy_declares_spec_as_product_truth():

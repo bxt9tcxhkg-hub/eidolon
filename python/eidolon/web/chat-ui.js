@@ -45,6 +45,79 @@ function renderChatRuntimeContext(runtimeContext) {
         setEidolonPresence(waiting ? 'waiting' : 'thinking', waiting ? 'Wartet auf dich' : 'Strukturiert Arbeit', workflow.next_step || (readableFocus + ' • ' + contextState));
     }
     if (typeof loadChatLandingSummary === 'function') loadChatLandingSummary();
+    renderChatOperateActionsFromContext(runtimeContext);
+}
+
+function operateActionButton(label, action, args, primary) {
+    return '<button class="btn btn-sm' + (primary ? ' btn-primary' : '') + '" data-ui-action="' + escapeHtml(action) + '" data-ui-args="' + escapeHtml(JSON.stringify(args)) + '">' + escapeHtml(label) + '</button>';
+}
+
+function pendingOperateApprovals(items) {
+    return (Array.isArray(items) ? items : []).filter((item) => item && item.id && (item.status === 'pending' || item.is_pending || !item.status));
+}
+
+function openOperateBlockers(items) {
+    return (Array.isArray(items) ? items : []).filter((item) => item && item.id && (item.status === 'open' || item.is_open || !item.status));
+}
+
+function renderChatOperateDoor(targetEl, data) {
+    if (!targetEl) return;
+    const run = data.run || {};
+    const runId = run.id || data.run_id || '';
+    const nextAction = data.next_action || {};
+    const approvals = pendingOperateApprovals(data.pending_approvals || data.approvals);
+    const blockers = openOperateBlockers(data.open_blockers || data.blockers);
+    const parts = [];
+    approvals.forEach((item) => {
+        parts.push('<div class="chat-operate-item">'
+            + '<div class="summary-headline">' + escapeHtml(item.title || 'Freigabe') + '</div>'
+            + '<div class="summary-copy">' + escapeHtml(item.summary || 'Diese Aktion wartet auf deine Entscheidung.') + '</div>'
+            + (runId ? '<div class="chat-operate-buttons">'
+                + operateActionButton('Freigeben', 'resolveOperateApproval', [runId, item.id, 'approved'], true)
+                + operateActionButton('Ablehnen', 'resolveOperateApproval', [runId, item.id, 'rejected'], false)
+                + '</div>' : '')
+            + '</div>');
+    });
+    blockers.forEach((item) => {
+        parts.push('<div class="chat-operate-item">'
+            + '<div class="summary-headline">' + escapeHtml(item.title || 'Blocker') + '</div>'
+            + '<div class="summary-copy">' + escapeHtml(item.summary || item.resolution_hint || 'Dieser Blocker hält die Arbeit an.') + '</div>'
+            + (runId ? '<div class="chat-operate-buttons">'
+                + operateActionButton('Weiter / lösen', 'resolveOperateBlocker', [runId, item.id], true)
+                + '</div>' : '')
+            + '</div>');
+    });
+    if (runId && nextAction.kind === 'next_step' && nextAction.action_enabled && !approvals.length && !blockers.length) {
+        parts.push('<div class="chat-operate-item">'
+            + '<div class="summary-headline">' + escapeHtml(nextAction.title || 'Nächster Schritt') + '</div>'
+            + '<div class="summary-copy">' + escapeHtml(nextAction.summary || 'Die Arbeit kann fortgesetzt werden.') + '</div>'
+            + '<div class="chat-operate-buttons">'
+            + operateActionButton(nextAction.action_label || 'Weiter', 'advanceOperateRun', [runId], true)
+            + '</div>'
+            + '</div>');
+    }
+    if (!parts.length) {
+        targetEl.innerHTML = '<div class="empty">Keine offenen Freigaben, Blocker oder fortsetzbaren Schritte.</div>';
+        return;
+    }
+    targetEl.innerHTML = parts.join('');
+}
+
+function renderChatOperateActionsFromContext(runtimeContext) {
+    const el = document.getElementById('chat-operate-actions');
+    if (!el) return;
+    const operate = (runtimeContext && runtimeContext.operate_context) || {};
+    if (!operate.run_id && !pendingOperateApprovals(operate.pending_approvals).length && !openOperateBlockers(operate.open_blockers).length) {
+        el.innerHTML = '<div class="empty">Keine ausführbare Operate-Aktion im aktuellen Kontext.</div>';
+        return;
+    }
+    renderChatOperateDoor(el, {
+        run: { id: operate.run_id, state: operate.run_state },
+        run_id: operate.run_id,
+        next_action: operate.next_action || {},
+        pending_approvals: operate.pending_approvals || [],
+        open_blockers: operate.open_blockers || [],
+    });
 }
 
 function renderChatLandingRecentSessions() {
@@ -77,8 +150,8 @@ async function loadChatLandingSummary() {
         const data = overview?.data || {};
         const run = data.run || null;
         const objective = data.objective || null;
-        const blockers = Array.isArray(data.blockers) ? data.blockers : [];
-        const approvals = Array.isArray(data.approvals) ? data.approvals : [];
+        const blockers = openOperateBlockers(data.blockers);
+        const approvals = pendingOperateApprovals(data.approvals);
         const nextAction = data.next_action || {};
         const history = Array.isArray(data.history) ? data.history : [];
         const presence = typeof describeOperatePresence === 'function'
@@ -97,21 +170,29 @@ async function loadChatLandingSummary() {
                 || (history.slice(-1)[0]?.summary || '')
                 || 'Kein offener nächster Schritt — die letzte Arbeit ist abgeschlossen.';
             const nextStep = escapeHtml(nextStepValue);
+            const continueButton = (run.id && nextAction.kind === 'next_step' && nextAction.action_enabled)
+                ? '<div class="chat-operate-buttons">' + operateActionButton(nextAction.action_label || 'Weiter', 'advanceOperateRun', [run.id], true) + '</div>'
+                : '';
             activeEl.innerHTML = '<div class="summary-headline">' + escapeHtml(objective.title || 'Aktive Arbeit') + '</div>'
                 + '<div class="summary-copy">' + nextStep + '</div>'
-                + '<div class="summary-meta"><span class="summary-chip">Status: ' + status + '</span><span class="summary-chip">Phase: ' + phase + '</span></div>';
+                + '<div class="summary-meta"><span class="summary-chip">Status: ' + status + '</span><span class="summary-chip">Phase: ' + phase + '</span></div>'
+                + continueButton;
         }
-        if (!blockers.length && !approvals.length) {
+        renderChatOperateDoor(decisionEl, {
+            run,
+            next_action: nextAction,
+            pending_approvals: approvals,
+            open_blockers: blockers,
+        });
+        if (!blockers.length && !approvals.length && !(run && run.id && nextAction.kind === 'next_step' && nextAction.action_enabled)) {
             decisionEl.innerHTML = '<div class="empty">Keine offenen Freigaben oder Blocker. Du kannst direkt weiterarbeiten.</div>';
-        } else {
-            const firstBlocker = blockers[0]?.title || blockers[0]?.message || '';
-            const firstApproval = approvals[0]?.title || approvals[0]?.message || '';
-            decisionEl.innerHTML = '<div class="summary-headline">' + (blockers.length ? (blockers.length + ' Blocker offen') : (approvals.length + ' Freigaben offen')) + '</div>'
-                + '<div class="summary-copy">' + escapeHtml(firstBlocker || firstApproval || 'Öffne Aktive Arbeit für Details.') + '</div>'
-                + '<div class="summary-meta">'
-                + '<span class="summary-chip">Blocker: ' + blockers.length + '</span>'
-                + '<span class="summary-chip">Freigaben: ' + approvals.length + '</span>'
-                + '</div>';
+        }
+        const actionsEl = document.getElementById('chat-operate-actions');
+        if (actionsEl) {
+            const hasActions = approvals.length || blockers.length || (run && run.id && nextAction.kind === 'next_step' && nextAction.action_enabled);
+            actionsEl.innerHTML = hasActions
+                ? '<div class="chat-panel-meta">Freigeben, Ablehnen und Weiter stehen oben in Gerade aktiv / Braucht deine Entscheidung.</div>'
+                : '<div class="empty">Keine ausführbare Operate-Aktion im aktuellen Kontext.</div>';
         }
     } catch (e) {
         activeEl.innerHTML = '<span class="tag err">' + escapeHtml(e.message || 'Aktive Arbeit konnte nicht geladen werden') + '</span>';

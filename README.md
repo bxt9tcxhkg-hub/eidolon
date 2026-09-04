@@ -10,7 +10,7 @@ Eidolon ist ein **arbeitsführendes agentisches Hauptsystem**, das Gespräch, Pr
 ## Primäre Produktlogik
 - **Chat ist der Einstieg** (`/#chat`)
 - **Operate ist der sichtbare Arbeitskern** hinter dem Chat, nicht die Starttür
-- **Projekte/Workspaces** sind die strukturierte Arbeitsfläche (Planung: Zusammengehörig / Geplant / In Arbeit / Fertig)
+- **Projekte/Workspaces** sind die strukturierte Arbeitsfläche (Planung: Zusammengehörig / Geplant / In Arbeit / Fertig / Archiv)
 - **Karten/Widgets** sind nur ein generisches Gerüst (Slots + Typen). Keine fest verdrahteten Domänen-Pakete
 - **Bots** sind organisatorische Rollen, keine Personas
 - **Autonomie** ist erlaubt, aber sichtbar und begrenzt
@@ -30,7 +30,8 @@ Rust-Crates bleiben im Repo (CLI, experimentelle Runtime, Mesh-Bibliotheken), si
 - Operate-Kernel mit Run-/Objective-/Approval-/Blocker-/Evidence-Modell vorhanden
 - Workspace-Bridge in Operate vorhanden
 - Web-UI startet in Chat; Projektfläche und Arbeit (Operate) sind erreichbar, ohne die Starttür zu sein
-- Projektplanung zeigt modellierte Status-Eimer und erlaubt Umbenennen/Status/Reihenfolge, soweit die APIs existieren
+- Chat zeigt ausstehende Freigaben, Blocker und den nächsten Schritt und löst dieselben Operate-APIs aus
+- Projektplanung erlaubt Rename, Status, Gruppe, Reihenfolge, Ablegen und Streichen gegen persistierte Projekt-APIs
 - `/identity` liefert Produktrolle und aktive/definierte Rollen getrennt
 - Runtime-State liegt außerhalb des Repos unter `%LOCALAPPDATA%/Eidolon/state/`
 - `python -m pytest -q` besteht
