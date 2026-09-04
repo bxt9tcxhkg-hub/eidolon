@@ -15,10 +15,14 @@
             .chat-home-brand { grid-template-columns: 1fr; }
             .chat-home-status-row { align-items: flex-start; }
             .ws-status {
+                left: auto;
                 bottom: 72px;
                 right: 12px;
-                max-width: calc(100vw - 24px);
+                max-width: 38vw;
                 z-index: 45;
+                pointer-events: none;
+                font-size: 0.62rem;
+                opacity: 0.65;
             }
             .mobile-bar {
                 display: flex;

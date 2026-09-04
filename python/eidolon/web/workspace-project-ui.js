@@ -48,9 +48,13 @@
             : projects;
 
         if (!filtered?.length) {
-            el.innerHTML = '<div class="empty">Keine Projekte</div>';
+            el.innerHTML = searchText ? '<div class="empty">Keine Projekte</div>' : '';
+            const scaffold = document.getElementById('ws-planning-scaffold');
+            if (scaffold) scaffold.hidden = Boolean(searchText);
             return;
         }
+        const scaffold = document.getElementById('ws-planning-scaffold');
+        if (scaffold) scaffold.hidden = true;
         window.__testProjectButtons = filtered.map((p) => p.id);
         el.innerHTML = filtered.map((p) =>
             '<div class="goal-card" data-status="' + escapeHtml(normalizeProjectStatus(p.status)) + '">' +
@@ -106,6 +110,9 @@
             description: item.metadata?.project_description || item.overview || '',
             status: item.metadata?.project_status || item.state || 'active',
         })));
+        const projectCount = (overview.workspaces || []).filter((item) => item.workspace_type === 'project_workspace').length;
+        const scaffold = document.getElementById('ws-planning-scaffold');
+        if (scaffold && !state.currentProjectId) scaffold.hidden = projectCount > 0;
         renderWorkspaceContext({ ...contextData, operate, work_kernel: overview.work_kernel, formation: overview.formation });
         state.lastWorkTruth = {
             operate,
@@ -148,6 +155,8 @@
         try {
             if (ws.projectListEl()) ws.projectListEl().style.display = 'none';
             if (ws.projectDetailEl()) ws.projectDetailEl().style.display = 'block';
+            const scaffold = document.getElementById('ws-planning-scaffold');
+            if (scaffold) scaffold.hidden = true;
             const titleEl = document.getElementById('ws-detail-title');
             if (titleEl) titleEl.textContent = 'Lade Projekt…';
             const viewMode = document.getElementById('ws-view-mode');

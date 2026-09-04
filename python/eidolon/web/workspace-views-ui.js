@@ -104,15 +104,9 @@
         if (!state.currentProject) return;
         const elements = state.currentProject.elements || [];
         const el = document.getElementById('ws-elements-view');
+        if (!el) return;
         const filterInput = document.getElementById('ws-element-filter');
         const filterText = filterInput ? filterInput.value.toLowerCase().trim() : '';
-
-        if (!elements.length) {
-            el.innerHTML = '<div class="empty">Keine Elemente für das Board vorhanden</div>';
-            document.getElementById('ws-elements-count').textContent = '0';
-            return;
-        }
-
         const filteredElements = filterText
             ? elements.filter(item => item.title.toLowerCase().includes(filterText) || (item.description || '').toLowerCase().includes(filterText))
             : elements;

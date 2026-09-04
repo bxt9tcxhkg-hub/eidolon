@@ -43,21 +43,41 @@ function closeMobileMore() {
     document.getElementById('mobile-more-sheet')?.classList.remove('open');
 }
 
+function syncNavHighlight(tabId) {
+    const activeId = tabId || currentTab || 'chat';
+    document.querySelectorAll('.nav-item').forEach((n) => {
+        const on = n.dataset.tab === activeId;
+        n.classList.toggle('active', on);
+        if (on) n.setAttribute('aria-current', 'page');
+        else n.removeAttribute('aria-current');
+    });
+    const moreOpen = Boolean(document.getElementById('mobile-more-sheet')?.classList.contains('open'));
+    const primary = ['chat', 'workspaces', 'operate'];
+    document.querySelectorAll('.mitem').forEach((m) => {
+        if (m.dataset.tab === 'more') {
+            m.classList.toggle('active', moreOpen || !primary.includes(activeId));
+            return;
+        }
+        m.classList.toggle('active', !moreOpen && m.dataset.tab === activeId);
+    });
+    const disclosure = document.querySelector('.nav-disclosure');
+    if (disclosure && disclosure.querySelector('.nav-item.active')) disclosure.open = true;
+}
+
 function toggleMobileMore() {
     const sheet = document.getElementById('mobile-more-sheet');
     if (!sheet) return;
     const next = !sheet.classList.contains('open');
-    document.querySelectorAll('.mitem').forEach(m => m.classList.toggle('active', next && m.dataset.tab === 'more'));
     sheet.classList.toggle('open', next);
+    syncNavHighlight(currentTab);
 }
 
 function showTab(tabId) {
     if (tabId !== 'more') closeMobileMore();
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + tabId)?.classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === tabId));
-    document.querySelectorAll('.mitem').forEach(m => m.classList.toggle('active', m.dataset.tab === tabId));
     currentTab = tabId;
+    syncNavHighlight(tabId);
     const page = PAGES[tabId] || PAGES.chat;
     document.getElementById('page-title').textContent = page.title;
     document.getElementById('page-subtitle').textContent = page.subtitle;
@@ -238,9 +258,14 @@ document.addEventListener('DOMContentLoaded', function() {
     chatMessages = loadStoredChatMessages();
     const initialTab = (window.location.hash || '#chat').replace('#', '');
     if (PAGES[initialTab]) showTab(initialTab);
+    else showTab('chat');
     setEidolonPresence(lastPresenceSnapshot.state, lastPresenceSnapshot.title, lastPresenceSnapshot.detail);
     ensureChatSession().catch(e => showNotice(e.message, 'error'));
     bindShellEvents();
+    window.addEventListener('hashchange', function () {
+        const tabId = (window.location.hash || '#chat').replace('#', '');
+        if (PAGES[tabId] && tabId !== currentTab) showTab(tabId);
+    });
     renderChat(); loadOperateView(); loadPodsView(); loadWorkspaces(); loadGoals(); loadGoalLog(); loadHealth(); loadCapabilities(); loadSystemMetrics(); loadSystemStorage(); loadExecutionView(); loadIdentity(); loadMesh(); loadMeshPending(); loadHealing(); loadSkills(); loadBackups(); loadSettings(); loadMobileDeviceState();
 });
 
@@ -285,4 +310,6 @@ document.addEventListener('keydown', function (event) {
 Object.assign(window, {
     setEidolonPresence,
     describeOperatePresence,
+    syncNavHighlight,
+    showTab,
 });

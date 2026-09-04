@@ -165,21 +165,26 @@
             display: flex; justify-content: flex-end; gap: 8px;
         }
         
-        /* WS Status */
+        /* WS Status — quieter than next-step content; meaning lives in tooltip */
         .ws-status {
-            position: fixed; bottom: 16px; right: 16px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 7px 14px;
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            z-index: 200;
+            position: fixed; left: 12px; bottom: 12px; right: auto;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            padding: 4px 6px;
+            font-size: 0.68rem;
+            color: var(--text-dim);
+            z-index: 51;
             display: flex; align-items: center; gap: 6px;
-            pointer-events: none;
+            pointer-events: auto;
+            max-width: 216px;
+            opacity: 0.72;
         }
-        .ws-status .dot { width: 7px; height: 7px; border-radius: 50%; }
-        .ws-status.connected .dot { background: var(--success); }
+        .ws-status .dot { width: 6px; height: 6px; border-radius: 50%; opacity: 0.7; background: var(--text-dim); }
+        .ws-status.quiet .dot,
+        .ws-status.connected .dot { background: var(--text-dim); }
+        .ws-status.limited .dot { background: var(--warning); }
+        .ws-status.offline .dot,
         .ws-status.disconnected .dot { background: var(--danger); }
         
         /* Theme Toggle */

@@ -2,6 +2,65 @@
     const operate = window.EidolonOperate;
     const row = operate.row;
 
+    function sectionHasVisibleData(el) {
+        if (!el) return false;
+        const text = String(el.textContent || '').trim();
+        if (!text) return false;
+        const emptyOnly = el.querySelector('.empty') && !el.querySelector('.comp-row, .goal-card, .chat-operate-item, button');
+        return !emptyOnly;
+    }
+
+    function syncOperateEmptyLayout(flags) {
+        const hasRun = Boolean(flags && flags.hasRun);
+        const panel = document.getElementById('panel-operate');
+        if (panel) panel.classList.toggle('operate-is-idle', !hasRun);
+        const idle = document.getElementById('operate-idle-empty');
+        if (idle) idle.hidden = hasRun;
+        const stateBar = document.getElementById('operate-state-bar');
+        if (stateBar) stateBar.hidden = !hasRun;
+        const nextAction = document.getElementById('operate-next-action');
+        const hasNext = Boolean(flags && flags.next);
+        if (nextAction) nextAction.hidden = !hasRun || !hasNext;
+        const populated = {
+            objective: Boolean(flags && flags.objective),
+            approvals: Boolean(flags && flags.approvals),
+            blockers: Boolean(flags && flags.blockers),
+            subagents: Boolean(flags && flags.subagents),
+            evidence: Boolean(flags && flags.evidence),
+            history: Boolean(flags && flags.history),
+            workgraph: Boolean(flags && flags.workgraph),
+            transitions: Boolean(flags && flags.transitions),
+        };
+        const emptyLabels = [];
+        const labelMap = {
+            objective: 'Ziel',
+            approvals: 'Freigaben',
+            blockers: 'Blocker',
+            subagents: 'Helfer',
+            evidence: 'Evidenz',
+            history: 'Verlauf',
+            workgraph: 'Work-Graph',
+            transitions: 'Übergänge',
+        };
+        document.querySelectorAll('#panel-operate [data-operate-section]').forEach((card) => {
+            const key = card.dataset.operateSection;
+            const show = hasRun && Boolean(populated[key]);
+            card.hidden = !show;
+            card.classList.toggle('operate-section-empty', !populated[key]);
+            if (hasRun && !populated[key] && labelMap[key]) emptyLabels.push(labelMap[key]);
+        });
+        const details = document.getElementById('operate-empty-details');
+        const detailsBody = document.getElementById('operate-empty-details-body');
+        if (details) {
+            details.hidden = !hasRun || emptyLabels.length === 0;
+            if (detailsBody) {
+                detailsBody.textContent = emptyLabels.length
+                    ? ('Ohne Daten: ' + emptyLabels.join(', ') + '.')
+                    : 'Keine leeren Kernel-Bereiche.';
+            }
+        }
+    }
+
     function renderState(run, objective, blockers, approvals) {
         const el = document.getElementById('operate-state-bar');
         if (!el) return;
@@ -90,5 +149,5 @@
         el.innerHTML = items.map((item) => ['<div class="comp-row"><span class="comp-name">' + escapeHtml(item.transition_type || 'state_change') + '</span>', '<span class="comp-detail">' + escapeHtml((item.from_state || '—') + ' → ' + (item.to_state || '—')) + '</span></div>', '<div style="margin:-4px 0 8px 0;color:var(--text-dim);font-size:0.78rem;line-height:1.4;">' + escapeHtml(item.summary || '') + '</div>'].join('')).join('');
     }
 
-    Object.assign(window, { renderState, renderObjective, renderSubagents, renderEvidence, renderNextAction, renderApprovals, renderBlockers, renderHistory, renderWorkGraph, renderTransitions });
+    Object.assign(window, { renderState, renderObjective, renderSubagents, renderEvidence, renderNextAction, renderApprovals, renderBlockers, renderHistory, renderWorkGraph, renderTransitions, syncOperateEmptyLayout, sectionHasVisibleData });
 })();

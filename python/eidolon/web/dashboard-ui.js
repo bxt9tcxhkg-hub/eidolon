@@ -5,10 +5,7 @@ async function loadHealth() {
         badge.className = d.status === 'ok' ? 'tag ok' : 'tag warn';
         badge.textContent = d.status === 'ok' ? 'OK' : 'Eingeschränkt';
         const wsStatus = document.getElementById('ws-status');
-        if (wsStatus) {
-            wsStatus.className = 'ws-status ' + (d.status === 'ok' ? 'connected' : 'disconnected');
-            wsStatus.innerHTML = '<span class="dot"></span> ' + escapeHtml(d.status === 'ok' ? 'Lokal verbunden' : 'Lokal eingeschränkt');
-        }
+        if (wsStatus) applyLocalRuntimeStatus(wsStatus, d);
         const comps = d.components || {};
         const componentRows = [];
         let html = '<div class="comp-row"><span class="comp-dot ok"></span><span class="comp-name">Laufzeit</span><span class="comp-detail">' + (d.uptime_human || '-') + '</span></div>';
@@ -33,11 +30,52 @@ async function loadHealth() {
         const dc = document.getElementById('dash-components');
         if (dc) dc.innerHTML = '<span class="tag err">' + e.message + '</span>';
         const wsStatus = document.getElementById('ws-status');
-        if (wsStatus) {
-            wsStatus.className = 'ws-status disconnected';
-            wsStatus.innerHTML = '<span class="dot"></span> Backend nicht erreichbar';
-        }
+        if (wsStatus) applyLocalRuntimeStatus(wsStatus, null, e.message);
     }
+}
+
+function describeLocalRuntimeStatus(health, errorMessage) {
+    if (!health) {
+        return {
+            label: 'Offline',
+            tone: 'offline',
+            title: 'Backend nicht erreichbar. Die lokale Runtime antwortet nicht' + (errorMessage ? (': ' + errorMessage) : '.'),
+        };
+    }
+    const status = health.status || '';
+    const problems = Array.isArray(health.problems) ? health.problems.filter(Boolean) : [];
+    const unavailable = health.components?.capabilities?.unavailable_ids || [];
+    if (status === 'ok') {
+        return {
+            label: 'Lokal',
+            tone: 'quiet',
+            title: 'Lokal verbunden. Die Runtime ist erreichbar — das ist kein voller Mesh-/QUIC-Status.',
+        };
+    }
+    if (status === 'ok_with_limits') {
+        const extra = unavailable.length ? (' Nicht verdrahtet: ' + unavailable.join(', ') + '.') : '';
+        return {
+            label: 'Lokal',
+            tone: 'quiet',
+            title: 'Lokal verbunden, mit bekannten Grenzen.' + extra + ' Kein erfundener Vollstatus.',
+        };
+    }
+    const reason = problems.length
+        ? problems.join('; ')
+        : 'Bekannte lokale Grenzen (z. B. fehlendes Backup oder unvollständige Zertifikate).';
+    return {
+        label: 'Lokal · Grenzen',
+        tone: 'limited',
+        title: 'Lokal eingeschränkt: ' + reason + ' Die Arbeitsfläche selbst läuft weiter — das ist kein Ausfall.',
+    };
+}
+
+function applyLocalRuntimeStatus(el, health, errorMessage) {
+    const info = describeLocalRuntimeStatus(health, errorMessage);
+    el.className = 'ws-status ' + info.tone;
+    el.title = info.title;
+    el.setAttribute('aria-label', info.title);
+    el.innerHTML = '<span class="dot"></span> ' + escapeHtml(info.label);
 }
 async function loadCapabilities() {
     try {

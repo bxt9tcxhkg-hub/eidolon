@@ -161,9 +161,54 @@
     gap: 12px;
 }
 
+.planning-scaffold {
+    margin-top: 12px;
+}
+
+.planning-scaffold-note {
+    text-align: left;
+    padding: 0 0 12px 0;
+}
+
 .planning-column {
     min-height: 140px;
     padding: 10px;
+}
+
+.operate-idle-empty {
+    padding: 4px 0 0;
+}
+
+.operate-is-idle [data-operate-section],
+.operate-is-idle #operate-state-bar,
+.operate-is-idle #operate-next-action,
+.operate-is-idle #operate-empty-details {
+    display: none;
+}
+
+.operate-section[hidden],
+#operate-idle-empty[hidden],
+#operate-empty-details[hidden],
+#operate-state-bar[hidden],
+#operate-next-action[hidden] {
+    display: none;
+}
+
+.operate-next-in-core {
+    margin-top: 12px;
+}
+
+.operate-empty-details {
+    margin: 8px 0 0;
+    padding: 8px 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.operate-empty-details summary {
+    cursor: pointer;
 }
 
 .planning-column.drop-target {

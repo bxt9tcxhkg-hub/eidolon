@@ -29,6 +29,10 @@
     margin: 8px 12px 0;
     padding: 12px 12px 10px;
     border-top: 1px solid var(--border-subtle);
+    display: none;
+}
+.nav-item[data-tab="chat"].active + .chat-session-rail {
+    display: block;
 }
 .chat-session-search input,
 .chat-sidebar-search {

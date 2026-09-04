@@ -604,7 +604,7 @@ def test_chat_ui_persists_messages_across_reload_in_local_storage():
     assert 'class="chat-shell"' in html
     assert '.theme-toggle { display: none; }' in APP_WEB_CSS
     assert '.nav-item .icon::before' in APP_WEB_CSS
-    assert 'data-tab="chat" data-tab-target="chat"><span class="icon"></span> Chat' in html
+    assert 'data-tab="chat" data-tab-target="chat"' in html
     assert 'data-tab="workspaces" data-tab-target="workspaces"><span class="icon"></span> Projektfläche' in html
     assert 'data-tab="dashboard" data-tab-target="dashboard"><span class="icon"></span> Systemstatus' in html
     assert 'data-tab="mesh" data-tab-target="mesh"><span class="icon"></span> Geräte' in html
@@ -932,13 +932,17 @@ def test_chat_is_initial_active_surface_and_header():
     html = INDEX_HTML.read_text(encoding='utf-8')
     assert '<h2 id="page-title">Eidolon</h2>' in html
     assert 'Starte ein Gespräch oder setze reale Arbeit fort.' in html
-    assert '<div id="panel-chat" class="tab-panel active">' in html
-    assert '<div id="panel-operate" class="tab-panel">' in html
+    assert '<div id="panel-chat" class="tab-panel active chat-is-idle">' in html
+    assert 'id="chat-idle-prompt"' in html
+    assert 'id="operate-idle-empty"' in html
+    assert '<div id="panel-operate" class="tab-panel operate-is-idle">' in html
     assert '<div id="panel-operate" class="tab-panel active">' not in html
     assert '<div id="panel-workspaces" class="tab-panel">' in html
     assert '<div id="panel-dashboard" class="tab-panel">' in html
     assert '<div id="panel-mesh" class="tab-panel">' in html
     assert "let currentTab = 'chat';" in APP_SHELL_JS.read_text(encoding='utf-8')
+    assert 'function syncNavHighlight(tabId)' in APP_SHELL_JS.read_text(encoding='utf-8')
+    assert "window.addEventListener('hashchange'" in APP_SHELL_JS.read_text(encoding='utf-8')
     assert "const initialTab = (window.location.hash || '#chat').replace('#', '');" in APP_SHELL_JS.read_text(encoding='utf-8')
     assert "operate: { title: 'Arbeit'" in APP_SHELL_JS.read_text(encoding='utf-8')
     assert 'data-tab="operate" data-tab-target="operate">' in html
@@ -961,7 +965,10 @@ def test_project_planning_surface_is_generic_and_editable():
     assert 'data-plan-drop' in js
     assert "/projects/' + state.currentProjectId + '/elements/reorder'" in js
     assert "status: 'archived'" in js
-    assert 'id="ws-project-slots"' in html
+    assert 'id="ws-planning-scaffold"' in html
+    assert 'id="ws-planning-scaffold-board"' in html
+    assert 'data-plan-column="idea"' in html
+    assert 'data-plan-column="archived"' in html
     assert 'overview.work_kernel' in js
     assert 'generic_slots' in js
     assert 'data-slot="context"' in html
