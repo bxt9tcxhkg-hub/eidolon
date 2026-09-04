@@ -187,12 +187,13 @@ async function loadChatLandingSummary() {
         if (!blockers.length && !approvals.length && !(run && run.id && nextAction.kind === 'next_step' && nextAction.action_enabled)) {
             decisionEl.innerHTML = '<div class="empty">Keine offenen Freigaben oder Blocker. Du kannst direkt weiterarbeiten.</div>';
         }
-        renderChatOperateDoor(document.getElementById('chat-operate-actions'), {
-            run,
-            next_action: nextAction,
-            pending_approvals: approvals,
-            open_blockers: blockers,
-        });
+        const actionsEl = document.getElementById('chat-operate-actions');
+        if (actionsEl) {
+            const hasActions = approvals.length || blockers.length || (run && run.id && nextAction.kind === 'next_step' && nextAction.action_enabled);
+            actionsEl.innerHTML = hasActions
+                ? '<div class="chat-panel-meta">Freigeben, Ablehnen und Weiter stehen oben in Gerade aktiv / Braucht deine Entscheidung.</div>'
+                : '<div class="empty">Keine ausführbare Operate-Aktion im aktuellen Kontext.</div>';
+        }
     } catch (e) {
         activeEl.innerHTML = '<span class="tag err">' + escapeHtml(e.message || 'Aktive Arbeit konnte nicht geladen werden') + '</span>';
         decisionEl.innerHTML = '<span class="tag err">' + escapeHtml(e.message || 'Freigaben konnten nicht geladen werden') + '</span>';
