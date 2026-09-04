@@ -33,6 +33,7 @@ def test_chat_empty_state_is_radically_slim():
     assert 'id="panel-chat"' in html
     assert 'chat-is-idle' in html
     assert 'id="chat-idle-prompt"' in html
+    assert 'id="chat-work-trace"' in html
     assert 'Woran sollen wir arbeiten?' in html
     assert 'id="chat-landing-panels"' in html
     assert 'id="chat-context-summary"' in html
@@ -45,7 +46,7 @@ def test_chat_empty_state_is_radically_slim():
     assert '.chat-is-idle .chat-home-hero' in css
     assert '.chat-is-idle #chat-landing-panels' in css
     assert '.chat-is-idle .chat-work-context' in css
-    assert "el.innerHTML = '<div class=\"empty chat-idle-hint\">Noch kein Gesprächskontext.</div>'" in js
+    assert "el.innerHTML = '<div class=\"empty chat-idle-hint\">Bereit, wenn du es bist.</div>'" in js
     assert 'Schreibe oben dein Ziel, damit Eidolon einen realen Arbeitskontext aufbauen kann.' not in js
     assert '<div id="panel-operate" class="tab-panel active">' not in html
     assert 'data-tab="chat" data-tab-target="chat"' in html
@@ -60,6 +61,7 @@ def test_operate_empty_state_hides_empty_section_wall():
     assert 'Im Chat starten' in html
     assert 'Aus Projektfläche übernehmen' in html
     assert 'sobald etwas läuft' in html
+    assert 'id="operate-work-trace"' in html
     assert 'id="operate-empty-details"' in html
     assert 'data-operate-section="objective"' in html
     assert 'data-operate-section="approvals"' in html
@@ -131,5 +133,5 @@ def test_local_runtime_status_is_quiet_and_honest():
     assert "wsStatus.innerHTML = '<span class=\"dot\"></span> ' + escapeHtml(d.status === 'ok' ? 'Lokal verbunden' : 'Lokal eingeschränkt')" not in js
     assert 'kein voller Mesh-/QUIC-Status' in js
     assert '.ws-status.limited .dot' in css
-    assert 'font-size: 0.68rem' in css
+    assert 'font-size: 0.72rem' in css
     assert 'z-index: 51' in css

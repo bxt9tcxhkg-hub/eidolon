@@ -21,7 +21,7 @@
         .canvas-node:active { cursor: grabbing; }
         .canvas-node.selected {
             border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(74,125,255,0.3);
+            box-shadow: 0 0 0 2px var(--accent-subtle);
         }
         .canvas-node .node-title {
             font-weight: 600;
@@ -167,25 +167,32 @@
         
         /* WS Status — quieter than next-step content; meaning lives in tooltip */
         .ws-status {
-            position: fixed; left: 12px; bottom: 12px; right: auto;
-            background: transparent;
-            border: none;
-            border-radius: 8px;
-            padding: 4px 6px;
-            font-size: 0.68rem;
-            color: var(--text-dim);
+            position: fixed; left: 14px; bottom: 14px; right: auto;
+            background: rgba(38, 33, 27, 0.82);
+            border: 1px solid var(--border-subtle);
+            border-radius: 999px;
+            padding: 5px 10px;
+            font-size: 0.72rem;
+            color: var(--text-muted);
             z-index: 51;
-            display: flex; align-items: center; gap: 6px;
+            display: flex; align-items: center; gap: 7px;
             pointer-events: auto;
-            max-width: 216px;
-            opacity: 0.72;
+            max-width: 228px;
+            opacity: 0.88;
+            letter-spacing: 0.01em;
         }
-        .ws-status .dot { width: 6px; height: 6px; border-radius: 50%; opacity: 0.7; background: var(--text-dim); }
+        .ws-status .dot { width: 6px; height: 6px; border-radius: 50%; opacity: 0.85; background: var(--text-dim); }
         .ws-status.quiet .dot,
-        .ws-status.connected .dot { background: var(--text-dim); }
+        .ws-status.connected .dot {
+            background: var(--accent);
+            animation: work-trace-breathe 4.2s ease-in-out infinite;
+        }
         .ws-status.limited .dot { background: var(--warning); }
         .ws-status.offline .dot,
         .ws-status.disconnected .dot { background: var(--danger); }
+        @media (prefers-reduced-motion: reduce) {
+            .ws-status .dot { animation: none; }
+        }
         
         /* Theme Toggle */
         .theme-toggle { display: none; }

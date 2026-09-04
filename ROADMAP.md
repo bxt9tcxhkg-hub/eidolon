@@ -34,6 +34,7 @@
 - Idle-Projektfläche ist handlungsfähig: große Primäraktion „Neues Projekt“ plus leeres Board, ohne Operate-Überblickswand
 - Idle-Arbeit zeigt drei klare Wege (Chat, Übernahme aus Projektfläche, Hinweis auf Freigaben) statt einer leeren Sektionswand
 - Kurze Action-Motion bestätigt nur reale Mutationen und respektiert `prefers-reduced-motion` sowie Settings `animations`
+- Idle-UI bleibt schlank (Chat: Frage + Eingabe); Dark-Theme ist wärmer, Arbeitsspur atmet aus Kernel-/Sessiondaten ohne Fake-Läufe
 - Findings- und Root-History-Dokumentation haben jetzt explizite Supersession-/Archiv-Readmes
 - `/identity` liefert konsistente Produktrolle
 - Runtime-State wurde aus dem Repo nach `%LOCALAPPDATA%/Eidolon/state/` ausgelagert

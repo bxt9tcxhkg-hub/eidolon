@@ -220,6 +220,7 @@ async function loadChatLandingSummary() {
         const presence = typeof describeOperatePresence === 'function'
             ? describeOperatePresence(data)
             : { state: 'idle', title: 'Bereit für neue Arbeit', detail: 'Starte ein Gespräch oder setze bestehende Arbeit fort.' };
+        if (typeof refreshWorkTraces === 'function') refreshWorkTraces(data);
         if (typeof setEidolonPresence === 'function') {
             setEidolonPresence(presence.state, presence.title, presence.detail);
         }
@@ -412,6 +413,7 @@ function renderChatSessions(sessions) {
     if (titleEl) titleEl.textContent = activeSession?.title || 'Neue Unterhaltung';
     if (summaryEl) summaryEl.textContent = filtered.length + ' von ' + ((sessions || []).length) + ' Sessions sichtbar';
     renderChatLandingRecentSessions();
+    if (typeof refreshWorkTraces === 'function') refreshWorkTraces();
 }
 async function loadChatSessions() {
     const result = await api('GET', '/chat/sessions');
@@ -557,7 +559,7 @@ function renderChat() {
     if (!el) return;
     syncChatIdleLayout(lastChatRuntimeContext);
     if (!chatMessages.length) {
-        el.innerHTML = '<div class="empty chat-idle-hint">Noch kein Gesprächskontext.</div>';
+        el.innerHTML = '<div class="empty chat-idle-hint">Bereit, wenn du es bist.</div>';
         return;
     }
     el.innerHTML = chatMessages.map(m => '<div class="msg ' + m.role + '"><div class="sender">' + escapeHtml(m.role === 'user' ? 'Du' : 'Eidolon') + '</div><div>' + escapeHtml(m.content) + '</div></div>').join('');

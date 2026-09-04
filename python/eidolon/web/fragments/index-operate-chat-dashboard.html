@@ -64,6 +64,16 @@
                                 <div class="chat-messages" id="chat-messages"></div>
                                 <div class="chat-input-shell">
                                     <div class="chat-input-caption" id="chat-idle-prompt">Woran sollen wir arbeiten?</div>
+                                    <div id="chat-work-trace" class="work-trace" data-work-trace data-work-trace-state="ready">
+                                        <span class="work-trace-pulse" aria-hidden="true"></span>
+                                        <p class="work-trace-line">
+                                            <span class="work-trace-ready" data-work-trace-ready>Bereit</span>
+                                            <span class="work-trace-sep" aria-hidden="true">·</span>
+                                            <span class="work-trace-waiting" data-work-trace-waiting>nichts wartet</span>
+                                            <span class="work-trace-sep" aria-hidden="true">·</span>
+                                            <span class="work-trace-next"><span data-work-trace-next-label>als Nächstes</span> <span data-work-trace-next>dein Impuls</span></span>
+                                        </p>
+                                    </div>
                                     <div class="chat-input">
                                         <input type="text" id="chat-input" placeholder="Nachricht schreiben…" data-enter-action="sendChat">
                                         <button class="btn btn-primary" data-ui-action="sendChat">Senden</button>
@@ -85,6 +95,16 @@
                             <p class="operate-idle-line">Noch kein laufender Schritt.</p>
                             <button class="btn btn-primary operate-idle-primary" id="operate-idle-start-chat" data-tab-target="chat">Im Chat starten</button>
                             <button class="btn operate-idle-secondary" id="operate-idle-from-project" data-ui-action="takeOverFromProject" hidden>Aus Projektfläche übernehmen</button>
+                            <div id="operate-work-trace" class="work-trace work-trace-operate" data-work-trace data-work-trace-state="ready">
+                                <span class="work-trace-pulse" aria-hidden="true"></span>
+                                <p class="work-trace-line">
+                                    <span class="work-trace-ready" data-work-trace-ready>Bereit</span>
+                                    <span class="work-trace-sep" aria-hidden="true">·</span>
+                                    <span class="work-trace-waiting" data-work-trace-waiting>nichts wartet</span>
+                                    <span class="work-trace-sep" aria-hidden="true">·</span>
+                                    <span class="work-trace-next"><span data-work-trace-next-label>als Nächstes</span> <span data-work-trace-next>dein Impuls</span></span>
+                                </p>
+                            </div>
                             <p class="empty operate-idle-hint">Hier siehst du Freigaben und den nächsten Schritt, sobald etwas läuft.</p>
                         </div>
                     </div>

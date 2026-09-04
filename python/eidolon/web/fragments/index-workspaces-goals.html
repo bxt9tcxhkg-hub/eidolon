@@ -11,6 +11,16 @@
                     <p class="ws-idle-line" id="ws-idle-line">Noch kein Projekt</p>
                     <button class="btn btn-primary ws-idle-primary" id="ws-idle-new-project" data-ui-action="toggleProjectComposer" data-ui-args='[true]'>Neues Projekt</button>
                     <p class="empty planning-scaffold-note" id="ws-idle-helper">Lege ein Projekt an oder starte im Chat — dann füllen sich die Spalten.</p>
+                    <div id="ws-work-trace" class="work-trace work-trace-workspace" data-work-trace data-work-trace-state="ready">
+                        <span class="work-trace-pulse" aria-hidden="true"></span>
+                        <p class="work-trace-line">
+                            <span class="work-trace-ready" data-work-trace-ready>Bereit</span>
+                            <span class="work-trace-sep" aria-hidden="true">·</span>
+                            <span class="work-trace-waiting" data-work-trace-waiting>nichts wartet</span>
+                            <span class="work-trace-sep" aria-hidden="true">·</span>
+                            <span class="work-trace-next"><span data-work-trace-next-label>als Nächstes</span> <span data-work-trace-next>dein Impuls</span></span>
+                        </p>
+                    </div>
                 </div>
 
                 <div class="card" id="project-create-panel" style="display:none;">
@@ -46,12 +56,12 @@
                     <div id="ws-projects-list"><div class="empty">Lade…</div></div>
                     <div id="ws-planning-scaffold" class="planning-scaffold">
                         <div class="planning-board" id="ws-planning-scaffold-board">
-                            <div class="card planning-column" data-plan-column="idea"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">Zusammengehörig</h3><span class="tag info">0</span></div><div class="empty">Leer</div></div>
-                            <div class="card planning-column" data-plan-column="planned"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">Geplant</h3><span class="tag info">0</span></div><div class="empty">Leer</div></div>
-                            <div class="card planning-column" data-plan-column="in_progress"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">In Arbeit</h3><span class="tag info">0</span></div><div class="empty">Leer</div></div>
-                            <div class="card planning-column" data-plan-column="blocked"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">Blockiert</h3><span class="tag info">0</span></div><div class="empty">Leer</div></div>
-                            <div class="card planning-column" data-plan-column="done"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">Fertig</h3><span class="tag info">0</span></div><div class="empty">Leer</div></div>
-                            <div class="card planning-column" data-plan-column="archived"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">Archiv</h3><span class="tag info">0</span></div><div class="empty">Leer</div></div>
+                            <div class="card planning-column" data-plan-column="idea"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">Zusammengehörig</h3><span class="tag info">0</span></div><div class="empty planning-column-empty">Offen</div></div>
+                            <div class="card planning-column" data-plan-column="planned"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">Geplant</h3><span class="tag info">0</span></div><div class="empty planning-column-empty">Offen</div></div>
+                            <div class="card planning-column" data-plan-column="in_progress"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">In Arbeit</h3><span class="tag info">0</span></div><div class="empty planning-column-empty">Offen</div></div>
+                            <div class="card planning-column" data-plan-column="blocked"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">Blockiert</h3><span class="tag info">0</span></div><div class="empty planning-column-empty">Offen</div></div>
+                            <div class="card planning-column" data-plan-column="done"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">Fertig</h3><span class="tag info">0</span></div><div class="empty planning-column-empty">Offen</div></div>
+                            <div class="card planning-column" data-plan-column="archived"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">Archiv</h3><span class="tag info">0</span></div><div class="empty planning-column-empty">Offen</div></div>
                         </div>
                     </div>
                 </div>

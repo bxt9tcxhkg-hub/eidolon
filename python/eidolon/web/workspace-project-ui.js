@@ -143,6 +143,15 @@
             hasOpenProject: Boolean(state.currentProjectId),
         });
         renderWorkspaceContext({ ...contextData, operate, work_kernel: overview.work_kernel, formation: overview.formation });
+        if (typeof refreshWorkTraces === 'function') {
+            refreshWorkTraces({
+                run: operate.run,
+                objective: operate.objective,
+                blockers: operate.blockers,
+                approvals: operate.approvals,
+                next_action: operate.next_action || (overview.work_kernel && overview.work_kernel.operate_context && overview.work_kernel.operate_context.next_action) || {},
+            });
+        }
         state.lastWorkTruth = {
             operate,
             work_kernel: overview.work_kernel,

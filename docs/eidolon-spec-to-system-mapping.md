@@ -423,6 +423,8 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 - idle Projektfläche leads with Neues Projekt + empty board and hides the Operate overview wall
 - idle Arbeit offers Chat start, optional project takeover, and a short hint instead of an empty section wall
 - action motion confirms real mutations only and honors reduced-motion plus `ui.animations`
+- dark shell uses warmer neutrals and a richer accent; idle Chat stays question + input
+- work-trace lines on Chat, Arbeit and Projektfläche read operate/session signals and otherwise show a calm ready state
 
 ### Remaining mismatch
 - the root component stylesheet is now segmented, but the goals component slice remains comparatively large
