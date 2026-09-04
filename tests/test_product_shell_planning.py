@@ -27,6 +27,7 @@ def test_chat_is_default_entry_and_operate_is_not_a_landing_tab():
     assert 'id="panel-operate"' not in html
     assert "const LANDING_TAB = 'chat';" in shell
     assert "if (!raw || raw === 'operate' || !PAGES[raw]) return LANDING_TAB;" in shell
+    assert "window.addEventListener('hashchange'" in shell
     assert "let currentTab = 'chat';" in shell
     assert 'chat: { title:' in shell
     assert 'operate: { title:' not in shell

@@ -68,7 +68,8 @@ function showTab(tabId) {
     const page = PAGES[tabId] || PAGES.chat;
     document.getElementById('page-title').textContent = page.title;
     document.getElementById('page-subtitle').textContent = page.subtitle;
-    if (window.location.hash !== '#' + tabId) history.replaceState(null, '', '#' + tabId);
+    const nextHash = '#' + tabId;
+    if (window.location.hash !== nextHash) history.replaceState(null, '', nextHash);
     const loaders = {
         operate: () => loadOperateView(),
         chat: () => {
@@ -249,6 +250,9 @@ document.addEventListener('DOMContentLoaded', function() {
     ensureChatSession().catch(e => showNotice(e.message, 'error'));
     bindShellEvents();
     loadMobileDeviceState();
+    window.addEventListener('hashchange', function () {
+        showTab(resolveInitialTab());
+    });
 });
 
 
