@@ -417,8 +417,8 @@ def test_chat_context_includes_operate_snapshot_fields(monkeypatch):
         'objective': {'id': 'obj1', 'title': 'Arbeitskern', 'normalized_goal': 'Chat und Operate vereinheitlichen'},
         'run': {'id': 'run1', 'state': 'acting', 'current_phase': 'execute', 'next_transition': 'verify', 'approval_required': True, 'pending_interrupt_count': 2},
         'next_action': {'kind': 'approval_request', 'title': 'Freigabe nötig', 'summary': 'Freigabe für strukturelle Änderung einholen'},
-        'approvals': [{'id': 'ap1'}],
-        'blockers': [],
+        'approvals': [{'id': 'ap1', 'title': 'Freigabe nötig', 'status': 'pending'}],
+        'blockers': [{'id': 'bl1', 'title': 'Wartet auf Klärung', 'status': 'open'}],
         'subagents': [{'id': 'sa1'}],
     })
 
@@ -428,6 +428,10 @@ def test_chat_context_includes_operate_snapshot_fields(monkeypatch):
     runtime = body['runtime_context']
     assert runtime['operate_context']['run_id'] == 'run1'
     assert runtime['operate_context']['objective_title'] == 'Arbeitskern'
+    assert runtime['operate_context']['pending_approval_count'] == 1
+    assert runtime['operate_context']['pending_approvals'][0]['id'] == 'ap1'
+    assert runtime['operate_context']['open_blocker_count'] == 1
+    assert runtime['operate_context']['open_blockers'][0]['id'] == 'bl1'
     assert runtime['workflow_state']['operate_run_state'] == 'acting'
     assert runtime['workflow_state']['approval_required'] is True
     assert runtime['workflow_state']['pending_interrupt_count'] == 2

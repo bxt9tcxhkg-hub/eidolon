@@ -6,6 +6,7 @@
         brainstormData: [],
         armedDeleteElementId: null,
         armedDeleteProjectId: null,
+        armedDropElementId: null,
         canvas: {
             zoom: 1,
             panX: 0,
@@ -36,6 +37,8 @@
         document.getElementById('task-priority').value = '0';
         document.getElementById('task-domain').value = 'idea';
         document.getElementById('task-status').value = 'idea';
+        const parentField = document.getElementById('task-parent-id');
+        if (parentField) parentField.value = '';
         document.getElementById('task-assigned-to').value = '';
         document.getElementById('task-due-at').value = '';
         const deleteBtn = document.getElementById('task-delete-btn');
@@ -59,7 +62,7 @@
     }
 
     function statusLabel(status) {
-        const labels = { idea: 'Idee', planned: 'Geplant', in_progress: 'In Arbeit', blocked: 'Blockiert', done: 'Erledigt', archived: 'Archiviert', ready: 'Bereit' };
+        const labels = { idea: 'Zusammengehörig', planned: 'Geplant', in_progress: 'In Arbeit', active: 'In Arbeit', blocked: 'Blockiert', done: 'Fertig', archived: 'Archiviert', ready: 'Geplant' };
         return labels[status] || status || 'Unklar';
     }
 

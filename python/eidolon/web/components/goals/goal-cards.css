@@ -19,6 +19,9 @@
 .goal-card[data-status="planned"] .goal-stripe { background: var(--text-dim); }
 .goal-card[data-status="paused"] .goal-stripe { background: var(--warning); }
 .goal-card[data-status="done"] .goal-stripe { background: var(--success); }
+.goal-card[data-status="archived"] .goal-stripe { background: var(--border); }
+.goal-card[data-status="archived"] .goal-body { opacity: 0.62; }
+.goal-card[data-status="in_progress"] .goal-stripe { background: var(--accent); }
 .goal-card[data-status="failed"] { border-color: rgba(239,68,68,0.45); }
 .goal-card[data-status="failed"] .goal-stripe { background: var(--danger); }
 .goal-card[data-status="cancelled"] .goal-stripe { background: var(--border); }

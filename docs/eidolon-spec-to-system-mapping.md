@@ -371,6 +371,7 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 - chat is the active initial panel
 - chat runtime compiles context and enforces direction/recommendation/next step
 - operate snapshot provides run/objective/blocker/approval/evidence state
+- `/chat/context` exposes pending approvals, open blockers, and next_action for Chat execute actions
 
 ### Remaining mismatch
 - the full conversation→operate→workspace loop is still distributed across several modules rather than one explicit kernel boundary

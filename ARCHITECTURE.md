@@ -52,7 +52,9 @@ Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gem
 - `python/eidolon/web/components/app-components.css`
 - CSS ist nach Shell-, Chat- und Goals-Slices in Importdateien aufgeteilt
 - Default-Einstieg ist Chat (`/#chat`); Operate ist über `#operate` / Nav „Arbeit“ erreichbar
-- Projektfläche zeigt ein generisches Slot-Gerüst plus Planungsboard (Zusammengehörig / Geplant / In Arbeit / Fertig)
+- Chat zeigt ausstehende Freigaben, Blocker und Next Action und löst dieselben Operate-APIs aus
+- Projektfläche zeigt ein generisches Slot-Gerüst plus Planungsboard (Zusammengehörig / Geplant / In Arbeit / Fertig / Archiv)
+- Projekt- und Elementmutationen (Rename, Status, Gruppe, Reihenfolge, Archiv, Streichen) schreiben gegen bestehende Projekt-APIs
 - Keine fest verdrahteten Domänen-Pakete (kein Training-/Instagram-/Reise-UI)
 - Operate zeigt Run-/Approval-/Blocker-/Evidence-/Transition-Sicht
 

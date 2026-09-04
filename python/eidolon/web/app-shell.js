@@ -2,10 +2,10 @@ const PAGES = {
     chat: { title: 'Eidolon', subtitle: 'Starte ein Gespräch oder setze reale Arbeit fort.' },
     operate: { title: 'Arbeit', subtitle: 'Sichtbarer Arbeitskern hinter dem Chat: Zustand, Freigaben, Blocker, nächster Schritt' },
     pods: { title: 'Helfer', subtitle: 'Aktive Hilfsläufe und ihr realer Zustand', group: 'advanced' },
-    dashboard: { title: 'Systemstatus', subtitle: 'Backend, Laufzeit, Speicher und verfügbare Fähigkeiten' },
+    dashboard: { title: 'Systemstatus', subtitle: 'Backend, Laufzeit, Speicher und verfügbare Fähigkeiten', group: 'advanced' },
     workspaces: { title: 'Projektfläche', subtitle: 'Planung und generische Arbeitskarten der aktuellen Arbeit' },
     execution: { title: 'Laufzeit', subtitle: 'Geräte, Laufzeitfähigkeiten und aktuelle Ausführungssignale', group: 'advanced' },
-    mesh: { title: 'Geräte', subtitle: 'Handy, Browser und weitere Geräte mit Eidolon koppeln' },
+    mesh: { title: 'Geräte', subtitle: 'Handy, Browser und weitere Geräte mit Eidolon koppeln', group: 'advanced' },
     goals: { title: 'Ziele', subtitle: 'Welche Ziele Eidolon verfolgt', group: 'advanced' },
     identity: { title: 'Identität', subtitle: 'Rollenmodell und Produkt-Selbstbeschreibung', group: 'config' },
     code: { title: 'Code-Reparatur', subtitle: 'Gezielte Analyse und Reparatur von lokalen Eidolon-Dateien', group: 'advanced' },
@@ -179,8 +179,8 @@ function setEidolonPresence(state, title, detail) {
 function describeOperatePresence(data) {
     const run = data?.run || {};
     const objective = data?.objective || {};
-    const blockers = Array.isArray(data?.blockers) ? data.blockers : [];
-    const approvals = Array.isArray(data?.approvals) ? data.approvals : [];
+    const blockers = (Array.isArray(data?.blockers) ? data.blockers : []).filter((item) => !item.status || item.status === 'open' || item.is_open);
+    const approvals = (Array.isArray(data?.approvals) ? data.approvals : []).filter((item) => !item.status || item.status === 'pending' || item.is_pending);
     const nextAction = data?.next_action || {};
     const focus = objective.title || objective.normalized_title || run.goal || 'Aktive Arbeit';
     const phase = String(run.phase || run.current_phase || '').toLowerCase();

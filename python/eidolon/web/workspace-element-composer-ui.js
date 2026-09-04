@@ -41,6 +41,14 @@
         document.getElementById('task-priority').value = String(existing?.priority || 0);
         document.getElementById('task-domain').value = existing?.element_type || 'idea';
         document.getElementById('task-status').value = existing?.status || 'idea';
+        const parentField = document.getElementById('task-parent-id');
+        if (parentField) {
+            const others = (state.currentProject?.elements || []).filter((entry) => entry.id !== existing?.id);
+            parentField.innerHTML = '<option value="">Kein übergeordnetes Element</option>' + others.map((entry) =>
+                '<option value="' + escapeHtml(entry.id) + '"' + (existing?.parent_id === entry.id ? ' selected' : '') + '>' + escapeHtml(entry.title || entry.id) + '</option>'
+            ).join('');
+            parentField.value = existing?.parent_id || '';
+        }
         document.getElementById('task-assigned-to').value = existing?.assigned_to || '';
         document.getElementById('task-due-at').value = existing?.due_at || '';
         ws.resetElementComposerPosition(existing?.position?.x ?? x ?? 0, existing?.position?.y ?? y ?? 0);
@@ -59,6 +67,7 @@
             priority: parseInt(document.getElementById('task-priority').value, 10) || 0,
             element_type: document.getElementById('task-domain').value || 'idea',
             status: document.getElementById('task-status').value || 'idea',
+            parent_id: document.getElementById('task-parent-id')?.value || null,
             assigned_to: document.getElementById('task-assigned-to').value.trim(),
             due_at: document.getElementById('task-due-at').value || '',
             position: { x: parseFloat(document.getElementById('task-x').value) || 0, y: parseFloat(document.getElementById('task-y').value) || 0 },
