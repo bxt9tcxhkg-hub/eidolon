@@ -11,6 +11,12 @@ def ok_payload(data: dict[str, Any], **extra) -> dict[str, Any]:
     return {'ok': True, 'data': data, 'error': None, **extra}
 
 
+def truth_payload(workspace_ui_service, data: dict[str, Any], *, project: dict[str, Any] | None = None, **extra) -> dict[str, Any]:
+    truth = workspace_ui_service().get_work_truth(project=project or data.get('project'))
+    merged = {**data, **truth}
+    return ok_payload(merged, **merged, **extra)
+
+
 def require_project(project, detail: str = 'Nicht gefunden'):
     if not project:
         raise HTTPException(status_code=404, detail=detail)

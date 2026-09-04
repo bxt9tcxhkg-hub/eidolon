@@ -145,9 +145,14 @@
     margin-bottom: 8px;
 }
 
-.project-slot-body {
-    font-size: 0.84rem;
-    color: var(--text);
+.chat-formation {
+    margin-top: 10px;
+}
+
+.project-slot-label .tag {
+    margin-left: 6px;
+    text-transform: none;
+    letter-spacing: 0;
 }
 
 .planning-board {

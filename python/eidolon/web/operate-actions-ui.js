@@ -5,6 +5,7 @@
         if (typeof loadChatRuntimeContext === 'function' && typeof currentChatSessionId === 'string' && currentChatSessionId) {
             await loadChatRuntimeContext(currentChatSessionId);
         }
+        if (typeof loadWorkspaces === 'function') await loadWorkspaces();
     }
 
     async function advanceOperateRun(runId) {

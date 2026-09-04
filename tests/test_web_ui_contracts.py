@@ -604,7 +604,7 @@ def test_chat_ui_persists_messages_across_reload_in_local_storage():
     assert 'class="chat-shell"' in html
     assert '.theme-toggle { display: none; }' in APP_WEB_CSS
     assert '.nav-item .icon::before' in APP_WEB_CSS
-    assert 'data-tab="chat" data-tab-target="chat"><span class="icon"></span> Unterhaltung' in html
+    assert 'data-tab="chat" data-tab-target="chat"><span class="icon"></span> Chat' in html
     assert 'data-tab="workspaces" data-tab-target="workspaces"><span class="icon"></span> Projektfläche' in html
     assert 'data-tab="dashboard" data-tab-target="dashboard"><span class="icon"></span> Systemstatus' in html
     assert 'data-tab="mesh" data-tab-target="mesh"><span class="icon"></span> Geräte' in html
@@ -962,6 +962,8 @@ def test_project_planning_surface_is_generic_and_editable():
     assert "/projects/' + state.currentProjectId + '/elements/reorder'" in js
     assert "status: 'archived'" in js
     assert 'id="ws-project-slots"' in html
+    assert 'overview.work_kernel' in js
+    assert 'generic_slots' in js
     assert 'data-slot="context"' in html
     assert 'data-slot="next"' in html
     assert 'data-slot="inbox"' in html
@@ -972,6 +974,10 @@ def test_project_planning_surface_is_generic_and_editable():
     assert 'id="task-parent-id"' in html
     assert 'Mehr Flächen' in html
     assert 'id="chat-operate-actions"' in html
+    assert 'id="chat-formation"' in html
+    assert 'Mehr Flächen' in html
+    assert 'nav-group-title">Betrieb</div>' in html
+    assert 'nav-group-title">Technik</div>' in html
     assert 'Slots, keine Domänen-Pakete' in html
     assert 'keine fest verdrahteten Training-, Instagram- oder Reise-Flächen' in html
     assert 'data-tab="training"' not in html
@@ -1060,6 +1066,9 @@ def test_chat_is_operate_execute_door():
     assert 'id="chat-operate-actions"' in html
     assert 'id="chat-decision-summary"' in html
     assert 'function renderChatOperateDoor' in js
+    assert 'function renderChatFormation' in js
+    assert "applyChatFormation" in js
+    assert "'/workspaces/formation'" in js
     assert "resolveOperateApproval" in js
     assert "advanceOperateRun" in js
     assert "resolveOperateBlocker" in js

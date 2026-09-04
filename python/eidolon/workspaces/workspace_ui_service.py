@@ -16,6 +16,8 @@ from eidolon.workspaces.workspace_payloads import (
     workspace_detail_payload,
     unified_work_context,
 )
+from eidolon.workspaces.project_formation_apply import apply_workspace_formation
+from eidolon.workspaces.work_truth import work_truth_fields
 
 
 class WorkspaceUIService:
@@ -43,6 +45,12 @@ class WorkspaceUIService:
     def get_overview(self) -> dict:
         data = self._merged_workspace_payload()
         return overview_payload(self._registry, self._operate_service, data)
+
+    def get_work_truth(self, *, project: dict | None = None) -> dict:
+        return work_truth_fields(self.get_overview(), project=project)
+
+    def apply_formation(self, workspace_id: str, to_state: str, *, confirmed: bool = False, reason: str = '') -> dict:
+        return apply_workspace_formation(self, workspace_id, to_state, confirmed=confirmed, reason=reason)
 
     def get_workspace(self, workspace_id: str) -> dict | None:
         return workspace_detail_payload(self._project_service, self._registry, self._operate_service, workspace_id)

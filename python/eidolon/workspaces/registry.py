@@ -48,13 +48,14 @@ class WorkspaceRegistry:
         return build_context_model(workspaces)
 
     def set_workspace_state(self, workspace_id: str, state: str) -> dict[str, Any]:
-        from eidolon.workspaces.contracts import map_workspace_state_to_product_state
+        from eidolon.workspaces.project_formation import map_workspace_state_to_product_state
         from datetime import datetime, timezone
         data = self.snapshot()
         for workspace in data.get('workspaces', []):
             if workspace.get('workspace_id') == workspace_id:
+                metadata = dict(workspace.get('metadata') or {})
                 workspace['state'] = state
-                workspace['product_state'] = map_workspace_state_to_product_state(state, workspace.get('metadata') or {})
+                workspace['product_state'] = map_workspace_state_to_product_state(state, metadata)
                 workspace['last_updated'] = datetime.now(timezone.utc).isoformat()
                 self._save(data)
                 return workspace

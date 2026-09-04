@@ -14,7 +14,17 @@ class ProjectService:
         self._store = ProjectStore(self._root)
 
     def create_project(self, title: str, description: str = '', domain: str = '') -> Project:
-        project = Project(id=str(uuid.uuid4())[:12], title=title, description=description, domain=domain)
+        project = Project(
+            id=str(uuid.uuid4())[:12],
+            title=title,
+            description=description,
+            domain=domain,
+            metadata={
+                'formation_confirmed': True,
+                'formation_source': 'user_created_project',
+                'product_state': 'active_project',
+            },
+        )
         self._store.save_project(project)
         return project
 

@@ -331,7 +331,7 @@ The direction is materially stronger than before:
 The system is **not yet fully unified** because:
 - documentation had drift and needed consolidation
 - runtime-state truth is now centralized externally, but some secondary/historical docs still refer to old repo-local state paths
-- chat/operate/workspace truth is improved but still sits across multiple layers
+- Chat/Operate/Projektfläche now share `work_kernel` + Operate snapshot on read and on project mutations; board-element blockers remain a second persisted model next to Operate blockers
 - some structural concentration remains, but the latest QUIC, healing, backups, browser-control, settings-schema, mesh-service, and operate-record hot spots were split into narrower modules
 - several runtime values were broader than the typed operate contracts admitted (subagent function families and evidence kinds), so the contracts needed truth hardening to match live behavior
 - the former workspace/domain/runtime/mesh hot spots were split into smaller files without changing the live UI/API contracts
@@ -340,10 +340,10 @@ The system is **not yet fully unified** because:
 ## Fit by area
 - Product identity: **7/10**
 - Core workflow: **7/10**
-- Project formation: **6/10**
+- Project formation: **8/10**
 - Autonomy contract: **6/10**
 - Bot organization: **8/10**
-- UI/workspace architecture: **6/10**
+- UI/workspace architecture: **7/10**
 - Truth/verification hygiene: **7/10**
 - Maintainability: **4/10**
 
@@ -383,12 +383,17 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 ### Current evidence
 - workspace payloads expose `product_state` such as `project_candidate` and `active_project`
 - chat runtime reacts differently to active project, candidate project, and no live context
+- `python/eidolon/workspaces/project_formation.py` is the public transition contract (`chat_topic` → `project_candidate` → `active_project`)
+- `POST /workspaces/formation` persists the transition; `project_candidate` → `active_project` requires `confirmed=true` and may create a real project
+- Chat shows the pending transition (`#chat-formation`) and calls the same formation API
+- heuristic mapping no longer silent-promotes runtime `active` to `active_project`
 
 ### Remaining mismatch
-- project formation is still partly heuristic and not yet one explicit domain module with a narrow public contract
+- topic detection is still heuristic for proposing `chat_topic` vs `project_candidate`
+- Operate `context_kind` is updated on confirmed transitions, but not every historical session is backfilled
 
 ### Verdict
-**Useful and real, but not yet fully canonicalized.**
+**Canonical transition contract is now real and tested; proposal heuristics remain for the first hop.**
 
 ## Area 4 — Autonomy and approval
 ### Current evidence
@@ -418,10 +423,11 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 
 ### Remaining mismatch
 - the root component stylesheet is now segmented, but the goals component slice remains comparatively large
-- product entry and project surfaces are more coherent, but still not yet a compact unified interaction grammar everywhere
+- primary nav is Chat / Projektfläche / Arbeit; utilities are grouped under Betrieb and Technik
+- generic slots are kernel-fed and denser, still not a full adaptive composition engine
 
 ### Verdict
-**Semantically improved, structural pressure moved upward into larger UI/Core surfaces instead of the old runtime support hotspots.**
+**Semantically improved; interaction grammar is thinner on the primary surfaces, with remaining density in utility and goals CSS.**
 
 ## Area 7 — Maintainability
 ### Current evidence

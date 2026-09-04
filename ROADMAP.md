@@ -26,7 +26,9 @@
 - Projektfläche öffnet in der Planungsansicht (Zusammengehörig / Geplant / In Arbeit / Fertig / Archiv) mit Umbenennen, Status, Gruppe, Reihenfolge, Ablegen und Streichen gegen echte Projekt-APIs
 - Projektstatus planned/in_progress/done/archived ist über `PUT /projects/{id}` editierbar
 - Chat zeigt ausstehende Freigaben, offene Blocker und den nächsten Schritt und löst dieselben Operate-APIs aus wie die Arbeitsfläche
-- Generisches Karten-/Slot-Gerüst ohne Domänen-Pakete
+- Chat, Arbeit und Projektfläche teilen denselben Operate-/Kernel-Snapshot für Freigaben, Blocker und Next Action; Projektmutationen schreiben nicht mehr in einen leeren parallelen `operate`-Pfad
+- Projektbildung ist ein expliziter Vertrag (`POST /workspaces/formation`): `chat_topic` → `project_candidate` sichtbar, `project_candidate` → `active_project` nur mit Nutzerbestätigung
+- Generisches Karten-/Slot-Gerüst ohne Domänen-Pakete, Slots werden situationsabhängig aus Kernel/Workspace verdichtet
 - Python FastAPI ist dokumentiert und durch Port-Wächter als einzige live Runtime gegenüber Rust abgegrenzt
 - Ein kleines zustandsfähiges Eidolon-Signature-Object transportiert reale Arbeitszustände statt bloßes Dekor
 - Findings- und Root-History-Dokumentation haben jetzt explizite Supersession-/Archiv-Readmes
@@ -40,6 +42,8 @@
 - große UI-/JS-Hotspots (`python/eidolon/web/index.html`, `python/eidolon/web/app-shell.js`) weiter in stabile Produktmodule schneiden
 - aktive Doku weiter synchron halten, wenn neue Runtime- oder UI-Schnitte dazukommen
 - verbleibende Mesh-/Core-Hotspots nur mit Live-Verifikation weiter reduzieren
+- **offen:** Workspace-Board-Blocker und Operate-`BlockingIssueRecord` werden in denselben Slots gezeigt, sind aber noch zwei persistierte Modelle; vollständige Write-Vereinigung der Element-Blocker in den Operate-Store ist nicht Teil dieses Schnitts
+- **offen:** Chat-Landing liest denselben Overview-Snapshot wie Arbeit, erzeugt ihn aber noch über `/api/v1/operate/overview` plus `/chat/context` statt eines einzigen HTTP-Calls
 
 ### P1 — Runtime und Oberfläche weiter verdichten
 - `python/eidolon/core/mesh_service.py`, `python/eidolon/core/auth_entities.py`, `python/eidolon/user/topic_attention.py` und andere verbleibende Domänen-Hotspots weiter entlang echter Zustandsgrenzen zerlegen

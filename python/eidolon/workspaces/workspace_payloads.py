@@ -6,6 +6,8 @@ from eidolon.workspaces.workspace_payload_assistance import merge_proactive_assi
 from eidolon.workspaces.workspace_payload_context import build_workspace_work_context, sync_workspace_operate
 from eidolon.workspaces.workspace_payload_records import project_backed_workspaces, project_to_workspace_record
 from eidolon.workspaces.workspace_payload_views import overview_user_payload
+from eidolon.workspaces.work_truth import describe_formation
+from eidolon.workspaces.generic_slots import build_generic_slots
 
 
 def merged_workspace_payload(project_service, registry) -> dict[str, Any]:
@@ -32,6 +34,7 @@ def overview_payload(registry, operate_service, data: dict[str, Any]) -> dict[st
     suggestions = data.get('proactive_assistance', {})
     user = registry.user_model.get()
     suggestion_list = suggestions.get('suggestions', []) if isinstance(suggestions, dict) else []
+    work_kernel = build_workspace_work_context(registry, operate_service, data, source='workspace', operate_snapshot=operate_snapshot)
     return {
         'user': overview_user_payload(user),
         'topics': data.get('topics', []),
@@ -41,7 +44,9 @@ def overview_payload(registry, operate_service, data: dict[str, Any]) -> dict[st
         'feature_enabled': registry.feature_enabled(),
         'total': len(workspaces),
         'operate': operate_snapshot,
-        'work_kernel': build_workspace_work_context(registry, operate_service, data, source='workspace', operate_snapshot=operate_snapshot),
+        'work_kernel': work_kernel,
+        'formation': work_kernel.get('formation') or describe_formation(data, operate_snapshot),
+        'generic_slots': build_generic_slots(work_kernel=work_kernel, operate=operate_snapshot),
     }
 
 
@@ -54,5 +59,7 @@ def workspace_detail_payload(project_service, registry, operate_service, workspa
         operate_snapshot = sync_workspace_operate(operate_service, {'workspaces': [payload]})
         payload['operate'] = operate_snapshot
         payload['work_kernel'] = build_workspace_work_context(registry, operate_service, data, source='workspace_detail', operate_snapshot=operate_snapshot)
+        payload['formation'] = payload['work_kernel'].get('formation') or describe_formation(data, operate_snapshot)
+        payload['generic_slots'] = build_generic_slots(work_kernel=payload['work_kernel'], operate=operate_snapshot)
         return payload
     return None

@@ -46,6 +46,7 @@ function renderChatRuntimeContext(runtimeContext) {
     }
     if (typeof loadChatLandingSummary === 'function') loadChatLandingSummary();
     renderChatOperateActionsFromContext(runtimeContext);
+    renderChatFormation((runtimeContext && runtimeContext.formation) || null);
 }
 
 function operateActionButton(label, action, args, primary) {
@@ -120,6 +121,45 @@ function renderChatOperateActionsFromContext(runtimeContext) {
     });
 }
 
+function renderChatFormation(formation) {
+    const el = document.getElementById('chat-formation');
+    if (!el) return;
+    const data = formation || {};
+    if (!data.visible || !data.workspace_id || !data.to_state) {
+        el.innerHTML = '<div class="empty">Keine sichtbare Projektbildung.</div>';
+        return;
+    }
+    const label = data.label || 'Aktueller Kontext';
+    const confirmNeeded = Boolean(data.requires_confirmation);
+    const copy = confirmNeeded
+        ? ('"' + label + '" ist ein Projektkandidat. Erst mit deiner Bestätigung wird daraus ein dauerhaftes Projekt — kein stiller Projekt-Bot.')
+        : ('"' + label + '" kann vom Gesprächsthema zum Projektkandidaten werden. Der Übergang bleibt sichtbar.');
+    const args = [data.workspace_id, data.to_state, confirmNeeded];
+    el.innerHTML = '<div class="chat-operate-item">'
+        + '<div class="summary-headline">' + escapeHtml(data.action_label || 'Projektbildung') + '</div>'
+        + '<div class="summary-copy">' + escapeHtml(copy) + '</div>'
+        + '<div class="summary-meta"><span class="summary-chip">' + escapeHtml(data.from_state || data.current_state || '') + '</span><span class="summary-chip">→ ' + escapeHtml(data.to_state) + '</span></div>'
+        + (data.action_enabled ? '<div class="chat-operate-buttons">' + operateActionButton(data.action_label || 'Bestätigen', 'applyChatFormation', args, true) + '</div>' : '')
+        + '</div>';
+}
+
+async function applyChatFormation(workspaceId, toState, confirmed) {
+    const response = await api('POST', '/workspaces/formation', {
+        workspace_id: workspaceId,
+        to_state: toState,
+        confirmed: Boolean(confirmed),
+        reason: confirmed ? 'user_confirmed_promotion' : 'visible_proactive_formation',
+    });
+    if (response?.ok === false) {
+        showNotice(response.error || 'Projektbildung fehlgeschlagen', 'error');
+        return;
+    }
+    showNotice(confirmed ? 'Projekt übernommen' : 'Kandidat sichtbar gesetzt', 'success');
+    if (typeof refreshOperateSurfaces === 'function') await refreshOperateSurfaces();
+    else if (typeof loadChatLandingSummary === 'function') await loadChatLandingSummary();
+    if (typeof loadWorkspaces === 'function') await loadWorkspaces();
+}
+
 function renderChatLandingRecentSessions() {
     const el = document.getElementById('chat-recent-summary');
     if (!el) return;
@@ -148,11 +188,13 @@ async function loadChatLandingSummary() {
     try {
         const overview = await api('GET', '/api/v1/operate/overview');
         const data = overview?.data || {};
-        const run = data.run || null;
-        const objective = data.objective || null;
-        const blockers = openOperateBlockers(data.blockers);
-        const approvals = pendingOperateApprovals(data.approvals);
-        const nextAction = data.next_action || {};
+        const kernel = data.work_kernel || lastChatRuntimeContext || {};
+        const operateCtx = kernel.operate_context || {};
+        const run = data.run || (operateCtx.run_id ? { id: operateCtx.run_id, state: operateCtx.run_state } : null);
+        const objective = data.objective || (operateCtx.objective_title ? { title: operateCtx.objective_title } : null);
+        const blockers = openOperateBlockers(operateCtx.open_blockers || data.blockers);
+        const approvals = pendingOperateApprovals(operateCtx.pending_approvals || data.approvals);
+        const nextAction = operateCtx.next_action || data.next_action || {};
         const history = Array.isArray(data.history) ? data.history : [];
         const presence = typeof describeOperatePresence === 'function'
             ? describeOperatePresence(data)
@@ -184,6 +226,7 @@ async function loadChatLandingSummary() {
             pending_approvals: approvals,
             open_blockers: blockers,
         });
+        renderChatFormation(kernel.formation || data.formation);
         if (!blockers.length && !approvals.length && !(run && run.id && nextAction.kind === 'next_step' && nextAction.action_enabled)) {
             decisionEl.innerHTML = '<div class="empty">Keine offenen Freigaben oder Blocker. Du kannst direkt weiterarbeiten.</div>';
         }
@@ -200,6 +243,9 @@ async function loadChatLandingSummary() {
     }
 }
 window.loadChatLandingSummary = loadChatLandingSummary;
+window.renderChatFormation = renderChatFormation;
+window.applyChatFormation = applyChatFormation;
+
 async function loadChatRuntimeContext(sessionId) {
     if (!sessionId) {
         renderChatRuntimeContext(null);
