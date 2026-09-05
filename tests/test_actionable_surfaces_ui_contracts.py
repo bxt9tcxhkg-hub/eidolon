@@ -136,6 +136,7 @@ def test_action_motion_confirms_real_mutations_only():
     assert "confirmAction(moved || column, 'moved')" in views_js
     assert "confirmAction(card || document.getElementById('ws-elements-view')" in views_js
     assert 'plan-card-notes' in views_js
+    assert "textarea class=\"plan-card-title\"" in views_js
     assert '.plan-card-notes' in css
     assert "confirmAction(document.getElementById('operate-approvals')" in actions_js
     assert "confirmAction(document.getElementById('operate-next-action')" in actions_js
