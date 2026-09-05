@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
+from eidolon.core.llm_backend import configure_from_settings
+from eidolon.core.settings_apply import apply_user_settings
 from eidolon.operate_api_helpers import require_user_request
 from eidolon.routes.api_response import api_v1_error, api_v1_ok
 
 
-def register_operate_action_routes(app: FastAPI, *, runtime, get_operate_service, sync_operate_with_workspace_payload, build_operate_snapshot, workspace_ui_service) -> None:
+def register_operate_action_routes(app: FastAPI, *, runtime, get_operate_service, sync_operate_with_workspace_payload, build_operate_snapshot, workspace_ui_service, get_settings_store=None, get_llm_backend=None) -> None:
     @app.post('/api/v1/objectives')
     async def api_v1_create_objective(request: dict):
         service = get_operate_service()
@@ -93,3 +95,26 @@ def register_operate_action_routes(app: FastAPI, *, runtime, get_operate_service
         except ValueError as exc:
             api_v1_error('invalid_interrupt', str(exc), status_code=400)
         return api_v1_ok({'run': updated_run.to_dict()})
+
+    @app.post('/api/v1/operate/settings/apply')
+    async def api_v1_operate_apply_settings(request: dict):
+        if get_settings_store is None:
+            api_v1_error('settings_unavailable', 'Settings-Store ist nicht verdrahtet', status_code=503)
+        payload = {
+            'user_requested': bool(request.get('user_requested')),
+            'area': request.get('area'),
+            'values': request.get('values') or {},
+            'reason': request.get('reason') or request.get('user_request') or 'Ausdrücklicher Nutzerwunsch über Operate',
+            'error': request.get('error'),
+        }
+
+        def after_llm() -> None:
+            if get_llm_backend is None:
+                return
+            configure_from_settings(get_settings_store().get_area('llm'), get_llm_backend())
+
+        result = apply_user_settings(get_settings_store(), payload, after_llm=after_llm)
+        if not result.get('ok'):
+            api_v1_error('settings_apply_rejected', result.get('error') or 'Einstellungen nicht übernommen', status_code=400)
+        public = {key: value for key, value in result.items() if key != 'settings' or isinstance(value, dict)}
+        return api_v1_ok(public)

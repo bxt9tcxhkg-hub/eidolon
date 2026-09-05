@@ -38,7 +38,7 @@ Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gem
 - Integrationspunkt für API, Produktlogik und UI-Auslieferung
 - **Einzige live Runtime:** Python FastAPI auf `EIDOLON_HTTP_PORT` (Standard `8002`)
 - Runtime-Service-Erzeugung läuft über kleine Contracts-/Bootstrap-/Auth-Module statt über eine dichte Einzeldatei
-- Live geprüft: 148 Routes im aktuellen App-Objekt
+- Live geprüft: 162 Routes im aktuellen App-Objekt
 
 ### 5b. Rust-Quarantäne
 - `crates/` bleiben im Repo (CLI gegen FastAPI, experimentelle Runtime, Bibliotheken)
@@ -65,6 +65,15 @@ Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gem
 - Arbeit im Idle: eine Karte mit Chat-Start, optional Übernahme aus der Projektfläche, kurzer Hinweis auf Freigaben
 - Arbeit mit Lauf: Ziel, nächster Schritt, Freigaben/Blocker nur wenn vorhanden; Rest in zugeklappten Details
 - Motion bestätigt nur echte Mutationen (Verschieben, Status, Freigabe, neues Projekt) und achtet `prefers-reduced-motion` sowie Settings `ui.animations`
+
+### 7. LLM-Provider-Registry
+- `python/eidolon/core/llm_provider_catalog.py` beschreibt Ollama, den OpenAI-kompatiblen HTTP-Stecker und Codex-OAuth
+- Chat/`complete()` geht über `llm_fallback.py`: gewählter Anbieter zuerst, danach die eindeutige `fallback_chain`
+- Die Ersatzkette ist in den Settings sortierbar und liegt in Settings/Registry; leer oder ungültig wird ehrlich abgelehnt, nicht still korrigiert
+- Chat (Execute-Tür) und Operate setzen Settings nur auf ausdrücklichen Wunsch: `POST /settings/apply` und `POST /api/v1/operate/settings/apply`; Secrets bleiben draußen
+- `/llm/connection`, Chat-Kontext und „Welche Fehler…“ zeigen erkannte LLM-/Healing-/Health-Probleme ohne Schlüsselwerte
+- OpenAI-kompatibel ist `base_url` + API-Schlüssel + Modell; Presets (Groq, OpenRouter, …) setzen nur Defaults
+- OAuth wird nur für `openai_oauth` angeboten; `/llm/connection` und Settings zeigen Status ohne Schlüsselwerte
 
 ## Aktuelle Hauptschulden
 - `python/agent_server.py` ist weiter ein großer Integrationspunkt

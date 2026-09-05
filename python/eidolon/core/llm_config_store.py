@@ -9,6 +9,10 @@ from eidolon.core.config import DATA_DIR, DEFAULT_LLM_MODEL, OLLAMA_URL
 
 LLM_CONFIG_FILE = Path(DATA_DIR) / 'llm_config.json'
 OPENAI_KEY_FILE = Path(DATA_DIR) / 'secrets' / 'openai_api_key'
+LLM_CONFIG_KEYS = {
+    'model', 'provider', 'ollama_url', 'base_url', 'preset',
+    'auth_method', 'fallback_chain', 'temperature', 'max_tokens',
+}
 OLLAMA_MODELS = ['llama3.1:8b', 'llama3.1:70b', 'llama3:8b', 'mistral:7b', 'mixtral:8x7b', 'codellama:13b', 'codellama:34b', 'qwen2.5:7b', 'qwen2.5:14b', 'qwen2.5:32b', 'phi3:mini', 'phi3:medium', 'gemma2:9b', 'gemma2:27b']
 OPENAI_MODELS = ['gpt-5.5', 'gpt-5', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4o', 'gpt-4o-mini', 'o1', 'o1-mini', 'o3-mini']
 SYSTEM_PROMPT = (
@@ -21,20 +25,34 @@ SYSTEM_PROMPT = (
 )
 
 
+def default_llm_config() -> dict[str, Any]:
+    return {
+        'model': DEFAULT_LLM_MODEL,
+        'provider': 'ollama',
+        'ollama_url': OLLAMA_URL,
+        'base_url': '',
+        'preset': 'custom',
+        'auth_method': 'none',
+        'fallback_chain': ['ollama', 'openai'],
+        'temperature': 0.7,
+        'max_tokens': 4096,
+    }
+
+
 def load_llm_config() -> dict[str, Any]:
-    default = {'model': DEFAULT_LLM_MODEL, 'provider': 'ollama', 'ollama_url': OLLAMA_URL}
+    default = default_llm_config()
     if not LLM_CONFIG_FILE.exists():
         return default
     try:
         data = json.loads(LLM_CONFIG_FILE.read_text(encoding='utf-8'))
-        return {**default, **data}
+        return {**default, **{key: value for key, value in data.items() if key in LLM_CONFIG_KEYS}}
     except Exception:
         return default
 
 
 def save_llm_config(config: dict[str, Any]) -> dict[str, Any]:
     current = load_llm_config()
-    current.update({key: value for key, value in config.items() if key in {'model', 'provider', 'ollama_url'}})
+    current.update({key: value for key, value in config.items() if key in LLM_CONFIG_KEYS and value is not None})
     LLM_CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
     LLM_CONFIG_FILE.write_text(json.dumps(current, ensure_ascii=False, indent=2), encoding='utf-8')
     return current

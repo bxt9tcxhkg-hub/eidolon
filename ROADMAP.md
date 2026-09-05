@@ -43,6 +43,8 @@
 - Runtime-State wurde aus dem Repo nach `%LOCALAPPDATA%/Eidolon/state/` ausgelagert
 - `python -m pytest -q` → Formation-/Board-Karten-/Freigabe- und Altverträge; vorbestehende Env-Fehler (kein Live-Ollama, kein `aioquic`, Codex-CLI/`oauth_supported` false) bleiben außerhalb dieses Schnitts
 - Bestätigtes Vorhaben füllt das Board mit unterscheidbaren, textgebundenen Karten (Fakten/Bedingungen in Notizen); erneutes Seed verdoppelt nicht
+- LLM-Anbieter liegen in einer Registry: Ollama, OpenAI-kompatibel (`base_url` + Key + Modell, optionale Presets wie Groq) und Codex-OAuth; OAuth wird nur für den Codex-Pfad gezeigt; `complete()` folgt der Ersatzkette (gewählt zuerst, dann `fallback_chain`); Schlüssel erscheinen nicht in Settings-/Connection-/Chat-Antworten
+- Ersatzkette ist in den Settings sortierbar und persistent; leer/ungültig wird ehrlich abgelehnt. Chat und Operate wenden Settings nur auf ausdrücklichen Wunsch an (`POST /settings/apply`, `POST /api/v1/operate/settings/apply`); Schema lehnt ungültige Werte ab, Secrets bleiben draußen. Erkannte `/health`-, LLM- und SelfHealing-Probleme erscheinen im Connection-Status und im Chat, ohne Placebo. Kein neues Self-Repair-OS in diesem Schnitt.
 
 ## Offene Prioritäten
 
@@ -61,6 +63,7 @@
 ### P1 — Agentisches Produktmodell vertiefen
 - Chat-Operate-Tür um Interrupts und feinere Next-Action-Gründe weiter verdichten
 - direkte Bearbeitung der Arbeitswahrheit weiter an denselben Operate-/Workspace-Schreibpfad binden
+- **Folge-PR, nicht dieser Schnitt:** tiefere Self-Repair-Autonomie (Code-Reparatur-Loops, Recovery über den vorhandenen `SelfHealingService` hinaus). Secrets und destruktive Live-Eingriffe bleiben hinter der Freigabe-Tür.
 
 ## Verifizierungsbasis
 - `python -m pytest -q`

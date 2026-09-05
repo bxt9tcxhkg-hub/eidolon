@@ -330,12 +330,27 @@ def test_settings_ui_renders_source_badges():
 
 def test_openai_connection_supports_oauth_via_codex_login():
     js = APP_WEB_JS
-    assert 'OpenAI (Login)' in js
+    assert 'OpenAI (ChatGPT-Login)' in js
+    assert 'OpenAI-kompatibel (API-Key)' in js
     assert 'Ollama lokal' in js
+    assert 'OAuth gibt es für diesen Anbieter nicht' in js
+    assert 'function moveFallbackProvider' in js
+    assert 'Ersatzkette ist leer' in js
+    assert 'Anbieter anhängen' in js
+    assert 'Erkannte Probleme' in js
+    assert "api('POST', '/settings/' + area" in js
     client = TestClient(agent_server.app)
     status = client.get('/llm/connection').json()
-    assert status['openai']['oauth_supported'] is True
+    providers = {item['id']: item for item in status['providers']}
+    assert providers['openai_oauth']['oauth_supported'] is True
+    assert providers['openai']['oauth_supported'] is False
+    assert providers['ollama']['oauth_supported'] is False
     assert status['openai']['auth_method'] == 'chatgpt_login'
+    assert 'oauth_supported' in status['openai']
+    if status['openai']['source'] == 'missing':
+        assert status['openai']['oauth_supported'] is False
+    else:
+        assert status['openai']['oauth_supported'] is True
 
 
 def test_llm_models_endpoint_returns_both_providers():
@@ -356,8 +371,10 @@ def test_integrations_status_and_auth_routes_are_truthful_compatibility_paths():
     assert integrations.status_code == 200
     payload = integrations.json()
     assert payload['ok'] is True
-    assert payload['integrations']['openai']['oauth_supported'] is True
     assert payload['integrations']['openai']['auth_method'] == 'chatgpt_login'
+    assert 'oauth_supported' in payload['integrations']['openai']
+    assert payload['integrations']['openai_compat']['oauth_supported'] is False
+    assert payload['integrations']['openai_compat']['auth_method'] == 'api_key'
     assert payload['integrations']['openai']['configured'] == llm['openai']['configured']
     assert payload['integrations']['openai']['current_provider'] == (llm['provider'] in ('openai', 'openai_oauth'))
 
@@ -923,6 +940,8 @@ def test_chat_ui_renders_live_runtime_context_contract():
     assert 'id="chat-context-state"' in html
     assert 'id="chat-intent-mode"' in html
     assert 'id="chat-next-step"' in html
+    assert 'id="chat-runtime-problems"' in html
+    assert 'function renderChatRuntimeProblems' in js
     assert "async function loadChatRuntimeContext(sessionId)" in js
     assert "'/chat/context?session_id=' + encodeURIComponent(sessionId)" in js
     assert 'renderChatRuntimeContext(r.runtime_context);' in js
@@ -1087,6 +1106,7 @@ def test_chat_is_operate_execute_door():
     assert "resolveOperateApproval" in js
     assert "advanceOperateRun" in js
     assert "resolveOperateBlocker" in js
+    assert '/api/v1/operate/settings/apply' in (ROOT / 'python' / 'eidolon' / 'operate_api_action_routes.py').read_text(encoding='utf-8')
     assert "'/api/v1/runs/' + runId + '/approval/'" in operate_js
     assert "'/api/v1/runs/' + runId + '/advance'" in operate_js
     assert 'refreshOperateSurfaces' in operate_js

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from eidolon.core.llm_provider_catalog import normalize_llm_settings
 from eidolon.core.settings_schema import DEFAULT_SETTINGS
 from eidolon.core.settings_validation_support import (
     clone_default_settings,
@@ -30,6 +31,11 @@ def validated_area(settings: dict[str, dict[str, Any]], area: str, values: dict[
             continue
         merged[key] = value
         updated.append(key)
+    if area == 'llm':
+        merged, changed = normalize_llm_settings(merged)
+        for key in changed:
+            if key not in updated:
+                updated.append(key)
     for key in updated:
         error = validate_value(area, key, merged[key], merged)
         if error:

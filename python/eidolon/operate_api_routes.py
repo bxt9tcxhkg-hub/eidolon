@@ -25,6 +25,7 @@ def register_operate_api_routes(
     goal_categories,
     autonomy_cycle_callback=None,
     llm_backend=None,
+    get_settings_store=None,
 ) -> None:
     runtime = OperateRouteRuntime(
         get_operate_service=get_operate_service,
@@ -39,6 +40,6 @@ def register_operate_api_routes(
     register_operate_overview_routes(app, runtime=runtime, get_operate_service=get_operate_service, workspace_ui_service=workspace_ui_service)
     register_operate_self_reflection_routes(app, runtime=runtime, get_operate_service=get_operate_service, workspace_ui_service=workspace_ui_service)
     register_operate_goal_routes(app, runtime=runtime, autonomy_engine=autonomy_engine, goal_deriver=goal_deriver, workspace_ui_service=workspace_ui_service, health_callback=health_callback, autonomy_cycle_callback=autonomy_cycle_callback)
-    register_operate_action_routes(app, runtime=runtime, get_operate_service=get_operate_service, sync_operate_with_workspace_payload=sync_operate_with_workspace_payload, build_operate_snapshot=build_operate_snapshot, workspace_ui_service=workspace_ui_service)
+    register_operate_action_routes(app, runtime=runtime, get_operate_service=get_operate_service, sync_operate_with_workspace_payload=sync_operate_with_workspace_payload, build_operate_snapshot=build_operate_snapshot, workspace_ui_service=workspace_ui_service, get_settings_store=get_settings_store, get_llm_backend=(lambda: llm_backend) if llm_backend is not None else None)
     if llm_backend is not None:
         register_self_reflection_chat_route(app, get_operate_service=get_operate_service, get_llm_backend=lambda: llm_backend)

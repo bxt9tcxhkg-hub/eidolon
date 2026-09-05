@@ -16,10 +16,20 @@ LIST_VALUE_RULES = {
 }
 
 
-def _validate_ollama_url(value: Any) -> str | None:
+def _validate_http_url(value: Any, field: str, *, allow_empty: bool = False) -> str | None:
+    if allow_empty and (value is None or value == ''):
+        return None
     if not isinstance(value, str) or not value.startswith(('http://', 'https://')):
-        return 'llm.ollama_url muss mit http:// oder https:// beginnen'
+        return f'{field} muss mit http:// oder https:// beginnen'
     return None
+
+
+def _validate_ollama_url(value: Any) -> str | None:
+    return _validate_http_url(value, 'llm.ollama_url')
+
+
+def _validate_base_url(value: Any) -> str | None:
+    return _validate_http_url(value, 'llm.base_url', allow_empty=True)
 
 
 def _validate_fallback_chain(value: Any) -> str | None:
@@ -62,6 +72,7 @@ def _validate_network_ports(merged_area: dict[str, Any]) -> str | None:
 
 SPECIAL_VALIDATORS = {
     ('llm', 'ollama_url'): _validate_ollama_url,
+    ('llm', 'base_url'): _validate_base_url,
     ('llm', 'fallback_chain'): _validate_fallback_chain,
     ('skills', 'skill_priorities'): _validate_skill_priorities,
 }

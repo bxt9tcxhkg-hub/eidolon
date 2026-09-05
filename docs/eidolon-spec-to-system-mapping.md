@@ -8,7 +8,7 @@
 - `python/eidolon/runtime_bootstrap.py` → 102 lines
 - `python/eidolon/runtime_service_factory.py` → 11 lines
 - `python/eidolon/runtime_service_contracts.py` → 36 lines
-- `python/eidolon/runtime_service_bootstrap.py` → 61 lines
+- `python/eidolon/runtime_service_bootstrap.py` → 54 lines
 - `python/eidolon/runtime_service_auth.py` → 23 lines
 - `python/eidolon/runtime_lifecycle.py` → 80 lines
 - `python/eidolon/runtime_route_registry.py` → 73 lines
@@ -17,9 +17,10 @@
 - `python/eidolon/runtime_health_system.py` → 35 lines
 - `python/eidolon/identity_mesh_routes.py` → 94 lines
 - `python/eidolon/backup_routes.py` → 65 lines
-- `python/eidolon/settings_routes.py` → 55 lines
+- `python/eidolon/settings_routes.py` → 77 lines
 - `python/eidolon/healing_skills_routes.py` → 99 lines
-- `python/eidolon/system_status_routes.py` → 92 lines
+- `python/eidolon/system_status_routes.py` → 69 lines
+- `python/eidolon/llm_routes.py` → 98 lines
 - `python/eidolon/chat_and_code_routes.py` → 34 lines
 - `python/eidolon/chat_route_support.py` → 13 lines
 - `python/eidolon/chat_session_routes.py` → 35 lines
@@ -89,8 +90,13 @@
 - `python/eidolon/core/cert_status.py` → 51 lines
 - `python/eidolon/core/cert_generation.py` → 80 lines
 - `python/eidolon/core/cert_verify.py` → 28 lines
-- `python/eidolon/core/llm_backend.py` → 46 lines
-- `python/eidolon/core/llm_config_store.py` → 62 lines
+- `python/eidolon/core/llm_backend.py` → 57 lines
+- `python/eidolon/core/llm_config_store.py` → 78 lines
+- `python/eidolon/core/llm_provider_catalog.py` → 123 lines
+- `python/eidolon/core/llm_secrets.py` → 65 lines
+- `python/eidolon/core/llm_openai_compat.py` → 60 lines
+- `python/eidolon/core/llm_fallback.py` → 39 lines
+- `python/eidolon/core/llm_connection.py` → 60 lines
 - `python/eidolon/core/llm_provider_status.py` → 46 lines
 - `python/eidolon/core/llm_codex.py` → 42 lines
 - `python/eidolon/core/llm_ollama.py` → 20 lines
@@ -101,13 +107,13 @@
 - `python/eidolon/core/settings_mutations.py` → 38 lines
 - `python/eidolon/core/settings_schema.py` → 9 lines
 - `python/eidolon/core/settings_schema_network.py` → 15 lines
-- `python/eidolon/core/settings_schema_llm.py` → 18 lines
+- `python/eidolon/core/settings_schema_llm.py` → 40 lines
 - `python/eidolon/core/settings_schema_autonomy.py` → 15 lines
 - `python/eidolon/core/settings_schema_mesh.py` → 21 lines
 - `python/eidolon/core/settings_schema_surfaces.py` → 18 lines
 - `python/eidolon/core/settings_schema_builders.py` → 27 lines
-- `python/eidolon/core/settings_validation.py` → 45 lines
-- `python/eidolon/core/settings_validation_support.py` → 100 lines
+- `python/eidolon/core/settings_validation.py` → 51 lines
+- `python/eidolon/core/settings_validation_support.py` → 155 lines
 - `python/eidolon/core/capabilities.py` → 16 lines
 - `python/eidolon/core/capability_checks.py` → 54 lines
 - `python/eidolon/core/capability_models.py` → 61 lines
@@ -303,7 +309,7 @@
 - `python/eidolon/web/code-repair-ui.js` → 47 lines
 - `python/eidolon/web/healing-ui.js` → 25 lines
 - `python/eidolon/web/skills-backups-ui.js` → 81 lines
-- `python/eidolon/web/settings-ui.js` → 215 lines
+- `python/eidolon/web/settings-ui.js` → 303 lines
 - `python/eidolon/web/workspace-ui.js` → 82 lines
 - `python/eidolon/web/workspace-project-ui.js` → 377 lines
 - `python/eidolon/web/workspace-canvas-ui.js` → 144 lines
@@ -313,7 +319,7 @@
 - `python/eidolon/web/operate-render-ui.js` → 94 lines
 - `python/eidolon/web/operate-actions-ui.js` → 43 lines
 - `python/eidolon/web/operate-view-ui.js` → 61 lines
-- live app object → 152 routes
+- live app object → 162 routes
 - live route path+method duplicates → 0
 - live `GET /identity` → returns `product_role: "Zentrales agentisches Hauptsystem"`
 - live `GET /chat/context` → returns runtime context including chat/workspace/operate state
