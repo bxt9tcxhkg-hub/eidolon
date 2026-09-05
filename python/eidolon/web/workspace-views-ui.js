@@ -65,6 +65,12 @@
         return parent ? ('Gehört zu: ' + parent.title) : ('Gehört zu: ' + item.parent_id);
     }
 
+    function cardNote(item, elements) {
+        const description = String(item.description || '').trim().split(/\r?\n/)[0];
+        if (description) return description;
+        return relatedLabel(item, elements);
+    }
+
     function relatedOptions(item, elements) {
         const choices = [['', 'Keine Gruppe']].concat(
             (elements || [])
@@ -78,21 +84,30 @@
 
     function elementCard(item) {
         const elements = state.currentProject?.elements || [];
-        const related = relatedLabel(item, elements);
-        return '<div class="goal-card plan-card" data-status="' + escapeHtml(item.status || 'idea') + '" data-element-id="' + escapeHtml(item.id) + '" draggable="true">' +
-            '<div class="goal-stripe"></div><div class="goal-body">' +
-            '<div class="comp-detail">' + escapeHtml(ws.elementTypeLabel(item.element_type)) + (related ? ' · ' + escapeHtml(related) : '') + '</div>' +
-            '<textarea class="plan-card-title" data-plan-field="title" data-element-id="' + escapeHtml(item.id) + '" rows="2" title="' + escapeHtml(item.title || '') + '">' + escapeHtml(item.title || '') + '</textarea>' +
-            (item.description ? '<div class="plan-card-notes">' + escapeHtml(item.description) + '</div>' : '') +
-            '<select class="plan-card-status" data-plan-field="status" data-element-id="' + escapeHtml(item.id) + '">' + statusOptions(item.status || 'idea') + '</select>' +
-            '<select class="plan-card-related" data-plan-field="parent_id" data-element-id="' + escapeHtml(item.id) + '">' + relatedOptions(item, elements) + '</select>' +
-            '<select class="plan-card-priority" data-plan-field="priority" data-element-id="' + escapeHtml(item.id) + '">' + priorityOptions(item.priority) + '</select>' +
-            '<div class="plan-card-actions">' +
-            '<button class="btn btn-sm" data-open-element-id="' + escapeHtml(item.id) + '" data-x="' + Number(item.position?.x || 0) + '" data-y="' + Number(item.position?.y || 0) + '">Details</button>' +
-            '<button class="btn btn-sm" data-plan-archive="' + escapeHtml(item.id) + '">Ablegen</button>' +
-            '<button class="btn btn-sm" data-plan-drop="' + escapeHtml(item.id) + '">' + (state.armedDropElementId === item.id ? 'Nochmal streichen' : 'Streichen') + '</button>' +
+        const note = cardNote(item, elements);
+        const elementId = escapeHtml(item.id);
+        return '<div class="plan-card" data-status="' + escapeHtml(item.status || 'idea') + '" data-element-id="' + elementId + '" draggable="true">' +
+            '<div class="plan-card-face">' +
+            '<div class="plan-card-copy">' +
+            '<div class="plan-card-title" title="' + escapeHtml(item.title || '') + '">' + escapeHtml(item.title || '') + '</div>' +
+            (note ? '<div class="plan-card-notes" title="' + escapeHtml(note) + '">' + escapeHtml(note) + '</div>' : '') +
             '</div>' +
-            '</div></div>';
+            '<button type="button" class="plan-card-menu-btn" data-plan-menu="' + elementId + '" aria-label="Kartenmenü" aria-haspopup="true" aria-expanded="false">…</button>' +
+            '</div>' +
+            '<div class="plan-card-menu" hidden>' +
+            '<label class="plan-card-menu-label">Status</label>' +
+            '<select class="plan-card-status" data-plan-field="status" data-element-id="' + elementId + '">' + statusOptions(item.status || 'idea') + '</select>' +
+            '<label class="plan-card-menu-label">Gruppe</label>' +
+            '<select class="plan-card-related" data-plan-field="parent_id" data-element-id="' + elementId + '">' + relatedOptions(item, elements) + '</select>' +
+            '<label class="plan-card-menu-label">Priorität</label>' +
+            '<select class="plan-card-priority" data-plan-field="priority" data-element-id="' + elementId + '">' + priorityOptions(item.priority) + '</select>' +
+            '<div class="plan-card-actions">' +
+            '<button type="button" class="btn btn-sm" data-open-element-id="' + elementId + '" data-x="' + Number(item.position?.x || 0) + '" data-y="' + Number(item.position?.y || 0) + '">Details</button>' +
+            '<button type="button" class="btn btn-sm" data-plan-archive="' + elementId + '">Ablegen</button>' +
+            '<button type="button" class="btn btn-sm" data-plan-drop="' + elementId + '">' + (state.armedDropElementId === item.id ? 'Nochmal streichen' : 'Streichen') + '</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
     }
 
     function bindOpenElementTargets(root) {
@@ -118,7 +133,9 @@
             const body = items.length
                 ? items.map((item) => elementCard(item)).join('')
                 : '<div class="empty planning-column-empty">Offen</div>';
-            return '<div class="card planning-column" data-plan-column="' + status + '"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">' + escapeHtml(label) + '</h3><span class="tag info">' + items.length + '</span></div>' + body + '</div>';
+            return '<div class="card planning-column" data-plan-column="' + status + '">' +
+                '<div class="planning-column-header"><h3>' + escapeHtml(label) + '</h3><span class="planning-column-count">' + items.length + '</span></div>' +
+                '<div class="planning-column-body">' + body + '</div></div>';
         }).join('') + '</div>';
         bindOpenElementTargets(el);
         bindPlanningBoard(el);
@@ -200,6 +217,17 @@
         return ids;
     }
 
+    function closePlanCardMenus(root, exceptCard) {
+        (root || document).querySelectorAll('.plan-card.is-open').forEach((card) => {
+            if (exceptCard && card === exceptCard) return;
+            card.classList.remove('is-open');
+            const menu = card.querySelector('.plan-card-menu');
+            const button = card.querySelector('[data-plan-menu]');
+            if (menu) menu.hidden = true;
+            if (button) button.setAttribute('aria-expanded', 'false');
+        });
+    }
+
     function bindPlanningBoard(root) {
         root.querySelectorAll('[data-plan-field]').forEach((field) => {
             field.addEventListener('change', () => {
@@ -209,7 +237,29 @@
                 if (key === 'parent_id') value = value || null;
                 updatePlanElement(field.dataset.elementId, { [key]: value });
             });
+            field.addEventListener('mousedown', (event) => event.stopPropagation());
         });
+        root.querySelectorAll('[data-plan-menu]').forEach((btn) => {
+            btn.addEventListener('mousedown', (event) => event.stopPropagation());
+            btn.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const card = btn.closest('.plan-card');
+                if (!card) return;
+                const opening = !card.classList.contains('is-open');
+                closePlanCardMenus(root, opening ? card : null);
+                const menu = card.querySelector('.plan-card-menu');
+                card.classList.toggle('is-open', opening);
+                if (menu) menu.hidden = !opening;
+                btn.setAttribute('aria-expanded', opening ? 'true' : 'false');
+            });
+        });
+        if (!root.dataset.planMenuBound) {
+            root.dataset.planMenuBound = '1';
+            root.addEventListener('click', (event) => {
+                if (!event.target.closest('.plan-card-menu, [data-plan-menu]')) closePlanCardMenus(root);
+            });
+        }
         root.querySelectorAll('[data-plan-archive]').forEach((btn) => {
             btn.addEventListener('click', (event) => {
                 event.stopPropagation();
@@ -224,6 +274,11 @@
         });
         root.querySelectorAll('.plan-card').forEach((card) => {
             card.addEventListener('dragstart', (event) => {
+                if (event.target.closest('.plan-card-menu, [data-plan-menu]')) {
+                    event.preventDefault();
+                    return;
+                }
+                closePlanCardMenus(root);
                 event.dataTransfer.setData('text/plain', card.dataset.elementId || '');
                 event.dataTransfer.effectAllowed = 'move';
             });
@@ -240,7 +295,10 @@
                 const elementId = event.dataTransfer.getData('text/plain');
                 const nextStatus = column.dataset.planColumn;
                 const card = root.querySelector('.plan-card[data-element-id="' + elementId + '"]');
-                if (card) column.appendChild(card);
+                const body = column.querySelector('.planning-column-body') || column;
+                const empty = body.querySelector('.planning-column-empty');
+                if (empty) empty.remove();
+                if (card) body.appendChild(card);
                 try {
                     if (elementId && nextStatus) await persistPlanElement(elementId, { status: nextStatus });
                     await persistPlanOrder(collectBoardOrder());

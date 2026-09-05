@@ -172,9 +172,14 @@
 }
 
 .planning-board {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 14px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 8px;
+    min-height: 280px;
 }
 
 .planning-scaffold {
@@ -194,18 +199,71 @@
 }
 
 .planning-column-empty {
-    min-height: 72px;
+    min-height: 120px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     color: var(--text-dim);
     font-size: 0.82rem;
-    padding: 16px 8px;
+    padding: 28px 8px;
+    flex: 1;
+}
+
+.planning-column-empty::before {
+    content: '';
+    width: 28px;
+    height: 18px;
+    border: 1.5px solid currentColor;
+    border-radius: 0 0 4px 4px;
+    border-top: 0;
+    opacity: 0.55;
+    box-shadow: inset 0 4px 0 -2px currentColor;
 }
 
 .planning-column {
-    min-height: 140px;
-    padding: 10px;
+    flex: 0 0 240px;
+    width: 240px;
+    min-height: 320px;
+    margin-bottom: 0;
+    padding: 12px 10px 16px;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-elevated);
+}
+
+.planning-column-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--accent);
+}
+
+.planning-column-header h3 {
+    color: var(--accent);
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.planning-column-count {
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.planning-column-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.ws-board-card #ws-elements-view {
+    overflow: visible;
 }
 
 .ws-idle-hero {
@@ -420,23 +478,98 @@
 }
 
 .plan-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
     margin-bottom: 8px;
+    padding: 10px 10px 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
     cursor: grab;
 }
 
+.plan-card:active { cursor: grabbing; }
+
+.plan-card-face {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.plan-card-copy {
+    min-width: 0;
+    flex: 1;
+}
+
+.plan-card-title {
+    color: var(--text);
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
 .plan-card-notes {
-    margin-top: 4px;
+    margin-top: 3px;
     color: var(--text-muted);
     font-size: 0.74rem;
     line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.plan-card-title,
+.plan-card-menu-btn {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    margin: -4px -4px 0 0;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 1.1rem;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity var(--transition), background var(--transition), color var(--transition);
+}
+
+.plan-card:hover .plan-card-menu-btn,
+.plan-card.is-open .plan-card-menu-btn,
+.plan-card-menu-btn:focus-visible {
+    opacity: 1;
+    color: var(--accent);
+    background: var(--accent-subtle);
+}
+
+.plan-card-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.plan-card-menu[hidden] { display: none; }
+
+.plan-card-menu-label {
+    margin-top: 2px;
+    color: var(--text-dim);
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
 .plan-card-status,
 .plan-card-related,
 .plan-card-priority {
     width: 100%;
-    margin-top: 6px;
     padding: 4px 6px;
     background: var(--bg);
     border: 1px solid var(--border);
@@ -445,18 +578,11 @@
     font-size: 0.78rem;
 }
 
-.plan-card-title {
-    resize: vertical;
-    min-height: 2.6em;
-    line-height: 1.3;
-    overflow: hidden;
-}
-
 .plan-card-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-top: 8px;
+    margin-top: 4px;
 }
 
 .chat-operate-actions,

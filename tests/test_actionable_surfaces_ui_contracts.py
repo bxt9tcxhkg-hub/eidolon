@@ -136,8 +136,15 @@ def test_action_motion_confirms_real_mutations_only():
     assert "confirmAction(moved || column, 'moved')" in views_js
     assert "confirmAction(card || document.getElementById('ws-elements-view')" in views_js
     assert 'plan-card-notes' in views_js
-    assert "textarea class=\"plan-card-title\"" in views_js
+    assert 'class="plan-card-title"' in views_js
+    assert "textarea class=\"plan-card-title\"" not in views_js
+    assert 'plan-card-menu-btn' in views_js
+    assert 'Kartenmenü' in views_js
     assert '.plan-card-notes' in css
+    assert '.plan-card-menu' in css
+    assert 'flex-wrap: nowrap' in css
+    assert 'overflow-x: auto' in css
+    assert 'grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))' not in css
     assert "confirmAction(document.getElementById('operate-approvals')" in actions_js
     assert "confirmAction(document.getElementById('operate-next-action')" in actions_js
     assert 'resolveOperateApproval' in chat_js
@@ -145,6 +152,35 @@ def test_action_motion_confirms_real_mutations_only():
     assert 'logo-breath' not in css
     assert 'signature-breathe' not in css
     assert "kind || 'settle'" in shell
+
+
+def test_planning_board_is_horizontal_kanban_with_compact_cards():
+    views_js = WORKSPACE_VIEWS_JS.read_text(encoding='utf-8')
+    css = COMPONENTS_CSS.read_text(encoding='utf-8')
+    html = INDEX_HTML.read_text()
+    assert 'class="planning-board"' in views_js
+    assert 'planning-column-header' in views_js
+    assert 'planning-column-body' in views_js
+    assert 'class="plan-card-face"' in views_js
+    assert 'class="plan-card-title"' in views_js
+    assert 'class="plan-card-notes"' in views_js
+    assert 'data-plan-menu' in views_js
+    assert 'goal-card plan-card' not in views_js
+    assert "textarea class=\"plan-card-title\"" not in views_js
+    assert 'plan-card-status' in views_js
+    assert 'plan-card-related' in views_js
+    assert 'plan-card-priority' in views_js
+    assert 'plan-card-actions' in views_js
+    assert views_js.find('class="plan-card-menu"') < views_js.find('plan-card-status')
+    assert '.planning-board' in css
+    assert 'flex-wrap: nowrap' in css
+    assert 'overflow-x: auto' in css
+    assert 'grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))' not in css
+    assert '.plan-card-menu[hidden]' in css
+    assert 'planning-column-header' in html
+    assert 'planning-column-body' in html
+    for column in ('idea', 'planned', 'in_progress', 'blocked', 'done', 'archived'):
+        assert 'data-plan-column="' + column + '"' in html
 
 
 def test_chat_stays_slim_default_entry():
