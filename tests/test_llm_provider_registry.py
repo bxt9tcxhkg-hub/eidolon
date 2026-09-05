@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'python'))
 import eidolon.core.llm_fallback as llm_fallback
 from eidolon.core.llm_backend import LLMBackend
 from eidolon.core.llm_config_store import load_llm_config, save_llm_config, save_openai_api_key
+from eidolon.core.llm_openai_compat import USER_AGENT, openai_compat_headers
 from eidolon.core.llm_provider_catalog import build_fallback_chain, normalize_llm_settings
 from eidolon.core.llm_secrets import contains_secret, mask_secret
 from eidolon.core.runtime_problems import healing_visible_problems
@@ -121,7 +122,8 @@ def test_openai_compat_complete_uses_base_url_key_and_model(monkeypatch):
 
     def fake_urlopen(request, timeout=90):
         seen['url'] = request.full_url
-        seen['auth'] = request.headers.get('Authorization')
+        seen['auth'] = request.get_header('Authorization')
+        seen['user_agent'] = request.get_header('User-agent')
         seen['payload'] = json.loads(request.data.decode('utf-8'))
         return FakeResponse()
 
@@ -141,10 +143,20 @@ def test_openai_compat_complete_uses_base_url_key_and_model(monkeypatch):
         assert text == 'GROQ_OK'
         assert seen['url'] == 'https://api.groq.com/openai/v1/chat/completions'
         assert seen['auth'] == f'Bearer {SECRET}'
+        assert seen['user_agent'] == USER_AGENT
         assert seen['payload']['model'] == 'llama-3.1-8b-instant'
     finally:
         save_openai_api_key('')
         save_llm_config(original_cfg)
+
+
+def test_openai_compat_headers_include_product_user_agent():
+    headers = openai_compat_headers(SECRET)
+    assert headers['User-Agent'] == USER_AGENT
+    assert headers['User-Agent'].startswith('Eidolon/')
+    assert 'github.com/bxt9tcxhkg-hub/eidolon' in headers['User-Agent']
+    assert headers['Authorization'] == f'Bearer {SECRET}'
+    assert headers['Content-Type'] == 'application/json'
 
 
 def test_fallback_chain_uses_secondary_when_primary_fails(monkeypatch):
