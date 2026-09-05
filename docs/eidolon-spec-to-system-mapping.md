@@ -317,7 +317,7 @@
 - live route path+method duplicates → 0
 - live `GET /identity` → returns `product_role: "Zentrales agentisches Hauptsystem"`
 - live `GET /chat/context` → returns runtime context including chat/workspace/operate state
-- live `python -m pytest -q` → passes for new formation/work-truth/planning contracts (127 passed, 2 warnings); this Cloud-Agent environment additionally failed 4 pre-existing checks: no live Ollama (`test_chat_endpoint_returns_real_model_response`), missing `aioquic`, and `oauth_supported is False` without Codex CLI. `EIDOLON_STATE_DIR` collapses tmp_path stores; tests here used `LOCALAPPDATA` so AppData layout stayed untouched.
+- live `python -m pytest -q` → 146 passed for formation/board-seed/Freigabe and prior contracts (2 warnings); this Cloud-Agent environment additionally failed 5 pre-existing checks: no live Ollama (`test_chat_endpoint_returns_real_model_response`), missing `aioquic`, `oauth_supported is False` without Codex CLI (2 tests), and a stale Chat-header copy assert from an earlier idle-copy change. `EIDOLON_STATE_DIR` collapses tmp_path stores; tests here used `LOCALAPPDATA=/tmp/AppData/Local`.
 - repo runtime-state roots `python/data/` and `data/` → removed from the repo
 - active runtime-state root → `%LOCALAPPDATA%/Eidolon/state/`
 

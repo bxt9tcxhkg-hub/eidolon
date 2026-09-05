@@ -41,7 +41,7 @@
 - Findings- und Root-History-Dokumentation haben jetzt explizite Supersession-/Archiv-Readmes
 - `/identity` liefert konsistente Produktrolle
 - Runtime-State wurde aus dem Repo nach `%LOCALAPPDATA%/Eidolon/state/` ausgelagert
-- `python -m pytest -q` besteht für die neuen Formation-/Board-Seed-/Freigabe-Verträge in dieser Umgebung; vorbestehende Env-Fehler (kein Live-Ollama, fehlendes `aioquic`, Codex-CLI/`oauth_supported`) bleiben außerhalb dieses Schnitts
+- `python -m pytest -q` → 146 passed für Formation-/Board-Seed-/Freigabe- und Altverträge; 5 vorbestehende Env-Fehler (kein Live-Ollama, kein `aioquic`, Codex-CLI/`oauth_supported` false, veralteter Chat-Header-Assert) bleiben außerhalb dieses Schnitts
 
 ## Offene Prioritäten
 
