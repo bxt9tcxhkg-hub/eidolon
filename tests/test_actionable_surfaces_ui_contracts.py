@@ -61,6 +61,10 @@ def test_projektflaeche_open_project_is_board_first():
     assert html.find('id="ws-elements-card"') < html.find('id="ws-project-slots"')
     assert html.find('id="ws-project-secondary"') < html.find('id="ws-elements-card"')
     assert html.find('data-tab-target="chat">Im Chat öffnen') < html.find('id="ws-elements-view"')
+    assert 'id="ws-project-stats-details"' in html
+    assert 'id="ws-project-slots-details"' in html
+    assert html.find('id="ws-elements-card"') < html.find('id="ws-project-slots-details"')
+    assert 'projectsCard.hidden = hasOpenProject' in WORKSPACE_PROJECT_JS.read_text(encoding='utf-8')
 
 
 def test_arbeit_idle_has_three_clear_paths():

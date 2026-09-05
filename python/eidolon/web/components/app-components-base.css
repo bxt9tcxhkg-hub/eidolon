@@ -203,13 +203,32 @@
     margin: 4px 0 10px;
 }
 
+.project-stats-details {
+    margin: 4px 0 0;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.project-stats-details summary,
+.project-slots-summary {
+    cursor: pointer;
+}
+
+.project-slots-details {
+    margin: 0 0 14px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
 .workspaces-is-idle #ws-overview-card,
 .workspaces-is-idle #ws-projects-card > .card-header,
 .workspaces-is-idle #ws-projects-list,
 .workspaces-has-open-project #ws-idle-hero,
+.workspaces-has-open-project #ws-projects-card,
 #ws-overview-card[hidden],
 #ws-idle-hero[hidden],
-#ws-planning-scaffold[hidden] {
+#ws-planning-scaffold[hidden],
+#ws-projects-card[hidden] {
     display: none;
 }
 

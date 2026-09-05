@@ -92,7 +92,10 @@
                             <button class="btn btn-sm" data-tab-target="chat">Im Chat öffnen</button>
                             <button class="btn btn-sm" data-tab-target="operate">Arbeit zeigen</button>
                         </div>
-                        <div id="ws-project-stats"></div>
+                        <details class="project-stats-details" id="ws-project-stats-details">
+                            <summary>Zahlen</summary>
+                            <div id="ws-project-stats"></div>
+                        </details>
                     </div>
 
                     <div class="card ws-board-card" id="ws-elements-card">
@@ -103,6 +106,8 @@
                         <div id="ws-elements-view"><div class="empty">Keine Elemente</div></div>
                     </div>
 
+                    <details class="project-slots-details" id="ws-project-slots-details">
+                        <summary class="project-slots-summary">Gerüst und Slots</summary>
                     <div class="card">
                         <div class="card-header">
                             <h3>Generisches Arbeitsgerüst</h3>
@@ -124,6 +129,7 @@
                             </section>
                         </div>
                     </div>
+                    </details>
 
                     <div class="card" id="ws-element-composer" style="display:none;">
                         <div class="card-header">

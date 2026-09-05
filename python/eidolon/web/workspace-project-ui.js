@@ -55,6 +55,8 @@
         if (overview) overview.hidden = true;
         const scaffold = document.getElementById('ws-planning-scaffold');
         if (scaffold) scaffold.hidden = !idle;
+        const projectsCard = document.getElementById('ws-projects-card');
+        if (projectsCard) projectsCard.hidden = hasOpenProject;
         window.__eidolonHasProject = projectCount > 0;
         if (typeof syncOperateProjectPath === 'function') syncOperateProjectPath(projectCount > 0);
     }
@@ -187,6 +189,8 @@
             if (hero) hero.hidden = true;
             const scaffold = document.getElementById('ws-planning-scaffold');
             if (scaffold) scaffold.hidden = true;
+            const projectsCard = document.getElementById('ws-projects-card');
+            if (projectsCard) projectsCard.hidden = true;
             const panel = document.getElementById('panel-workspaces');
             if (panel) {
                 panel.classList.remove('workspaces-is-idle');
