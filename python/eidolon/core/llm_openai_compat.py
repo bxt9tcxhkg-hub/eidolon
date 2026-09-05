@@ -9,6 +9,18 @@ from eidolon.core.llm_config_store import load_openai_api_key
 from eidolon.core.llm_provider_catalog import resolve_base_url
 from eidolon.core.llm_secrets import redact_secrets
 
+# Cloudflare (Groq and similar fronts) returns 403 error code 1010 for urllib's
+# default User-Agent. Identify as this product, not a browser spoof.
+USER_AGENT = 'Eidolon/1.0 (+https://github.com/bxt9tcxhkg-hub/eidolon)'
+
+
+def openai_compat_headers(api_key: str) -> dict[str, str]:
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {api_key}',
+        'User-Agent': USER_AGENT,
+    }
+
 
 def complete_openai_compat(backend, *, system: str, user: str) -> str:
     api_key = load_openai_api_key()
@@ -29,7 +41,7 @@ def complete_openai_compat(backend, *, system: str, user: str) -> str:
     request = urllib.request.Request(
         base_url.rstrip('/') + '/chat/completions',
         data=json.dumps(payload).encode('utf-8'),
-        headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {api_key}'},
+        headers=openai_compat_headers(api_key),
         method='POST',
     )
     try:
