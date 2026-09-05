@@ -22,7 +22,7 @@
 Zusätzlich widerspricht der Settings-Header sich selbst:
 
 - `python/eidolon/web/fragments/index-healing-footer.html`: „OAuth ist in diesem lokalen Runtime-Pfad nicht implementiert.“
-- Dieselbe Seite bietet „OpenAI (Login)“ und behauptet API-Key-Anbindung — das Key-Feld wird auf `master` aber nur gerendert, wenn der (nicht im Dropdown vorhandene) API-Key-Pfad aktiv wäre. `saveOpenAIKey()` existiert, das Input `#openai-api-key` wird für Ollama nicht eingeblendet.
+- Dieselbe Seite bietet „OpenAI (Login)“ und behauptet API-Key-Anbindung. Die Route `POST /llm/openai/api-key` **existiert auf `master` nicht mehr** (EIDO-021-Drift). `saveOpenAIKey()` postet ins Leere. `load_openai_api_key` / `save_openai_api_key` werden vom Live-LLM-Backend nicht genutzt.
 
 `llm.provider = openai` ist im Schema erlaubt (`settings_schema_llm.py`), im Dropdown unsichtbar. `LLMBackend.complete()` wirft dann ehrlich `LLM-Provider nicht angebunden: openai`. Persistenz und Chat-Pfad sind also inkonsistent: API kann `openai` speichern, Runtime kann es nicht ausführen.
 
@@ -50,8 +50,8 @@ Zusätzlich widerspricht der Settings-Header sich selbst:
 |---|---|
 | **Datei / Route** | Chat `#chat-decision-summary`, Arbeit `#operate`; `resolveOperateApproval` → `POST /api/v1/runs/{id}/approval/{gate}`; `operate/service_support_actions.py` `resolve_approval`; Seed `workspaces/board_seed.py` + `vorhaben_extract.py` |
 | **Nutzer sieht** | Bei Buchungs-/Extern-Vorhaben nach Bestätigen: „Freigeben“ / „Ablehnen“. Nach Freigeben Motion „approved“ und Run geht weiter. Ohne Gate oft nur „Weiter“. |
-| **Wahrheit** | Die Tür ist **real persistiert** (Approval-Record, Chat und Arbeit teilen denselben Snapshot). `approved` setzt den Run auf `planning` und schreibt ein Transition-Event. Es gibt **keinen** Executor für `external_write` (keine Buchung, keine Mail, kein HTTP nach außen). „Weiter“ (`advance_run`) schiebt nur die Zustandsmaschine (`understanding → planning → spawning_work → acting → verifying → completed`) ohne Arbeit. Keyword-Gate ist schmal (`buch`, `hotel`, `anrufen`, …). Viele Vorhaben erzeugen deshalb nur „Weiter“ — das erklärt die Live-Beobachtung „nur Weiter“. Ablehnen markiert den Run `failed`, ebenfalls ohne Gegenaktion. |
-| **Fix-Richtung** | Copy und Next-Action ehrlich machen: „Freigabe notiert — Ausführung ist nicht angebunden“ solange kein Executor existiert. „Weiter“ als „Phase fortschreiben, keine Ausführung“ labeln. Oder echte, begrenzte Ausführung hinter die Tür legen. Keyword-Liste nicht als vollständige Sicherheitstür verkaufen. |
+| **Wahrheit** | Die Tür ist **real persistiert** (Approval-Record, Chat und Arbeit teilen denselben Snapshot). `approved` setzt den Run auf `planning` und schreibt ein Transition-Event. Es gibt **keinen** Executor für `external_write` (keine Buchung, keine Mail, kein HTTP nach außen). „Weiter“ (`advance_run`) schiebt nur die Zustandsmaschine (`understanding → planning → spawning_work → acting → verifying → completed`) ohne Arbeit. Keyword-Gate ist schmal (`buch`, `hotel`, `anrufen`, …). Viele Vorhaben erzeugen deshalb nur „Weiter“ — das erklärt die Live-Beobachtung „nur Weiter“. Ablehnen markiert den Run `failed`, ebenfalls ohne Gegenaktion. Zusätzlich: Chat-`renderChatOperateDoor` zeigt Freigeben/Ablehnen **nur** wenn `pending_approvals` Einträge hat. Operate hat Fallback „Freigabe erneut anfordern“ bei `next_action.kind === 'approval_request'` ohne Gate — Chat nicht. Dann bleibt im Chat oft nur „Weiter“. |
+| **Fix-Richtung** | Copy und Next-Action ehrlich machen: „Freigabe notiert — Ausführung ist nicht angebunden“ solange kein Executor existiert. „Weiter“ als „Phase fortschreiben, keine Ausführung“ labeln. Chat dieselbe Fallback-Logik wie Operate. Oder echte, begrenzte Ausführung hinter die Tür legen. Keyword-Liste nicht als vollständige Sicherheitstür verkaufen. |
 
 ### K5 — Systemstatus zeigt tote Komponenten als vorhanden (`master` und PR #11)
 
@@ -61,6 +61,15 @@ Zusätzlich widerspricht der Settings-Header sich selbst:
 | **Nutzer sieht** | Knowledge Graph „0 Entitäten“ mit grünem Punkt (`available: true`). Mesh-Peers „0 verbunden“ aus `mesh_metrics` (hart 0). Evidence Store „0 verifiziert / 0 blockiert“, `available: true`. `#health-problems` bleibt leer, obwohl `/health.problems` existiert. |
 | **Wahrheit** | `knowledge_graph` und `evidence` sind hartcodierte Zeros, nicht aus `KnowledgeGraph` / Evidence-Store gelesen. `mesh_metrics.peer_count` ist nicht `/mesh/peers` oder `/mesh/pairing/paired`. Echte Peer-Zahlen liegen auf anderen Routen. Die Problem-Liste der API wird in der Dashboard-Karte nicht gerendert (nur im Tooltip des lokalen Status-Dots). |
 | **Fix-Richtung** | Entweder echte Stats einbinden oder `available: false` / „nicht angebunden“. `#health-problems` aus `d.problems` füllen. Mesh-Zahlen aus dem Peer-Store. |
+
+### K6 — Selbstreflexions-Chat: LLM antwortet, UI zeigt Fehler
+
+| | |
+|---|---|
+| **Datei / Route** | `python/eidolon/web/chat-ui.js` `sendChat()`; `POST /api/v1/self-reflection/chat`; `operate_api_self_reflection_chat.py`; Envelope `routes/api_response.py` `api_v1_ok` |
+| **Nutzer sieht** | Bei „reflektiere…“ / „analysiere dich…“ / „selbstreflexion“: `Fehler: Keine Modellantwort erhalten`. |
+| **Wahrheit** | Der Endpoint kann eine echte Modellantwort liefern, wrappt sie aber als `{ok: true, data: {response: …}}`. Die Chat-UI liest nur `r.response` (Top-Level, wie `/chat`). Treffer auf den Self-Reflection-Pfad wirken deshalb wie ein Fehlschlag, obwohl das LLM geantwortet hat. Das ist die sichtbarste Chat-Lüge nach dem (behobenen) EIDO-007-Fake-Success. |
+| **Fix-Richtung** | Bei Self-Reflection `r.data.response` lesen oder die API auf `/chat`-Shape (`response` top-level) angleichen. |
 
 ---
 
@@ -84,8 +93,8 @@ Toast „Einstellungen gespeichert“ ist für die Datei wahr und für das Produ
 |---|---|
 | **Datei / Route** | `GET /healing/status`, `POST /healing/check`; `runtime_lifecycle.py`; `healing_runtime.py`; UI `#healing` „Stabilität“ |
 | **Nutzer sieht** | Subtitle „Reale Health-Checks und Wiederherstellungsstatus“. Button „Check ausführen“ → „Healing-Check ausgeführt“. Status `running`. |
-| **Wahrheit** | EIDO-002 ist behoben: `SelfHealingService` wird gestartet, Status kommt aus dem Service, nicht mehr hart `ok`. `backup_check` liefert immer `ok: True` (auch bei 0 Backups). `runtime_check` ist immer ok. Recovery (`attempt_targeted_recovery`) hat **keinen** HTTP-Endpunkt; Skills-Recovery gibt `{ok: True, strategy: 'skill_reload_requested'}` ohne Reload. Loop schluckt Exceptions. |
-| **Fix-Richtung** | Checks an echte Schwellen binden (Backup-Count, Ollama, Zertifikat). Recovery nicht `ok` ohne Tat. UI „Wiederherstellung“ nur zeigen, wenn ein Recovery-Pfad existiert. |
+| **Wahrheit** | EIDO-002 ist behoben: `SelfHealingService` wird gestartet, Status kommt aus dem Service, nicht mehr hart `ok`. `backup_check` liefert immer `ok: True` (auch bei 0 Backups). `runtime_check` ist immer ok. Recovery (`attempt_targeted_recovery`) hat **keinen** HTTP-Endpunkt; Skills-Recovery gibt `{ok: True, strategy: 'skill_reload_requested'}` ohne Reload. Loop schluckt Exceptions. `POST /healing/check` antwortet immer `{'ok': True, 'cycle': result}`; die UI toastet immer „Healing-Check ausgeführt“ (success), auch wenn `cycle.checks.*.ok` false ist. |
+| **Fix-Richtung** | Checks an echte Schwellen binden (Backup-Count, Ollama, Zertifikat). Recovery nicht `ok` ohne Tat. UI an `cycle.checks` koppeln, nicht an Envelope-`ok`. „Wiederherstellung“ nur zeigen, wenn ein Recovery-Pfad existiert. |
 
 ### M3 — Helfer / Pods sind Buchhaltung, keine Arbeiter
 
@@ -128,6 +137,24 @@ Ziele-UI „Zyklus ausführen“ → `POST /autonomy/cycle` → `run_cycle()` st
 
 PR #11 verdrahtet `POST /settings/apply` und Chat-Intent ehrlich (Fragen und „setz das um“ ändern nichts; Secrets werden abgelehnt). Wenn der Nutzer „setze http_port auf 8010“ oder „Thema auf light“ sagt, antwortet der Chat „übernommen“, obwohl Bindung/Theme weiter Env/`localStorage` folgen (M1). Das verschärft die Settings-Lücke, weil jetzt auch der Chat den Erfolg behauptet.
 
+### M9 — Chat-Kontext behauptet Capabilities, die nicht aus dem Katalog kommen
+
+| | |
+|---|---|
+| **Datei / Route** | `python/eidolon/work_context_contracts.py` `derive_capabilities` |
+| **Nutzer / LLM sieht** | `can_analyze`, `can_plan`, `can_summarize`, `can_propose_options` fast immer `true`. `can_execute_actions` wahr, sobald ein Operate-Run oder Workspace aktiv ist. |
+| **Wahrheit** | Die Flags sind hardcodiert bzw. nur an Run-Existenz gekoppelt, nicht an Capability-Registry, LLM-Bereitschaft oder einen Executor. Das Modell plant „darf“, obwohl K2/K4 das Gegenteil belegen. |
+| **Fix-Richtung** | Flags aus echten Probes + Operate-State ableiten. `can_execute_actions` nur bei angebundenem Executor. |
+
+### M10 — Operate-Aktionsbuttons: Animation ohne Fehler-Feedback
+
+| | |
+|---|---|
+| **Datei / Route** | `python/eidolon/web/operate-actions-ui.js` |
+| **Nutzer sieht** | Nach Klick Motion `continued` / `approved`, als wäre der Call gelungen. |
+| **Wahrheit** | Kein `try/catch`, keine Prüfung auf `ok: false`. 400/404 enden als unhandled rejection — keine Notice in Chat/Arbeit. |
+| **Fix-Richtung** | Response prüfen, Fehler via `showNotice`, Animation nur bei Erfolg. |
+
 ---
 
 ## 3. Gering — toter Code / interne Stubs, kaum nutzerseitig
@@ -142,6 +169,9 @@ PR #11 verdrahtet `POST /settings/apply` und Chat-Intent ehrlich (Fragen und „
 | G6 | `VALID_TABS` in `settings_routes.py` | `/tab-settings/{tab}` persistiert freie Areas (`tab_chat` …), UI ruft das nicht auf. `set_area` erlaubt unbekannte Areas ungeprüft. |
 | G7 | HUD `Weiter` | Desktop-Nebenfläche; nicht die Web-Starttür. |
 | G8 | `health-problems` DOM-Node | Tot, bis jemand `d.problems` rendert. |
+| G9 | `goals-ui.js` Verlauf | Lädt `operate/overview` → `history`, nicht ein Goal-spezifisches Log. |
+| G10 | Brainstorm „Vorschläge holen“ | Klingt nach KI; `project_route_support.py` ist heuristisch. Placeholder-Copy ist ehrlich, der Button nicht. |
+| G11 | `workspace_mutation_routes.py` | Request-Feld `success` default `True` — Feedback kann Erfolg vortäuschen. |
 
 ---
 
@@ -171,7 +201,7 @@ Das ist der größte Honesty-Schnitt seit EIDO-021, **noch nicht auf master**:
 - `/llm/connection` und Chat-Kontext zeigen Probleme ohne Schlüsselwerte.
 - `testOpenAIChat` liest `result.reply || result.response` (auf master nur `reply` → leerer Success-Toast).
 
-**Offen in #11:** K2–K5, M1–M3, M7–M8 bleiben. Healing/Self-Repair bewusst als Follow-up markiert — das ist ehrlich, solange die UI nicht „repariert“ behauptet.
+**Offen in #11:** K2–K6, M1–M3, M7–M10 bleiben. Healing/Self-Repair bewusst als Follow-up markiert — das ist ehrlich, solange die UI nicht „repariert“ behauptet.
 
 ---
 
@@ -180,7 +210,7 @@ Das ist der größte Honesty-Schnitt seit EIDO-021, **noch nicht auf master**:
 | Claim | Stand 2026-09-05 |
 |---|---|
 | EIDO-007 Chat Fake-Success | **Behoben** auf master (Frontend). Serverseitiges unmarkiertes Fallback bleibt M4. |
-| EIDO-021 OAuth-Honesty | **Teilweise.** API-Key-Pfad und `oauth_supported`-Flag existieren. Master-UI widerspricht sich (Header vs. Login-Button) und feiert Login-Erfolg ohne Login (K1). PR #11 räumt die LLM-Fläche weitgehend auf. |
+| EIDO-021 OAuth-Honesty | **Teilweise / Drift.** Route `/llm/openai/api-key` ist auf master **weg**; Totcode `saveOpenAIKey()` bleibt. Header behauptet API-Key + „OAuth nicht implementiert“, Dropdown bietet Login (K1). PR #11 räumt die LLM-Fläche weitgehend auf. |
 | Freigabe nur „Weiter“ | **Erklärbar und real.** Tür existiert für Keyword-Buchung/Extern nach Formation-Confirm. Sonst nur Phasen-„Weiter“. Freigeben führt die Folgeaktion nicht aus (K4). |
 | SelfHealingService existiert | **Verdrahtet und gestartet.** Status ehrlich bzgl. running/stopped. Checks/Recovery überzeichnen (M2). Kein Self-Repair-OS. |
 
@@ -188,11 +218,12 @@ Das ist der größte Honesty-Schnitt seit EIDO-021, **noch nicht auf master**:
 
 ## Priorisierte Fix-Reihenfolge (nur Richtung)
 
-1. **K1** Settings-Login-Toasts und `/integrations/openai/*` `ok`-Semantik — kleine Honesty-Änderung, hoher Vertrauenshebel. PR #11 senkt das Risiko, ersetzt aber nicht den Auth-Endpunkt auf master.
-2. **K2** Capability-Checks entlügen (vor allem `llm.ollama`, `autonomy.loop`, `skills.runtime`, Default-`True`).
-3. **K4** Freigabe-Copy / fehlender Executor sichtbar machen; „Weiter“ nicht als Ausführung lesen.
-4. **K3 / K5** Skills- und Health-Flächen auf echte Quellen oder `unavailable`.
-5. **M1 / M8** Settings nur speichern, was wirkt — oder Wirkung kennzeichnen. Besonders bevor Chat Settings autonom setzt.
-6. **M2** Healing-Checks an echte Schwellen; Recovery nicht vortäuschen.
+1. **K6** Self-Reflection-Envelope — höchste Chat-Sichtbarkeit: Erfolg wird als Fehler gezeigt.
+2. **K1** Settings-Login-Toasts und `/integrations/openai/*` `ok`-Semantik. PR #11 senkt das Risiko, ersetzt aber nicht den Auth-Endpunkt auf master. Statischen Header an Codex-Login angleichen; API-Key-Totcode entfernen.
+3. **K2** Capability-Checks entlügen (vor allem `llm.ollama`, `autonomy.loop`, `skills.runtime`, Default-`True`).
+4. **K4** Freigabe-Copy / fehlender Executor; Chat-Fallback wie Operate; „Weiter“ nicht als Ausführung lesen.
+5. **K3 / K5** Skills- und Health-Flächen auf echte Quellen oder `unavailable`.
+6. **M1 / M8** Settings nur speichern, was wirkt — oder Wirkung kennzeichnen.
+7. **M2 / M9 / M10** Healing-Toasts, Kontext-Capabilities, Operate-Fehlerfeedback.
 
-Keine Merge-Empfehlung für diesen Audit-PR. PR #11 nicht mergen, solange K2–K5 und M8 ungeprüft bleiben; LLM-Honesty dort ist trotzdem ein Fortschritt gegenüber master.
+Keine Merge-Empfehlung für diesen Audit-PR. PR #11 nicht mergen, solange K2–K6 und M8 ungeprüft bleiben; LLM-Honesty dort ist trotzdem ein Fortschritt gegenüber master.
