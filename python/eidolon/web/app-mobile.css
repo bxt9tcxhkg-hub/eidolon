@@ -86,4 +86,41 @@
             }
             .card-header { align-items: flex-start; }
             .card-header > div { max-width: 100%; flex-wrap: wrap; }
+            .main { min-width: 0; }
+            #panel-workspaces,
+            #ws-project-detail,
+            .ws-board-card {
+                min-width: 0;
+                max-width: 100%;
+            }
+            .ws-project-chrome #ws-detail-title {
+                font-size: 0.98rem;
+            }
+            .ws-board-card {
+                padding: 12px 10px 14px;
+            }
+            .ws-board-toolbar {
+                width: 100%;
+            }
+            .ws-board-toolbar-actions {
+                width: 100%;
+            }
+            .ws-board-filter {
+                flex: 1 1 120px;
+                width: auto;
+            }
+            .planning-column {
+                flex: 0 0 min(200px, 72vw);
+                width: min(200px, 72vw);
+                min-width: min(200px, 72vw);
+                max-width: min(200px, 72vw);
+                min-height: 260px;
+            }
+            .planning-column-title,
+            .planning-column-header h3 {
+                font-size: 0.8rem;
+            }
+            .planning-board {
+                min-height: 240px;
+            }
         }

@@ -134,7 +134,9 @@
                 ? items.map((item) => elementCard(item)).join('')
                 : '<div class="empty planning-column-empty">Offen</div>';
             return '<div class="card planning-column" data-plan-column="' + status + '">' +
-                '<div class="planning-column-header"><h3>' + escapeHtml(label) + '</h3><span class="planning-column-count">' + items.length + '</span></div>' +
+                '<div class="planning-column-header">' +
+                '<h3 class="planning-column-title">' + escapeHtml(label) + '</h3>' +
+                '<span class="planning-column-count">' + items.length + '</span></div>' +
                 '<div class="planning-column-body">' + body + '</div></div>';
         }).join('') + '</div>';
         bindOpenElementTargets(el);
