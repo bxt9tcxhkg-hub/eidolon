@@ -144,13 +144,20 @@
             if (Object.prototype.hasOwnProperty.call(nextPatch, 'parent_id') && !nextPatch.parent_id) {
                 nextPatch.parent_id = null;
             }
-            if (await persistPlanElement(elementId, nextPatch)) await openProject(state.currentProjectId);
+            if (await persistPlanElement(elementId, nextPatch)) {
+                await openProject(state.currentProjectId);
+                const card = document.querySelector('.plan-card[data-element-id="' + elementId + '"]');
+                if (typeof confirmAction === 'function') confirmAction(card || document.getElementById('ws-elements-view'), nextPatch.status ? 'status' : 'updated');
+            }
         } catch (e) { showNotice(e.message, 'error'); }
     }
 
     async function reorderPlanElements(elementIds) {
         try {
-            if (await persistPlanOrder(elementIds)) await openProject(state.currentProjectId);
+            if (await persistPlanOrder(elementIds)) {
+                await openProject(state.currentProjectId);
+                if (typeof confirmAction === 'function') confirmAction(document.getElementById('ws-elements-view'), 'moved');
+            }
         } catch (e) { showNotice(e.message, 'error'); }
     }
 
@@ -237,6 +244,8 @@
                     if (elementId && nextStatus) await persistPlanElement(elementId, { status: nextStatus });
                     await persistPlanOrder(collectBoardOrder());
                     await openProject(state.currentProjectId);
+                    const moved = document.querySelector('.plan-card[data-element-id="' + elementId + '"]');
+                    if (typeof confirmAction === 'function') confirmAction(moved || column, 'moved');
                 } catch (e) { showNotice(e.message, 'error'); }
             });
         });

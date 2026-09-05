@@ -76,55 +76,62 @@
             </div>
 
             <div id="panel-operate" class="tab-panel operate-is-idle">
-                <div class="card operate-core-card">
+                <div class="card operate-core-card" id="operate-idle-card">
                     <div class="card-header">
-                        <h3>Arbeitskern</h3>
-                        <div style="display:flex;gap:6px;">
-                            <button class="btn btn-sm" data-ui-action="loadOperateView">Aktualisieren</button>
-                            <button class="btn btn-sm" data-ui-mode="syncOperateAndReload">Aus Projektfläche übernehmen</button>
-                        </div>
+                        <h3>Arbeit</h3>
                     </div>
                     <div id="operate-idle-empty" class="operate-idle-empty">
-                        <div class="empty">Kein aktiver Lauf. Starte im Chat oder übernimm reale Arbeit aus der Projektfläche.</div>
+                        <div class="operate-idle-paths">
+                            <p class="operate-idle-line">Noch kein laufender Schritt.</p>
+                            <button class="btn btn-primary operate-idle-primary" id="operate-idle-start-chat" data-tab-target="chat">Im Chat starten</button>
+                            <button class="btn operate-idle-secondary" id="operate-idle-from-project" data-ui-action="takeOverFromProject" hidden>Aus Projektfläche übernehmen</button>
+                            <p class="empty operate-idle-hint">Hier siehst du Freigaben und den nächsten Schritt, sobald etwas läuft.</p>
+                        </div>
                     </div>
-                    <div id="operate-state-bar"><div class="empty">Lade Arbeitskern…</div></div>
-                    <div id="operate-next-action" class="operate-next-in-core"><div class="empty">Kein nächster Schritt geladen.</div></div>
                 </div>
-                <div class="card operate-section" data-operate-section="objective">
+                <div class="operate-run-toolbar" id="operate-run-toolbar" hidden>
+                    <button class="btn btn-sm" data-ui-action="loadOperateView">Aktualisieren</button>
+                </div>
+                <div class="card operate-section" data-operate-priority="objective" data-operate-section="objective">
                     <div class="card-header"><h3>Ziel</h3></div>
                     <div id="operate-objective-card"><div class="empty">Kein Ziel geladen.</div></div>
                 </div>
-                <div class="card operate-section" data-operate-section="approvals">
+                <div class="card operate-section" data-operate-priority="next">
+                    <div class="card-header"><h3>Nächster Schritt</h3></div>
+                    <div id="operate-next-action" class="operate-next-in-core"><div class="empty">Kein nächster Schritt geladen.</div></div>
+                </div>
+                <div class="card operate-section" data-operate-priority="approvals" data-operate-section="approvals">
                     <div class="card-header"><h3>Freigaben</h3></div>
                     <div id="operate-approvals"><div class="empty">Keine Freigaben geladen.</div></div>
                 </div>
-                <div class="card operate-section" data-operate-section="blockers">
+                <div class="card operate-section" data-operate-priority="blockers" data-operate-section="blockers">
                     <div class="card-header"><h3>Blocker</h3></div>
                     <div id="operate-blockers"><div class="empty">Keine Blocker geladen.</div></div>
-                </div>
-                <div class="card operate-section" data-operate-section="subagents">
-                    <div class="card-header"><h3>Helfer</h3></div>
-                    <div id="operate-subagents"><div class="empty">Keine Pods geladen.</div></div>
-                </div>
-                <div class="card operate-section" data-operate-section="evidence">
-                    <div class="card-header"><h3>Evidenz</h3></div>
-                    <div id="operate-evidence"><div class="empty">Keine Evidenz geladen.</div></div>
-                </div>
-                <div class="card operate-section" data-operate-section="history">
-                    <div class="card-header"><h3>Verlauf</h3></div>
-                    <div id="operate-history"><div class="empty">Kein Verlauf geladen.</div></div>
-                </div>
-                <div class="card operate-section" data-operate-section="workgraph">
-                    <div class="card-header"><h3>Work-Graph</h3></div>
-                    <div id="operate-workgraph"><div class="empty">Kein Work-Graph geladen.</div></div>
-                </div>
-                <div class="card operate-section" data-operate-section="transitions">
-                    <div class="card-header"><h3>Übergänge</h3></div>
-                    <div id="operate-transitions"><div class="empty">Keine Übergänge geladen.</div></div>
                 </div>
                 <details id="operate-empty-details" class="operate-empty-details" hidden>
                     <summary>Details</summary>
                     <div id="operate-empty-details-body" class="empty">Leere Kernel-Bereiche ohne Daten.</div>
+                    <div id="operate-state-bar"><div class="empty">Lade Arbeitskern…</div></div>
+                    <div class="card operate-section" data-operate-section="subagents">
+                        <div class="card-header"><h3>Helfer</h3></div>
+                        <div id="operate-subagents"><div class="empty">Keine Pods geladen.</div></div>
+                    </div>
+                    <div class="card operate-section" data-operate-section="evidence">
+                        <div class="card-header"><h3>Evidenz</h3></div>
+                        <div id="operate-evidence"><div class="empty">Keine Evidenz geladen.</div></div>
+                    </div>
+                    <div class="card operate-section" data-operate-section="history">
+                        <div class="card-header"><h3>Verlauf</h3></div>
+                        <div id="operate-history"><div class="empty">Kein Verlauf geladen.</div></div>
+                    </div>
+                    <div class="card operate-section" data-operate-section="workgraph">
+                        <div class="card-header"><h3>Work-Graph</h3></div>
+                        <div id="operate-workgraph"><div class="empty">Kein Work-Graph geladen.</div></div>
+                    </div>
+                    <div class="card operate-section" data-operate-section="transitions">
+                        <div class="card-header"><h3>Übergänge</h3></div>
+                        <div id="operate-transitions"><div class="empty">Keine Übergänge geladen.</div></div>
+                    </div>
                 </details>
             </div>
 

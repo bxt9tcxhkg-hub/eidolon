@@ -57,7 +57,9 @@ def test_operate_empty_state_hides_empty_section_wall():
     view_js = OPERATE_VIEW_JS.read_text(encoding='utf-8')
     css = COMPONENTS_CSS.read_text(encoding='utf-8')
     assert 'id="operate-idle-empty"' in html
-    assert 'Kein aktiver Lauf.' in html
+    assert 'Im Chat starten' in html
+    assert 'Aus Projektfläche übernehmen' in html
+    assert 'sobald etwas läuft' in html
     assert 'id="operate-empty-details"' in html
     assert 'data-operate-section="objective"' in html
     assert 'data-operate-section="approvals"' in html
@@ -89,7 +91,10 @@ def test_projektflaeche_empty_shows_planning_scaffold():
     for label in ('Zusammengehörig', 'Geplant', 'In Arbeit', 'Fertig', 'Archiv'):
         assert label in html
     assert '+ Neues Projekt' in html
-    assert "scaffold.hidden = Boolean(searchText)" in project_js
+    assert 'id="ws-idle-hero"' in html
+    assert 'Noch kein Projekt' in html
+    assert '>Neues Projekt</button>' in html
+    assert 'function syncWorkspaceIdleLayout' in project_js
     assert 'Keine Elemente für das Board vorhanden' not in views_js
     assert "['idea', 'Zusammengehörig']" in views_js
     assert "['archived', 'Archiv']" in views_js

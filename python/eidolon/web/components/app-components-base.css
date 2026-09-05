@@ -167,7 +167,7 @@
 
 .planning-scaffold-note {
     text-align: left;
-    padding: 0 0 12px 0;
+    padding: 0;
 }
 
 .planning-column {
@@ -175,14 +175,75 @@
     padding: 10px;
 }
 
+.ws-idle-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.ws-idle-line,
+.operate-idle-line {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.ws-idle-primary,
+.operate-idle-primary {
+    padding: 12px 22px;
+    font-size: 1rem;
+}
+
+.project-secondary-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 4px 0 10px;
+}
+
+.workspaces-is-idle #ws-overview-card,
+.workspaces-is-idle #ws-projects-card > .card-header,
+.workspaces-is-idle #ws-projects-list,
+.workspaces-has-open-project #ws-idle-hero,
+#ws-overview-card[hidden],
+#ws-idle-hero[hidden],
+#ws-planning-scaffold[hidden] {
+    display: none;
+}
+
+.workspaces-has-projects:not(.workspaces-has-open-project) #ws-idle-hero,
+.workspaces-has-projects:not(.workspaces-has-open-project) #ws-planning-scaffold {
+    display: none;
+}
+
 .operate-idle-empty {
     padding: 4px 0 0;
 }
 
+.operate-idle-paths {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.operate-idle-hint {
+    text-align: left;
+    padding: 0;
+}
+
 .operate-is-idle [data-operate-section],
+.operate-is-idle [data-operate-priority],
 .operate-is-idle #operate-state-bar,
 .operate-is-idle #operate-next-action,
-.operate-is-idle #operate-empty-details {
+.operate-is-idle #operate-empty-details,
+.operate-is-idle #operate-run-toolbar {
+    display: none;
+}
+
+#panel-operate:not(.operate-is-idle) #operate-idle-card {
     display: none;
 }
 
@@ -190,12 +251,20 @@
 #operate-idle-empty[hidden],
 #operate-empty-details[hidden],
 #operate-state-bar[hidden],
-#operate-next-action[hidden] {
+#operate-next-action[hidden],
+#operate-run-toolbar[hidden],
+#operate-idle-from-project[hidden] {
     display: none;
 }
 
+.operate-run-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 10px;
+}
+
 .operate-next-in-core {
-    margin-top: 12px;
+    margin-top: 0;
 }
 
 .operate-empty-details {
@@ -269,4 +338,32 @@
     cursor: pointer;
     color: var(--text-muted);
     font-size: 0.8rem;
+}
+
+@keyframes action-confirm-flash {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+    100% { box-shadow: 0 0 0 10px transparent; }
+}
+
+@keyframes action-confirm-settle {
+    0% { transform: translateY(-2px); }
+    100% { transform: none; }
+}
+
+.action-confirm {
+    animation: action-confirm-flash 380ms ease-out, action-confirm-settle 280ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .action-confirm,
+    .btn:active {
+        animation: none;
+        transform: none;
+    }
+}
+
+[data-animations="off"] .action-confirm,
+[data-animations="off"] .btn:active {
+    animation: none;
+    transform: none;
 }

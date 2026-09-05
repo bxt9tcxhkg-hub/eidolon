@@ -31,6 +31,9 @@
 - Generisches Karten-/Slot-Gerüst ohne Domänen-Pakete, Slots werden situationsabhängig aus Kernel/Workspace verdichtet
 - Python FastAPI ist dokumentiert und durch Port-Wächter als einzige live Runtime gegenüber Rust abgegrenzt
 - Ein kleines zustandsfähiges Eidolon-Signature-Object transportiert reale Arbeitszustände statt bloßes Dekor
+- Idle-Projektfläche ist handlungsfähig: große Primäraktion „Neues Projekt“ plus leeres Board, ohne Operate-Überblickswand
+- Idle-Arbeit zeigt drei klare Wege (Chat, Übernahme aus Projektfläche, Hinweis auf Freigaben) statt einer leeren Sektionswand
+- Kurze Action-Motion bestätigt nur reale Mutationen und respektiert `prefers-reduced-motion` sowie Settings `animations`
 - Findings- und Root-History-Dokumentation haben jetzt explizite Supersession-/Archiv-Readmes
 - `/identity` liefert konsistente Produktrolle
 - Runtime-State wurde aus dem Repo nach `%LOCALAPPDATA%/Eidolon/state/` ausgelagert

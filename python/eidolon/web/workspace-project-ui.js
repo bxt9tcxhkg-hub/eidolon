@@ -38,23 +38,46 @@
         }
     }
 
+    function syncWorkspaceIdleLayout(options) {
+        const projectCount = Number(options && options.projectCount) || 0;
+        const searching = Boolean(options && options.searching);
+        const hasOpenProject = Boolean(options && options.hasOpenProject);
+        const idle = !hasOpenProject && projectCount === 0 && !searching;
+        const panel = document.getElementById('panel-workspaces');
+        if (panel) {
+            panel.classList.toggle('workspaces-is-idle', idle);
+            panel.classList.toggle('workspaces-has-open-project', hasOpenProject);
+            panel.classList.toggle('workspaces-has-projects', projectCount > 0);
+        }
+        const hero = document.getElementById('ws-idle-hero');
+        if (hero) hero.hidden = !idle;
+        const overview = document.getElementById('ws-overview-card');
+        if (overview) overview.hidden = true;
+        const scaffold = document.getElementById('ws-planning-scaffold');
+        if (scaffold) scaffold.hidden = !idle;
+        window.__eidolonHasProject = projectCount > 0;
+        if (typeof syncOperateProjectPath === 'function') syncOperateProjectPath(projectCount > 0);
+    }
+
     function renderProjectListFiltered(projects) {
         const el = ws.projectListEl();
         if (!el) return;
         const searchInput = document.getElementById('ws-project-search');
         const searchText = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const allCount = (projects || []).length;
         const filtered = searchText
             ? projects.filter(p => p.title.toLowerCase().includes(searchText) || (p.description || '').toLowerCase().includes(searchText))
             : projects;
 
+        syncWorkspaceIdleLayout({
+            projectCount: allCount,
+            searching: Boolean(searchText),
+            hasOpenProject: Boolean(state.currentProjectId),
+        });
         if (!filtered?.length) {
             el.innerHTML = searchText ? '<div class="empty">Keine Projekte</div>' : '';
-            const scaffold = document.getElementById('ws-planning-scaffold');
-            if (scaffold) scaffold.hidden = Boolean(searchText);
             return;
         }
-        const scaffold = document.getElementById('ws-planning-scaffold');
-        if (scaffold) scaffold.hidden = true;
         window.__testProjectButtons = filtered.map((p) => p.id);
         el.innerHTML = filtered.map((p) =>
             '<div class="goal-card" data-status="' + escapeHtml(normalizeProjectStatus(p.status)) + '">' +
@@ -111,8 +134,12 @@
             status: item.metadata?.project_status || item.state || 'active',
         })));
         const projectCount = (overview.workspaces || []).filter((item) => item.workspace_type === 'project_workspace').length;
-        const scaffold = document.getElementById('ws-planning-scaffold');
-        if (scaffold && !state.currentProjectId) scaffold.hidden = projectCount > 0;
+        const searchText = (document.getElementById('ws-project-search')?.value || '').trim();
+        syncWorkspaceIdleLayout({
+            projectCount,
+            searching: Boolean(searchText),
+            hasOpenProject: Boolean(state.currentProjectId),
+        });
         renderWorkspaceContext({ ...contextData, operate, work_kernel: overview.work_kernel, formation: overview.formation });
         state.lastWorkTruth = {
             operate,
@@ -148,6 +175,7 @@
             showNotice('Projekt angelegt', 'success');
             resetProjectForm();
             await loadWorkspaces();
+            if (typeof confirmAction === 'function') confirmAction(document.getElementById('panel-workspaces'), 'created');
         } catch (e) { showNotice(e.message, 'error'); }
     }
 
@@ -155,8 +183,15 @@
         try {
             if (ws.projectListEl()) ws.projectListEl().style.display = 'none';
             if (ws.projectDetailEl()) ws.projectDetailEl().style.display = 'block';
+            const hero = document.getElementById('ws-idle-hero');
+            if (hero) hero.hidden = true;
             const scaffold = document.getElementById('ws-planning-scaffold');
             if (scaffold) scaffold.hidden = true;
+            const panel = document.getElementById('panel-workspaces');
+            if (panel) {
+                panel.classList.remove('workspaces-is-idle');
+                panel.classList.add('workspaces-has-open-project');
+            }
             const titleEl = document.getElementById('ws-detail-title');
             if (titleEl) titleEl.textContent = 'Lade Projekt…';
             const viewMode = document.getElementById('ws-view-mode');
@@ -265,6 +300,7 @@
             if (await persistProjectPatch(state.currentProjectId, { title, status }, 'Projekt gespeichert')) {
                 await openProject(state.currentProjectId);
                 await loadWorkspaces();
+                if (typeof confirmAction === 'function') confirmAction(document.getElementById('ws-project-title-edit') || document.getElementById('ws-project-head'), 'status');
             }
         } catch (e) { showNotice(e.message, 'error'); }
     }
@@ -276,6 +312,7 @@
             if (await persistProjectPatch(id, { status: normalizeProjectStatus(status) }, 'Projektstatus gespeichert')) {
                 if (state.currentProjectId === id) await openProject(id);
                 await loadWorkspaces();
+                if (typeof confirmAction === 'function') confirmAction(document.getElementById('ws-project-status-edit') || document.getElementById('panel-workspaces'), 'status');
             }
         } catch (e) { showNotice(e.message, 'error'); }
     }
@@ -382,5 +419,5 @@
         state.brainstormData = [];
     }
 
-    Object.assign(window, { loadWorkspaces, toggleProjectComposer, resetProjectForm, submitProjectForm, openProject, showProjectList, deleteProject, generateBrainstorm, acceptSuggestion, rejectSuggestion, clearBrainstorm, saveProjectTitle, saveProjectStatus, archiveCurrentProject, toggleArchiveProject });
+    Object.assign(window, { loadWorkspaces, toggleProjectComposer, resetProjectForm, submitProjectForm, openProject, showProjectList, deleteProject, generateBrainstorm, acceptSuggestion, rejectSuggestion, clearBrainstorm, saveProjectTitle, saveProjectStatus, archiveCurrentProject, toggleArchiveProject, syncWorkspaceIdleLayout });
 })();
