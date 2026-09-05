@@ -155,9 +155,11 @@ def _coerce_value(area: str, key: str, raw: str) -> Any:
 
 
 def _apply_preset_provider_hints(lowered: str, llm_values: dict[str, Any]) -> None:
+    wants_preset = any(token in lowered for token in ('vorlage', 'preset'))
+    if not wants_preset:
+        return
     for preset in PRESET_IDS:
         if preset != 'custom' and preset in lowered:
             llm_values.setdefault('preset', preset)
             if llm_values.get('provider') in {None, 'ollama'}:
-                if any(token in lowered for token in ('anbieter', 'provider', 'vorlage', 'preset', 'groq', 'openrouter', 'mistral', 'gemini')):
-                    llm_values.setdefault('provider', 'openai')
+                llm_values.setdefault('provider', 'openai')

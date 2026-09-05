@@ -257,8 +257,9 @@ def test_chat_applies_fallback_chain_only_on_explicit_request():
         assert applied.status_code == 200
         body = applied.json()
         assert body['settings_apply']['applied'] is True
-        assert body['settings_apply']['updated']
+        assert body['settings_apply']['updated'] == ['fallback_chain']
         assert 'openai' in body['response'] and 'ollama' in body['response']
+        assert agent_server.settings_store.get_area('llm')['preset'] == original['preset']
         assert SECRET not in body['response']
         assert agent_server.settings_store.get_area('llm')['fallback_chain'] == ['openai', 'ollama']
         client.delete(f"/chat/sessions/{body['session_id']}")
@@ -339,6 +340,13 @@ def test_chat_and_operate_apply_general_settings_and_reject_invalid():
     original_ui = agent_server.settings_store.get_area('ui')
     original_llm = agent_server.settings_store.get_area('llm')
     try:
+        groq = client.post('/chat', json={'message': 'Stell den Anbieter auf OpenAI-kompatibel und die Vorlage auf Groq', 'source': 'test-settings-preset'}).json()
+        assert groq['settings_apply']['applied'] is True
+        assert agent_server.settings_store.get_area('llm')['provider'] == 'openai'
+        assert agent_server.settings_store.get_area('llm')['preset'] == 'groq'
+        if groq.get('session_id'):
+            client.delete(f"/chat/sessions/{groq['session_id']}")
+
         chat = client.post('/chat', json={'message': 'Ändere das Thema auf light', 'source': 'test-settings-theme'}).json()
         assert chat['settings_apply']['applied'] is True
         assert agent_server.settings_store.get_area('ui')['theme'] == 'light'
