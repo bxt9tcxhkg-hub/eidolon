@@ -21,7 +21,7 @@ FAMILIEN = (
 def _isolated(tmp_path, monkeypatch):
     ui = WorkspaceUIService(tmp_path)
     ui._project_service = ProjectService(tmp_path)
-    ui._operate_service = OperateService(tmp_path)
+    ui._operate_service = OperateService(tmp_path, db_path=tmp_path / 'operate.db')
     monkeypatch.setattr(agent_server, 'workspace_ui_service', ui, raising=False)
     monkeypatch.setattr(agent_server, 'project_service', ui._project_service, raising=False)
     monkeypatch.setattr(agent_server, 'operate_service', ui._operate_service, raising=False)
@@ -37,7 +37,7 @@ def test_vorhaben_extract_is_generic_not_a_travel_pack():
     titles = [card['title'] for card in extracted['cards']]
     assert any('Anreise' in title and 'Laden' in title for title in titles)
     assert any('Unterkunft' in title and 'Bad' in title for title in titles)
-    assert any('Dauer' in title or 'Termin' in title for title in titles)
+    assert any('Zeitraum' in title or 'Dauer' in title or 'Termin' in title for title in titles)
     assert any('Packen' in title or 'Vorbereitung' in title for title in titles)
     assert extracted['approval']['action_type'] == 'external_write'
     assert extracted['approval']['title'] == 'Buchung vorschlagen'

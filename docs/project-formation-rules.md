@@ -63,3 +63,12 @@ Projektbildung ist kein rein sprachliches Labeling, sondern eine Arbeitsentschei
 - spätere Rückkehr wird möglich
 - passende Oberfläche kann entstehen
 - Rollenbildung wird vorbereitet
+
+## Board-Karten aus dem Vorhaben
+Nach sichtbarer Bestätigung (`project_candidate` → `active_project`) entstehen Planungselemente aus dem Nachrichtentext, nicht aus einem Domänen-Paket.
+
+- Titel und Split kommen aus dem genannten Vorhaben (Fakten, Bedingungen, offene Punkte)
+- Bedingungen (etwa eigenes Bad, genannte Kürzel) hängen an der passenden Karte (Notizen/Metadaten), ohne erfundene Orte oder Ausstattung
+- Status ist `planned`, solange der Text kein Tor impliziert (`erst nach`, `ohne Freigabe`, …)
+- Karten bleiben über die bestehenden Projekt-APIs umbenennbar, verschiebbar und streichbar
+- Erneutes Seed ist idempotent: vorhandene `slot:*`- oder gleiche Titel werden nicht verdoppelt; Nutzerkarten ohne `seed:vorhaben` bleiben unangetastet

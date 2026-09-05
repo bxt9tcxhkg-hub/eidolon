@@ -34,7 +34,7 @@ Rust-Crates bleiben im Repo (CLI, experimentelle Runtime, Mesh-Bibliotheken), si
 - Chat zeigt ausstehende Freigaben, Blocker und den nächsten Schritt und löst dieselben Operate-APIs aus
 - Projektplanung erlaubt Rename, Status, Gruppe, Reihenfolge, Ablegen und Streichen gegen persistierte Projekt-APIs
 - Chat, Arbeit und Projektfläche lesen Freigaben/Blocker/Next aus demselben `work_kernel`/`operate`-Snapshot; Projektmutationen geben denselben Snapshot zurück statt eines leeren Parallelpfads
-- Projektbildung `chat_topic` → `project_candidate` → `active_project` ist ein expliziter Vertrag mit sichtbarer Bestätigung vor dauerhaftem Projekt; stille Projekt-Bots gibt es nicht. Kandidaten entstehen auch ohne LLM; Bestätigung füllt generische Board-Karten
+- Projektbildung `chat_topic` → `project_candidate` → `active_project` ist ein expliziter Vertrag mit sichtbarer Bestätigung vor dauerhaftem Projekt; stille Projekt-Bots gibt es nicht. Kandidaten entstehen auch ohne LLM; Bestätigung füllt unterscheidbare Board-Karten aus dem Vorhaben-Text (Bedingungen in Notizen, idempotentes Seed)
 - Generische Slots (Kontext, Ziel, Zustand, Next, Freigabe, Blocker, Inbox, Evidenz) werden aus Kernel/Workspace gespeist, nicht aus Domänen-Paketen
 - `/identity` liefert Produktrolle und aktive/definierte Rollen getrennt
 - Runtime-State liegt außerhalb des Repos unter `%LOCALAPPDATA%/Eidolon/state/`

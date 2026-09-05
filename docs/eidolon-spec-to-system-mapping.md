@@ -317,7 +317,7 @@
 - live route path+method duplicates → 0
 - live `GET /identity` → returns `product_role: "Zentrales agentisches Hauptsystem"`
 - live `GET /chat/context` → returns runtime context including chat/workspace/operate state
-- live `python -m pytest -q` → 146 passed for formation/board-seed/Freigabe and prior contracts (2 warnings); this Cloud-Agent environment additionally failed 5 pre-existing checks: no live Ollama (`test_chat_endpoint_returns_real_model_response`), missing `aioquic`, `oauth_supported is False` without Codex CLI (2 tests), and a stale Chat-header copy assert from an earlier idle-copy change. `EIDOLON_STATE_DIR` collapses tmp_path stores; tests here used `LOCALAPPDATA=/tmp/AppData/Local`.
+- live `python -m pytest -q` → passes for formation/board-card-quality/Freigabe and prior contracts (152 passed, 2 warnings); this Cloud-Agent environment additionally failed 5 pre-existing checks: no live Ollama (`test_chat_endpoint_returns_real_model_response`), missing `aioquic`, `oauth_supported is False` without Codex CLI (2 tests), and a stale Chat-header copy assert from an earlier idle-copy change. `EIDOLON_STATE_DIR` collapses tmp_path stores; tests here used `LOCALAPPDATA=/tmp/AppData/Local`.
 - repo runtime-state roots `python/data/` and `data/` → removed from the repo
 - active runtime-state root → `%LOCALAPPDATA%/Eidolon/state/`
 
@@ -387,7 +387,8 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 - `POST /workspaces/formation` persists the transition; `project_candidate` → `active_project` requires `confirmed=true` and may create a real project
 - Chat shows the pending transition (`#chat-formation`) and calls the same formation API
 - heuristic mapping no longer silent-promotes runtime `active` to `active_project`
-- work-oriented chat messages persist a visible `project_candidate` without an LLM; confirm seeds generic board cards and may request a real Operate approval for booking/external-write steps
+- work-oriented chat messages persist a visible `project_candidate` without an LLM; confirm seeds generic, constraint-aware board cards from the Vorhaben text and may request a real Operate approval for booking/external-write steps
+- board seed is idempotent (`seed:vorhaben` + `slot:*`); user-owned cards are not duplicated or rewritten
 
 ### Remaining mismatch
 - first-hop title/summary extraction is deterministic, not model-enriched
