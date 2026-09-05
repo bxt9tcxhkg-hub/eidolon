@@ -5,6 +5,7 @@ async function loadSettings() {
         const areas = ['network', 'llm', 'autonomy', 'privacy', 'ui'];
         const settings = d.settings || {};
         window.__lastSettings = settings;
+        if (typeof applyUiMotionPreference === 'function') applyUiMotionPreference(settings);
         const meta = d.settings_meta || {};
         areas.forEach(a => { const el = document.getElementById('settings-' + a); if (el) el.innerHTML = renderSettingsArea(a, settings, meta[a] || {}); });
         // LLM-Modelle und -Actions initialisieren

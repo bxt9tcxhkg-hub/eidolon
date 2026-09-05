@@ -10,17 +10,31 @@
         return !emptyOnly;
     }
 
+    function syncOperateProjectPath(hasProject) {
+        const fromProject = document.getElementById('operate-idle-from-project');
+        if (fromProject) fromProject.hidden = !hasProject;
+        const panel = document.getElementById('panel-operate');
+        if (panel) panel.classList.toggle('operate-has-project', Boolean(hasProject));
+    }
+
     function syncOperateEmptyLayout(flags) {
         const hasRun = Boolean(flags && flags.hasRun);
         const panel = document.getElementById('panel-operate');
         if (panel) panel.classList.toggle('operate-is-idle', !hasRun);
         const idle = document.getElementById('operate-idle-empty');
         if (idle) idle.hidden = hasRun;
+        const idleCard = document.getElementById('operate-idle-card');
+        if (idleCard) idleCard.hidden = hasRun;
+        const toolbar = document.getElementById('operate-run-toolbar');
+        if (toolbar) toolbar.hidden = !hasRun;
         const stateBar = document.getElementById('operate-state-bar');
         if (stateBar) stateBar.hidden = !hasRun;
         const nextAction = document.getElementById('operate-next-action');
         const hasNext = Boolean(flags && flags.next);
         if (nextAction) nextAction.hidden = !hasRun || !hasNext;
+        const nextCard = nextAction ? nextAction.closest('[data-operate-priority="next"]') : document.querySelector('#panel-operate [data-operate-priority="next"]');
+        if (nextCard) nextCard.hidden = !hasRun || !hasNext;
+        syncOperateProjectPath(Boolean(window.__eidolonHasProject));
         const populated = {
             objective: Boolean(flags && flags.objective),
             approvals: Boolean(flags && flags.approvals),
@@ -47,18 +61,23 @@
             const show = hasRun && Boolean(populated[key]);
             card.hidden = !show;
             card.classList.toggle('operate-section-empty', !populated[key]);
-            if (hasRun && !populated[key] && labelMap[key]) emptyLabels.push(labelMap[key]);
+            if (hasRun && !populated[key] && labelMap[key] && card.closest('#operate-empty-details')) emptyLabels.push(labelMap[key]);
         });
         const details = document.getElementById('operate-empty-details');
         const detailsBody = document.getElementById('operate-empty-details-body');
         if (details) {
-            details.hidden = !hasRun || emptyLabels.length === 0;
+            details.hidden = !hasRun;
+            details.open = false;
             if (detailsBody) {
                 detailsBody.textContent = emptyLabels.length
                     ? ('Ohne Daten: ' + emptyLabels.join(', ') + '.')
-                    : 'Keine leeren Kernel-Bereiche.';
+                    : 'Weitere Laufdaten, wenn vorhanden.';
             }
         }
+        document.querySelectorAll('#operate-empty-details [data-operate-section]').forEach((card) => {
+            const key = card.dataset.operateSection;
+            card.hidden = !hasRun || !Boolean(populated[key]);
+        });
     }
 
     function renderState(run, objective, blockers, approvals) {
@@ -149,5 +168,5 @@
         el.innerHTML = items.map((item) => ['<div class="comp-row"><span class="comp-name">' + escapeHtml(item.transition_type || 'state_change') + '</span>', '<span class="comp-detail">' + escapeHtml((item.from_state || '—') + ' → ' + (item.to_state || '—')) + '</span></div>', '<div style="margin:-4px 0 8px 0;color:var(--text-dim);font-size:0.78rem;line-height:1.4;">' + escapeHtml(item.summary || '') + '</div>'].join('')).join('');
     }
 
-    Object.assign(window, { renderState, renderObjective, renderSubagents, renderEvidence, renderNextAction, renderApprovals, renderBlockers, renderHistory, renderWorkGraph, renderTransitions, syncOperateEmptyLayout, sectionHasVisibleData });
+    Object.assign(window, { renderState, renderObjective, renderSubagents, renderEvidence, renderNextAction, renderApprovals, renderBlockers, renderHistory, renderWorkGraph, renderTransitions, syncOperateEmptyLayout, syncOperateProjectPath, sectionHasVisibleData });
 })();

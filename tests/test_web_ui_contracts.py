@@ -937,7 +937,8 @@ def test_chat_is_initial_active_surface_and_header():
     assert 'id="operate-idle-empty"' in html
     assert '<div id="panel-operate" class="tab-panel operate-is-idle">' in html
     assert '<div id="panel-operate" class="tab-panel active">' not in html
-    assert '<div id="panel-workspaces" class="tab-panel">' in html
+    assert 'id="panel-workspaces"' in html
+    assert 'class="tab-panel workspaces-is-idle"' in html
     assert '<div id="panel-dashboard" class="tab-panel">' in html
     assert '<div id="panel-mesh" class="tab-panel">' in html
     assert "let currentTab = 'chat';" in APP_SHELL_JS.read_text(encoding='utf-8')

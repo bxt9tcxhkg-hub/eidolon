@@ -11,6 +11,7 @@
     async function advanceOperateRun(runId) {
         await api('POST', '/api/v1/runs/' + runId + '/advance', { reason: 'Advance triggered from chat or operate UI' });
         await refreshOperateSurfaces();
+        if (typeof confirmAction === 'function') confirmAction(document.getElementById('operate-next-action') || document.getElementById('panel-operate'), 'continued');
     }
 
     async function requestOperateApproval(runId) {
@@ -25,6 +26,7 @@
     async function resolveOperateApproval(runId, approvalId, decision) {
         await api('POST', '/api/v1/runs/' + runId + '/approval/' + approvalId, { decision, resolved_by: 'user' });
         await refreshOperateSurfaces();
+        if (typeof confirmAction === 'function') confirmAction(document.getElementById('operate-approvals') || document.getElementById('panel-operate'), decision === 'rejected' ? 'rejected' : 'approved');
     }
 
     async function resolveOperateBlocker(runId, blockerId) {
@@ -39,5 +41,16 @@
         return api('POST', '/api/v1/session/sync-from-workspaces');
     }
 
-    Object.assign(window, { advanceOperateRun, requestOperateApproval, resolveOperateApproval, resolveOperateBlocker, syncOperateFromWorkspace, refreshOperateSurfaces });
+    async function takeOverFromProject() {
+        const synced = await syncOperateFromWorkspace();
+        await loadOperateView();
+        const run = synced && synced.data && synced.data.run;
+        if (run && typeof confirmAction === 'function') {
+            confirmAction(document.getElementById('panel-operate'), 'synced');
+            return;
+        }
+        if (!run) showNotice('Keine übernehmbare Arbeit in der Projektfläche', 'info');
+    }
+
+    Object.assign(window, { advanceOperateRun, requestOperateApproval, resolveOperateApproval, resolveOperateBlocker, syncOperateFromWorkspace, refreshOperateSurfaces, takeOverFromProject });
 })();

@@ -1,9 +1,9 @@
 const PAGES = {
     chat: { title: 'Eidolon', subtitle: 'Starte ein Gespräch oder setze reale Arbeit fort.' },
-    operate: { title: 'Arbeit', subtitle: 'Sichtbarer Arbeitskern hinter dem Chat: Zustand, Freigaben, Blocker, nächster Schritt' },
+    operate: { title: 'Arbeit', subtitle: 'Freigaben und nächster Schritt, sobald etwas läuft' },
     pods: { title: 'Helfer', subtitle: 'Aktive Hilfsläufe und ihr realer Zustand', group: 'advanced' },
     dashboard: { title: 'Systemstatus', subtitle: 'Backend, Laufzeit, Speicher und verfügbare Fähigkeiten', group: 'advanced' },
-    workspaces: { title: 'Projektfläche', subtitle: 'Planung und generische Arbeitskarten der aktuellen Arbeit' },
+    workspaces: { title: 'Projektfläche', subtitle: 'Board zum Planen — oder ein neues Projekt anlegen' },
     execution: { title: 'Laufzeit', subtitle: 'Geräte, Laufzeitfähigkeiten und aktuelle Ausführungssignale', group: 'advanced' },
     mesh: { title: 'Geräte', subtitle: 'Handy, Browser und weitere Geräte mit Eidolon koppeln', group: 'advanced' },
     goals: { title: 'Ziele', subtitle: 'Welche Ziele Eidolon verfolgt', group: 'advanced' },
@@ -307,9 +307,38 @@ document.addEventListener('keydown', function (event) {
     invokeUiAction(enterEl.dataset.enterAction);
 });
 
+function actionMotionEnabled() {
+    if (document.documentElement.getAttribute('data-animations') === 'off') return false;
+    try {
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+    } catch (_) { /* ignore */ }
+    return true;
+}
+
+function applyUiMotionPreference(settings) {
+    const enabled = !(settings && settings.ui && settings.ui.animations === false);
+    document.documentElement.setAttribute('data-animations', enabled ? 'on' : 'off');
+}
+
+function confirmAction(target, kind) {
+    const el = typeof target === 'string' ? document.getElementById(target) : target;
+    const node = el || document.getElementById('panel-' + (currentTab || 'chat'));
+    if (!node) return false;
+    node.dataset.actionConfirm = kind || 'settle';
+    if (!actionMotionEnabled()) return false;
+    node.classList.remove('action-confirm');
+    void node.offsetWidth;
+    node.classList.add('action-confirm');
+    window.setTimeout(() => node.classList.remove('action-confirm'), 420);
+    return true;
+}
+
 Object.assign(window, {
     setEidolonPresence,
     describeOperatePresence,
     syncNavHighlight,
     showTab,
+    actionMotionEnabled,
+    applyUiMotionPreference,
+    confirmAction,
 });
