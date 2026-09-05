@@ -51,6 +51,8 @@ Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gem
 - `python/eidolon/web/app-shell.css`
 - `python/eidolon/web/components/app-components.css`
 - CSS ist nach Shell-, Chat- und Goals-Slices in Importdateien aufgeteilt
+- Dark-Theme bleibt Standard, mit wärmeren Neutralen, Display-Typo und reicherem Akzent; Idle-Signature atmet
+- Arbeitsspur (`data-work-trace`) zeigt Bereit / Wartet / Als Nächstes aus Kernel- und Sessiondaten, ohne Placebo-Aktivität
 - Default-Einstieg ist Chat (`/#chat`); Operate ist über `#operate` / Nav „Arbeit“ erreichbar
 - Chat zeigt ausstehende Freigaben, Blocker und Next Action und löst dieselben Operate-APIs aus
 - Chat, Arbeit und Projektfläche lesen denselben `work_kernel`-/Operate-Snapshot; Projektmutationen geben denselben Snapshot zurück

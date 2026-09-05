@@ -116,7 +116,7 @@
             const items = filteredElements.filter((item) => planningColumnFor(item.status) === status);
             const body = items.length
                 ? items.map((item) => elementCard(item)).join('')
-                : '<div class="empty">Leer</div>';
+                : '<div class="empty planning-column-empty">Offen</div>';
             return '<div class="card planning-column" data-plan-column="' + status + '"><div class="card-header" style="margin-bottom:8px;"><h3 style="font-size:0.9rem;">' + escapeHtml(label) + '</h3><span class="tag info">' + items.length + '</span></div>' + body + '</div>';
         }).join('') + '</div>';
         bindOpenElementTargets(el);

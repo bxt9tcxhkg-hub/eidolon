@@ -35,6 +35,7 @@
             const blockers = data.blockers || [];
             const approvals = data.approvals || [];
             const nextAction = data.next_action || { kind: 'none' };
+            if (typeof refreshWorkTraces === 'function') refreshWorkTraces(data);
             if (typeof setEidolonPresence === 'function' && typeof describeOperatePresence === 'function') {
                 const presence = describeOperatePresence(data);
                 setEidolonPresence(presence.state, presence.title, presence.detail);

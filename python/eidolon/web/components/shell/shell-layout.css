@@ -1,11 +1,14 @@
         
-        html { font-size: 14px; -webkit-font-smoothing: antialiased; }
+        html { font-size: 15px; -webkit-font-smoothing: antialiased; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-            background: var(--bg);
+            font-family: var(--font-sans);
+            background:
+                radial-gradient(1100px 560px at 8% -12%, rgba(217, 161, 92, 0.1), transparent 56%),
+                radial-gradient(820px 420px at 100% 0%, rgba(176, 86, 48, 0.06), transparent 52%),
+                var(--bg);
             color: var(--text);
-            line-height: 1.5;
+            line-height: 1.55;
             min-height: 100vh;
         }
         
@@ -37,7 +40,8 @@
         }
         
         .sidebar-header h1 {
-            font-size: 1.15rem;
+            font-family: var(--font-display);
+            font-size: 1.28rem;
             font-weight: 600;
             letter-spacing: -0.02em;
         }
@@ -56,11 +60,11 @@
             border-radius: 50%;
             flex: 0 0 42px;
             background:
-                radial-gradient(circle at 50% 48%, rgba(245, 248, 255, 0.96), rgba(245, 248, 255, 0.18) 18%, transparent 52%),
-                radial-gradient(circle at 50% 50%, rgba(74, 124, 255, 0.24), rgba(74, 124, 255, 0.05) 48%, transparent 75%),
-                linear-gradient(180deg, rgba(10, 14, 22, 0.96), rgba(15, 22, 34, 0.92));
-            border: 1px solid rgba(132, 162, 255, 0.2);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 30px rgba(4, 8, 20, 0.34);
+                radial-gradient(circle at 50% 48%, rgba(255, 244, 226, 0.96), rgba(255, 228, 190, 0.2) 18%, transparent 52%),
+                radial-gradient(circle at 50% 50%, rgba(217, 161, 92, 0.32), rgba(217, 161, 92, 0.06) 48%, transparent 75%),
+                linear-gradient(180deg, rgba(28, 22, 16, 0.96), rgba(22, 18, 13, 0.92));
+            border: 1px solid rgba(217, 161, 92, 0.28);
+            box-shadow: inset 0 1px 0 rgba(255,244,226,0.08), 0 10px 30px rgba(18, 10, 4, 0.36);
             overflow: hidden;
         }
 
@@ -79,20 +83,26 @@
 
         .signature-ring-outer {
             inset: 5px;
-            border: 1px solid rgba(170, 194, 255, 0.14);
+            border: 1px solid rgba(242, 214, 170, 0.22);
             opacity: 0.8;
         }
 
         .signature-ring-inner {
             inset: 11px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 244, 226, 0.16);
             opacity: 0.75;
         }
 
         .signature-core {
             inset: 15px;
-            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.95), rgba(194,212,255,0.78) 45%, rgba(61,92,160,0.22) 75%, transparent 100%);
-            box-shadow: 0 0 20px rgba(117, 154, 255, 0.42);
+            background: radial-gradient(circle at 50% 50%, rgba(255,248,236,0.96), rgba(242, 206, 150, 0.78) 45%, rgba(140, 88, 36, 0.24) 75%, transparent 100%);
+            box-shadow: 0 0 20px rgba(217, 161, 92, 0.42);
+        }
+
+        .eidolon-signature[data-presence-state="idle"] .signature-ring-outer,
+        .eidolon-signature[data-presence-state="idle"] .signature-ring-inner,
+        .eidolon-signature[data-presence-state="idle"] .signature-core {
+            animation: signature-breathe 4.8s ease-in-out infinite;
         }
 
         .eidolon-signature[data-presence-state="thinking"] .signature-ring-outer,
@@ -197,10 +207,10 @@
         
         .nav-item {
             display: flex; align-items: center; gap: 10px;
-            padding: 8px 20px;
+            padding: 9px 20px;
             color: var(--text-muted);
             cursor: pointer;
-            font-size: 0.88rem;
+            font-size: 0.9rem;
             border-left: 2px solid transparent;
             transition: all var(--transition);
             user-select: none;
@@ -234,4 +244,11 @@
             border-radius: 999px;
             background: currentColor;
             opacity: 0.55;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .eidolon-signature .signature-ring,
+            .eidolon-signature .signature-core {
+                animation: none !important;
+            }
         }

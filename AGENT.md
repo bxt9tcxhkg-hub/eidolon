@@ -66,6 +66,7 @@ python -m pytest -q
 Gezielte Verträge zusätzlich bei betroffenen Bereichen:
 - Chat: `tests/test_chat_runtime.py`
 - UI/API-Wahrheit: `tests/test_web_ui_contracts.py`
+- Idle-/Wärme-Verträge: `tests/test_empty_state_ui_contracts.py`, `tests/test_warmth_work_trace_ui_contracts.py`
 - Operate-Contracts: `tests/test_operate_api_contracts.py`, `tests/test_operate_ui_contracts.py`
 
 ## Änderungsregel

@@ -913,7 +913,7 @@ def test_chat_ui_does_not_fall_back_to_fake_success_copy():
     js = APP_WEB_JS
     assert "'Antwort erhalten'" not in html
     assert "Fehler: Keine Modellantwort erhalten" in js
-    assert 'Noch kein Gesprächskontext.' in js
+    assert 'Bereit, wenn du es bist.' in js
     assert 'renderChat(); loadOperateView(); loadPodsView(); loadWorkspaces();' in js
 
 
@@ -931,7 +931,7 @@ def test_chat_ui_renders_live_runtime_context_contract():
 def test_chat_is_initial_active_surface_and_header():
     html = INDEX_HTML.read_text(encoding='utf-8')
     assert '<h2 id="page-title">Eidolon</h2>' in html
-    assert 'Starte ein Gespräch oder setze reale Arbeit fort.' in html
+    assert 'Sprich den Kern an — oder setze reale Arbeit fort.' in html
     assert '<div id="panel-chat" class="tab-panel active chat-is-idle">' in html
     assert 'id="chat-idle-prompt"' in html
     assert 'id="operate-idle-empty"' in html

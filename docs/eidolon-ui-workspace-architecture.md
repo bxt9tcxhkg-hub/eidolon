@@ -75,6 +75,14 @@ Immer sichtbar oder sofort auffindbar sein müssen:
 - zuständige Instanz
 - nächster sinnvoller Schritt
 
+## Charakter ohne Placebo
+Die Kernschale bleibt dunkel. Wärme kommt aus Typografie, Abstand, Radius und einem reicheren Akzent — nicht aus einem erzwungenen Light-Theme und nicht aus einer zweiten Startwand im Chat.
+
+Lebendigkeit im Leerlauf ist erlaubt, wenn sie ehrlich ist:
+- ein ruhiger Atem/Puls für „bereit“
+- Bereit / Wartet / Als Nächstes nur aus Kernel, Session oder Workspace
+- keine erfundenen Läufe, keine Placebo-Fortschrittsbalken
+
 ## Harte UX-Regeln
 - keine semantisch wichtigen Informationen nur in Hover/Tooltip verstecken
 - keine Zustandslogik nur über subtile Farbunterschiede vermitteln

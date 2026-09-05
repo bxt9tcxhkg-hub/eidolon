@@ -38,6 +38,7 @@ let currentGoalId = null;
 let goalComposerVisible = false;
 let armedUnpairPeerId = null;
 let lastPresenceSnapshot = { state: 'idle', title: 'Bereit für neue Arbeit', detail: 'Starte ein Gespräch oder setze bestehende Arbeit fort.' };
+let lastOperateSnapshot = {};
 
 function closeMobileMore() {
     document.getElementById('mobile-more-sheet')?.classList.remove('open');
@@ -194,6 +195,7 @@ function setEidolonPresence(state, title, detail) {
     }
     const noteEl = document.getElementById('chat-presence-note');
     if (noteEl) noteEl.textContent = next.detail;
+    refreshWorkTraces();
 }
 
 function describeOperatePresence(data) {
@@ -221,6 +223,107 @@ function describeOperatePresence(data) {
         return { state: 'thinking', title: 'Strukturiert Arbeit', detail: focus + (phase ? ' • Phase: ' + phase : '') };
     }
     return { state: 'idle', title: 'Bereit für neue Arbeit', detail: 'Starte ein Gespräch oder setze bestehende Arbeit fort.' };
+}
+
+function pickRecentLocalWork(sessions) {
+    const list = Array.isArray(sessions) ? sessions : [];
+    const withSignal = list.filter((session) => {
+        const preview = String(session.last_message_preview || '').trim();
+        const count = Number(session.message_count || 0);
+        const title = String(session.title || '').trim();
+        return Boolean(preview) || count > 0 || (title && title !== 'Neue Unterhaltung');
+    });
+    if (!withSignal.length) return null;
+    return withSignal.slice().sort((a, b) => {
+        const ta = Date.parse(a.updated_at || a.created_at || 0) || 0;
+        const tb = Date.parse(b.updated_at || b.created_at || 0) || 0;
+        return tb - ta;
+    })[0];
+}
+
+function describeWorkTrace(data) {
+    const presence = describeOperatePresence(data);
+    const nextAction = data?.next_action || {};
+    const nextKind = String(nextAction.kind || '').toLowerCase();
+    const nextText = String(nextAction.title || nextAction.summary || nextAction.action_label || '').trim();
+    const hasNext = nextKind && nextKind !== 'none' && Boolean(nextText);
+    const recent = pickRecentLocalWork(typeof chatSessions !== 'undefined' ? chatSessions : []);
+
+    if (presence.state === 'blocked') {
+        return {
+            state: 'waiting',
+            ready: presence.title,
+            waiting: presence.detail,
+            next: hasNext ? nextText : 'Blocker in Arbeit sichtbar',
+            nextLabel: 'als Nächstes',
+        };
+    }
+    if (presence.state === 'waiting') {
+        return {
+            state: 'waiting',
+            ready: presence.title,
+            waiting: presence.detail,
+            next: hasNext ? nextText : 'deine Entscheidung',
+            nextLabel: 'als Nächstes',
+        };
+    }
+    if (presence.state === 'acting' || presence.state === 'thinking') {
+        return {
+            state: 'active',
+            ready: presence.title,
+            waiting: presence.detail,
+            next: hasNext ? nextText : presence.detail,
+            nextLabel: 'als Nächstes',
+        };
+    }
+    if (presence.state === 'done') {
+        return {
+            state: 'recent',
+            ready: 'Zuletzt',
+            waiting: 'nichts wartet',
+            next: presence.detail,
+            nextLabel: 'zuletzt',
+        };
+    }
+    if (recent) {
+        const title = String(recent.title || 'Unterhaltung').trim();
+        const when = (typeof formatSessionTimestamp === 'function')
+            ? formatSessionTimestamp(recent.updated_at || recent.created_at)
+            : '';
+        return {
+            state: 'recent',
+            ready: 'Bereit',
+            waiting: 'nichts wartet',
+            next: when ? (title + ' · ' + when) : title,
+            nextLabel: 'zuletzt',
+        };
+    }
+    return {
+        state: 'ready',
+        ready: 'Bereit',
+        waiting: 'nichts wartet',
+        next: 'dein Impuls',
+        nextLabel: 'als Nächstes',
+    };
+}
+
+function applyWorkTrace(el, trace) {
+    if (!el || !trace) return;
+    el.dataset.workTraceState = trace.state;
+    const ready = el.querySelector('[data-work-trace-ready]');
+    const waiting = el.querySelector('[data-work-trace-waiting]');
+    const next = el.querySelector('[data-work-trace-next]');
+    const nextLabel = el.querySelector('[data-work-trace-next-label]');
+    if (ready) ready.textContent = trace.ready;
+    if (waiting) waiting.textContent = trace.waiting;
+    if (next) next.textContent = trace.next;
+    if (nextLabel) nextLabel.textContent = trace.nextLabel;
+}
+
+function refreshWorkTraces(operateData) {
+    if (operateData && typeof operateData === 'object') lastOperateSnapshot = operateData;
+    const trace = describeWorkTrace(lastOperateSnapshot);
+    document.querySelectorAll('[data-work-trace]').forEach((el) => applyWorkTrace(el, trace));
 }
 
 // Chat
@@ -336,6 +439,9 @@ function confirmAction(target, kind) {
 Object.assign(window, {
     setEidolonPresence,
     describeOperatePresence,
+    describeWorkTrace,
+    refreshWorkTraces,
+    pickRecentLocalWork,
     syncNavHighlight,
     showTab,
     actionMotionEnabled,

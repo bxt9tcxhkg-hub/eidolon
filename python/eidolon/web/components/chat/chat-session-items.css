@@ -14,11 +14,11 @@
 }
 .chat-session-item:hover {
     background: var(--surface-hover);
-    border-color: rgba(74,125,255,0.28);
+    border-color: var(--accent-subtle);
 }
 .chat-session-item.active {
-    background: rgba(74,125,255,0.08);
-    border-color: rgba(74,125,255,0.35);
+    background: var(--accent-subtle);
+    border-color: var(--accent);
 }
 .chat-session-main { min-width: 0; text-align: left; }
 .chat-session-name {

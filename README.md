@@ -30,6 +30,7 @@ Rust-Crates bleiben im Repo (CLI, experimentelle Runtime, Mesh-Bibliotheken), si
 - Operate-Kernel mit Run-/Objective-/Approval-/Blocker-/Evidence-Modell vorhanden
 - Workspace-Bridge in Operate vorhanden
 - Web-UI startet in Chat; Projektfläche und Arbeit (Operate) sind erreichbar, ohne die Starttür zu sein
+- Idle-Chat bleibt schlank (Frage + Eingabe); Dark-Theme ist wärmer, Arbeitsspur zeigt Bereit/Wartet/Nächstes aus echten Kernel- und Sessiondaten
 - Chat zeigt ausstehende Freigaben, Blocker und den nächsten Schritt und löst dieselben Operate-APIs aus
 - Projektplanung erlaubt Rename, Status, Gruppe, Reihenfolge, Ablegen und Streichen gegen persistierte Projekt-APIs
 - Chat, Arbeit und Projektfläche lesen Freigaben/Blocker/Next aus demselben `work_kernel`/`operate`-Snapshot; Projektmutationen geben denselben Snapshot zurück statt eines leeren Parallelpfads
