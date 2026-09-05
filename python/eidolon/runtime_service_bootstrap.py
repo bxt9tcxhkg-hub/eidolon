@@ -10,7 +10,7 @@ from eidolon.core.cert_manager import get_certificate_manager
 from eidolon.core.config import HTTP_PORT, MESH_DISCOVERY_PORT
 from eidolon.core.goal_deriver import GoalDeriver
 from eidolon.core.healing import SelfHealingService
-from eidolon.core.llm_backend import get_llm_backend
+from eidolon.core.llm_backend import configure_from_settings, get_llm_backend
 from eidolon.core.mesh_service import get_mesh_service
 from eidolon.core.settings_store import SettingsStore
 from eidolon.operate.service import get_operate_service
@@ -26,14 +26,7 @@ from eidolon.workspaces.workspace_ui_service import get_workspace_ui_service
 
 
 def configure_llm_backend(settings_store: SettingsStore):
-    llm_backend = get_llm_backend()
-    llm_settings = settings_store.get_area('llm')
-    llm_backend.configure(
-        provider=llm_settings.get('provider'),
-        model=llm_settings.get('model'),
-        ollama_url=llm_settings.get('ollama_url'),
-    )
-    return llm_backend
+    return configure_from_settings(settings_store.get_area('llm'), get_llm_backend())
 
 
 def create_runtime_services(project_root: Path) -> RuntimeServices:

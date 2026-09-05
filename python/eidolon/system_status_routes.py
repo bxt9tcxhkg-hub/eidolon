@@ -6,6 +6,8 @@ from typing import Any, Callable
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
+from eidolon.llm_routes import register_llm_routes
+
 
 def register_system_status_routes(
     app: FastAPI,
@@ -19,43 +21,18 @@ def register_system_status_routes(
     get_openai_models: Callable[[], Any],
     get_openai_login_payload: Callable[[], Callable[[], dict[str, Any]]],
 ) -> None:
-    def llm_backend():
-        return get_llm_backend()
-    def settings_store():
-        return get_settings_store()
+    register_llm_routes(
+        app,
+        get_llm_backend=get_llm_backend,
+        get_settings_store=get_settings_store,
+        get_ollama_models=get_ollama_models,
+        get_openai_models=get_openai_models,
+        get_openai_login_payload=get_openai_login_payload,
+    )
     def workspace_ui_service():
         return get_workspace_ui_service()
     def voice_runtime_service():
         return get_voice_runtime_service()
-
-    @app.get('/llm/connection')
-    async def llm_connection_status():
-        status = llm_backend().status()
-        return {'ok': True, **status}
-
-    @app.get('/llm/models')
-    async def llm_models():
-        return {
-            'ok': True,
-            'ollama': get_ollama_models(llm_backend().status().get('ollama_url') or settings_store().get_area('llm').get('ollama_url') or 'http://127.0.0.1:11434'),
-            'openai': get_openai_models(),
-        }
-
-    @app.post('/integrations/openai/auth')
-    async def integrations_openai_auth():
-        openai = dict(llm_backend().status().get('openai') or {})
-        return {'ok': True, 'supported': True, 'provider': 'openai', 'auth_method': 'chatgpt_login', **openai}
-
-    @app.post('/integrations/openai/login')
-    async def integrations_openai_login():
-        return get_openai_login_payload()()
-
-    @app.get('/integrations/status')
-    async def integrations_status():
-        llm = llm_backend().status()
-        openai = dict(llm.get('openai') or {})
-        openai['current_provider'] = llm.get('provider') in ('openai', 'openai_oauth')
-        return {'ok': True, 'integrations': {'openai': openai, 'ollama': {'configured': llm.get('provider') == 'ollama', 'url': llm.get('ollama_url')}}}
 
     @app.get('/runtime/process')
     async def runtime_process():

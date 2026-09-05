@@ -66,6 +66,12 @@ Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gem
 - Arbeit mit Lauf: Ziel, nächster Schritt, Freigaben/Blocker nur wenn vorhanden; Rest in zugeklappten Details
 - Motion bestätigt nur echte Mutationen (Verschieben, Status, Freigabe, neues Projekt) und achtet `prefers-reduced-motion` sowie Settings `ui.animations`
 
+### 7. LLM-Provider-Registry
+- `python/eidolon/core/llm_provider_catalog.py` beschreibt Ollama, den OpenAI-kompatiblen HTTP-Stecker und Codex-OAuth
+- Chat/`complete()` geht über `llm_fallback.py`: gewählter Anbieter zuerst, danach die eindeutige `fallback_chain`
+- OpenAI-kompatibel ist `base_url` + API-Schlüssel + Modell; Presets (Groq, OpenRouter, …) setzen nur Defaults
+- OAuth wird nur für `openai_oauth` angeboten; `/llm/connection` und Settings zeigen Status ohne Schlüsselwerte
+
 ## Aktuelle Hauptschulden
 - `python/agent_server.py` ist weiter ein großer Integrationspunkt
 - `python/eidolon/web/index.html` bleibt groß und mischt Produktsemantik mit UI-Implementierung

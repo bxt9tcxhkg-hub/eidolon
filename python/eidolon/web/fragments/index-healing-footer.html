@@ -34,7 +34,7 @@
                 </div>
                 <div class="card">
                     <div class="card-header"><h3>🧠 KI-Verbindung</h3><button class="btn btn-sm" data-ui-action="resetSettingsArea" data-ui-args='["llm"]'>Zurücksetzen</button></div>
-                    <div class="empty" style="margin-bottom:10px;">OpenAI wird hier ehrlich per API-Key angebunden. OAuth ist in diesem lokalen Runtime-Pfad nicht implementiert.</div>
+                    <div class="empty" style="margin-bottom:10px;">OpenAI-kompatible Anbieter (Groq, OpenRouter, Mistral, lokale Gateways) werden über Basis-URL, API-Schlüssel und Modell angebunden. ChatGPT-Login (OAuth) erscheint nur für den Codex-Pfad — nie als Fake für reine Key-Anbieter. Die Ersatzkette versucht den gewählten Anbieter zuerst, danach die hinterlegten Fallbacks.</div>
                     <div id="settings-llm"><div class="empty">Lade...</div></div>
                     <div id="llm-connection-status" class="empty" style="margin-top:10px;"></div>
                 </div>

@@ -43,6 +43,7 @@
 - Runtime-State wurde aus dem Repo nach `%LOCALAPPDATA%/Eidolon/state/` ausgelagert
 - `python -m pytest -q` → Formation-/Board-Karten-/Freigabe- und Altverträge; vorbestehende Env-Fehler (kein Live-Ollama, kein `aioquic`, Codex-CLI/`oauth_supported` false) bleiben außerhalb dieses Schnitts
 - Bestätigtes Vorhaben füllt das Board mit unterscheidbaren, textgebundenen Karten (Fakten/Bedingungen in Notizen); erneutes Seed verdoppelt nicht
+- LLM-Anbieter liegen in einer Registry: Ollama, OpenAI-kompatibel (`base_url` + Key + Modell, optionale Presets wie Groq) und Codex-OAuth; OAuth wird nur für den Codex-Pfad gezeigt; `complete()` folgt der Ersatzkette (gewählt zuerst, dann `fallback_chain`); Schlüssel erscheinen nicht in Settings-/Connection-/Chat-Antworten
 
 ## Offene Prioritäten
 

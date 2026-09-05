@@ -16,6 +16,7 @@ def test_chat_endpoint_returns_real_model_response():
         provider='ollama',
         model='llama3.1:8b',
         ollama_url='http://127.0.0.1:11434',
+        fallback_chain=['ollama'],
     )
     client = TestClient(agent_server.app)
     try:
