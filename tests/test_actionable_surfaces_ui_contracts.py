@@ -105,6 +105,11 @@ def test_arbeit_run_keeps_priority_and_collapses_rest():
     assert 'details.open = false' in render_js
     assert 'syncOperateEmptyLayout({' in view_js
     assert '/api/v1/operate/overview' in view_js
+    assert 'function renderNextAction(runId, nextAction, approvals)' in render_js
+    assert '>Freigeben</button>' in render_js
+    assert '>Ablehnen</button>' in render_js
+    assert "nextAction.kind === 'next_step' && nextAction.action_enabled && !pending.length" in render_js
+    assert 'renderNextAction(run.id, nextAction, approvals)' in view_js
 
 
 def test_action_motion_confirms_real_mutations_only():

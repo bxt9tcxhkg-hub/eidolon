@@ -154,6 +154,16 @@
 .chat-formation {
     margin-top: 10px;
 }
+.chat-formation-card {
+    border: 1px solid var(--accent, #c9a36a);
+    background: rgba(201, 163, 106, 0.08);
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+.chat-formation-card .summary-headline {
+    font-family: var(--font-display);
+    font-size: 1.02rem;
+}
 
 .project-slot-label .tag {
     margin-left: 6px;

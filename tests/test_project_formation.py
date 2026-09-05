@@ -163,5 +163,8 @@ def test_describe_formation_exposes_visible_promotion_contract():
     })
     assert formation['requires_confirmation'] is True
     assert formation['creates_durable_project'] is True
-    assert formation['action_label'] == 'Als Projekt übernehmen'
+    assert formation['action_label'] == 'Ja, übernehmen'
     assert formation['workspace_id'] == 'ws_1'
+    assert formation['decline_label'] == 'Nein, nur im Chat'
+    assert formation['decline_to_state'] == 'chat_topic'
+    assert formation['seed_board'] is True

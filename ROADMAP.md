@@ -28,6 +28,9 @@
 - Chat zeigt ausstehende Freigaben, offene Blocker und den nächsten Schritt und löst dieselben Operate-APIs aus wie die Arbeitsfläche
 - Chat, Arbeit und Projektfläche teilen denselben Operate-/Kernel-Snapshot für Freigaben, Blocker und Next Action; Projektmutationen schreiben nicht mehr in einen leeren parallelen `operate`-Pfad
 - Projektbildung ist ein expliziter Vertrag (`POST /workspaces/formation`): `chat_topic` → `project_candidate` sichtbar, `project_candidate` → `active_project` nur mit Nutzerbestätigung
+- Arbeitsorientierte Chat-Nachrichten erzeugen den Kandidaten deterministisch (ohne Ollama); Chat zeigt Bestätigen/Ablehnen
+- Bestätigung legt das Projekt an und füllt das Board mit generischen Planungselementen aus dem Vorhaben
+- Consequential next steps (Buchung / externe Aktion) erzeugen eine echte Operate-Freigabe; Chat und Arbeit zeigen dann Freigeben/Ablehnen, Weiter nur als Fortsetzen
 - Generisches Karten-/Slot-Gerüst ohne Domänen-Pakete, Slots werden situationsabhängig aus Kernel/Workspace verdichtet
 - Python FastAPI ist dokumentiert und durch Port-Wächter als einzige live Runtime gegenüber Rust abgegrenzt
 - Ein kleines zustandsfähiges Eidolon-Signature-Object transportiert reale Arbeitszustände statt bloßes Dekor
@@ -38,7 +41,7 @@
 - Findings- und Root-History-Dokumentation haben jetzt explizite Supersession-/Archiv-Readmes
 - `/identity` liefert konsistente Produktrolle
 - Runtime-State wurde aus dem Repo nach `%LOCALAPPDATA%/Eidolon/state/` ausgelagert
-- `python -m pytest -q` besteht für die neuen Formation-/Work-Truth-/Planning-/Idle-/Action-Verträge (136 passed in dieser Umgebung); 6 vorbestehende Env-Fehler: kein Live-Ollama, Operate-Element-Feed `planning` vs `acting`, fehlendes `aioquic`, Codex-CLI/`oauth_supported` false (2 Tests), Mesh-Self-Pairing sieht einen bestehenden Browser-Peer
+- `python -m pytest -q` besteht für die neuen Formation-/Board-Seed-/Freigabe-Verträge in dieser Umgebung; vorbestehende Env-Fehler (kein Live-Ollama, fehlendes `aioquic`, Codex-CLI/`oauth_supported`) bleiben außerhalb dieses Schnitts
 
 ## Offene Prioritäten
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from eidolon.workspaces.contracts import build_workspace_semantic_frame, map_workspace_state_to_product_state
+from eidolon.workspaces.message_candidate import is_preserved_workspace
 
 
 def propose_from_topics(registry) -> dict:
@@ -39,6 +40,14 @@ def propose_from_topics(registry) -> dict:
         workspace['product_state'] = state.get('product_state', workspace.get('product_state'))
         workspace['semantic_frame'] = state.get('semantic_frame', {})
         enriched.append(workspace)
+    claimed = {workspace.get('workspace_id') for workspace in enriched}
+    for workspace_id, prior in previous.items():
+        if workspace_id in claimed or not is_preserved_workspace(prior):
+            continue
+        state = registry.state_store.ensure_workspace_state(prior)
+        prior = {**prior, 'state_data': state, 'product_state': prior.get('product_state') or state.get('product_state')}
+        enriched.append(prior)
+        claimed.add(workspace_id)
     suggestions = registry.proactive_store.generate(topics, enriched, user)
     payload = {'workspaces': enriched, 'feature_flags': data.get('feature_flags', {'workspace_adaptive_modules': True}), 'proactive_assistance': suggestions, 'context_model': registry.build_context_model(enriched)}
     registry._save({'workspaces': enriched, 'feature_flags': payload['feature_flags']})

@@ -36,6 +36,7 @@ Wenn mindestens eines gilt:
 - wiederkehrender Hilfebedarf
 - klarer Bedarf an Verlauf oder Nachverfolgung
 - erkennbare Fortsetzung über eine Einmalantwort hinaus
+- ein arbeitsorientiertes Vorhaben in der Nachricht, auch ohne LLM: deterministische Extraktion plus sichtbare Bestätigung
 
 ### `project_candidate` → `active_project`
 Wenn genug Struktur vorhanden ist, um:

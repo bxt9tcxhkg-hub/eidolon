@@ -43,6 +43,7 @@ function renderChatRuntimeContext(runtimeContext) {
     const classification = intent.classification || 'unknown';
     const workOriented = Boolean(intent.is_work_oriented);
 
+    renderChatFormation((runtimeContext && runtimeContext.formation) || null);
     if (!workOriented || classification === 'casual_chat' || classification === 'general_chat' || classification === 'general_chat_with_work_context') {
         stateEl.textContent = (readableFocus && readableFocus !== 'Kein Fokus')
             ? (readableFocus + ' • Arbeitskontext verfügbar, aber für dieses Gespräch nicht erzwungen')
@@ -66,7 +67,6 @@ function renderChatRuntimeContext(runtimeContext) {
     }
     if (typeof loadChatLandingSummary === 'function') loadChatLandingSummary();
     renderChatOperateActionsFromContext(runtimeContext);
-    renderChatFormation((runtimeContext && runtimeContext.formation) || null);
     syncChatIdleLayout(runtimeContext);
 }
 
@@ -152,30 +152,50 @@ function renderChatFormation(formation) {
     }
     const label = data.label || 'Aktueller Kontext';
     const confirmNeeded = Boolean(data.requires_confirmation);
+    const why = data.why || (confirmNeeded
+        ? 'Erst mit deiner Bestätigung wird daraus ein dauerhaftes Projekt.'
+        : 'Der Übergang bleibt sichtbar und legt noch kein dauerhaftes Projekt an.');
+    const summary = data.summary ? String(data.summary) : '';
     const copy = confirmNeeded
-        ? ('"' + label + '" ist ein Projektkandidat. Erst mit deiner Bestätigung wird daraus ein dauerhaftes Projekt — kein stiller Projekt-Bot.')
-        : ('"' + label + '" kann vom Gesprächsthema zum Projektkandidaten werden. Der Übergang bleibt sichtbar.');
-    const args = [data.workspace_id, data.to_state, confirmNeeded];
-    el.innerHTML = '<div class="chat-operate-item">'
-        + '<div class="summary-headline">' + escapeHtml(data.action_label || 'Projektbildung') + '</div>'
+        ? ('Projekt: ' + label + '. ' + why)
+        : ('Thema: ' + label + '. ' + why);
+    const confirmArgs = [data.workspace_id, data.to_state, confirmNeeded, Boolean(data.seed_board)];
+    const buttons = [];
+    if (data.action_enabled) {
+        buttons.push(operateActionButton(data.action_label || (confirmNeeded ? 'Ja, übernehmen' : 'Als Kandidat merken'), 'applyChatFormation', confirmArgs, true));
+        if (data.decline_to_state) {
+            buttons.push(operateActionButton(data.decline_label || 'Nein, nur im Chat', 'applyChatFormation', [data.workspace_id, data.decline_to_state, false, false], false));
+        }
+    }
+    el.innerHTML = '<div class="chat-operate-item chat-formation-card">'
+        + '<div class="summary-headline">' + escapeHtml(confirmNeeded ? 'Daraus ein Projekt machen?' : (data.action_label || 'Projektbildung')) + '</div>'
         + '<div class="summary-copy">' + escapeHtml(copy) + '</div>'
+        + (summary ? '<div class="summary-copy">' + escapeHtml(summary) + '</div>' : '')
         + '<div class="summary-meta"><span class="summary-chip">' + escapeHtml(data.from_state || data.current_state || '') + '</span><span class="summary-chip">→ ' + escapeHtml(data.to_state) + '</span></div>'
-        + (data.action_enabled ? '<div class="chat-operate-buttons">' + operateActionButton(data.action_label || 'Bestätigen', 'applyChatFormation', args, true) + '</div>' : '')
+        + (buttons.length ? '<div class="chat-operate-buttons">' + buttons.join('') + '</div>' : '')
         + '</div>';
 }
 
-async function applyChatFormation(workspaceId, toState, confirmed) {
+async function applyChatFormation(workspaceId, toState, confirmed, seedBoard) {
     const response = await api('POST', '/workspaces/formation', {
         workspace_id: workspaceId,
         to_state: toState,
         confirmed: Boolean(confirmed),
-        reason: confirmed ? 'user_confirmed_promotion' : 'visible_proactive_formation',
+        seed_board: Boolean(seedBoard || (confirmed && toState === 'active_project')),
+        reason: confirmed ? 'user_confirmed_promotion' : (toState === 'chat_topic' ? 'user_declined_promotion' : 'visible_proactive_formation'),
     });
     if (response?.ok === false) {
-        showNotice(response.error || 'Projektbildung fehlgeschlagen', 'error');
+        showNotice(response.error || response.detail || 'Projektbildung fehlgeschlagen', 'error');
         return;
     }
-    showNotice(confirmed ? 'Projekt übernommen' : 'Kandidat sichtbar gesetzt', 'success');
+    const seeded = (response && response.seeded_elements) || [];
+    if (confirmed && toState === 'active_project') {
+        showNotice(seeded.length ? ('Projekt übernommen, ' + seeded.length + ' Karten auf dem Board') : 'Projekt übernommen', 'success');
+    } else if (toState === 'chat_topic') {
+        showNotice('Bleibt im Chat, kein Projekt angelegt', 'info');
+    } else {
+        showNotice('Kandidat sichtbar gesetzt', 'success');
+    }
     if (typeof refreshOperateSurfaces === 'function') await refreshOperateSurfaces();
     else if (typeof loadChatLandingSummary === 'function') await loadChatLandingSummary();
     if (typeof loadWorkspaces === 'function') await loadWorkspaces();
@@ -234,7 +254,7 @@ async function loadChatLandingSummary() {
                 || (history.slice(-1)[0]?.summary || '')
                 || 'Kein offener nächster Schritt — die letzte Arbeit ist abgeschlossen.';
             const nextStep = escapeHtml(nextStepValue);
-            const continueButton = (run.id && nextAction.kind === 'next_step' && nextAction.action_enabled)
+            const continueButton = (run.id && nextAction.kind === 'next_step' && nextAction.action_enabled && !approvals.length)
                 ? '<div class="chat-operate-buttons">' + operateActionButton(nextAction.action_label || 'Weiter', 'advanceOperateRun', [run.id], true) + '</div>'
                 : '';
             activeEl.innerHTML = '<div class="summary-headline">' + escapeHtml(objective.title || 'Aktive Arbeit') + '</div>'

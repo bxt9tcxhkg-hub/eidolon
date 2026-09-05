@@ -108,6 +108,7 @@ def register_project_routes(app: FastAPI, *, get_project_service, get_workspace_
                 to_state,
                 confirmed=bool(request.get('confirmed')),
                 reason=str(request.get('reason') or ''),
+                seed_board=request.get('seed_board'),
             )
         except FormationError as exc:
             raise HTTPException(status_code=400, detail=str(exc))
