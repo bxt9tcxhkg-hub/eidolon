@@ -959,7 +959,10 @@ def test_project_planning_surface_is_generic_and_editable():
     assert "['planned', 'Geplant']" in js
     assert "['done', 'Fertig']" in js
     assert "['archived', 'Archiv']" in js
-    assert 'data-plan-field="title"' in js
+    assert 'class="plan-card-title"' in js
+    assert 'data-plan-field="title"' not in js
+    assert 'id="task-title"' in html
+    assert 'data-plan-menu' in js
     assert 'data-plan-field="status"' in js
     assert 'data-plan-field="parent_id"' in js
     assert 'data-plan-archive' in js
