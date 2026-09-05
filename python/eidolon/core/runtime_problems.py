@@ -24,12 +24,21 @@ def llm_visible_problems(status: dict[str, Any] | None) -> list[str]:
 
 def healing_visible_problems(healing_state: dict[str, Any] | None) -> list[str]:
     problems: list[str] = []
-    state = healing_state or {}
+    if healing_state is None:
+        return problems
+    state = healing_state
+    if not state.get('running'):
+        problems.append('SelfHealingService ist verdrahtet, läuft aber aktuell nicht.')
     blocked = state.get('blocked') or {}
     if isinstance(blocked, dict):
         for name, info in blocked.items():
             if info:
                 problems.append(f'Healing-Check blockiert: {name}')
+    errors = state.get('error_counts') or {}
+    if isinstance(errors, dict):
+        for name, count in errors.items():
+            if count:
+                problems.append(f'Healing-Fehler {name}: {count}')
     return problems
 
 

@@ -12,6 +12,7 @@ from eidolon.core.llm_backend import LLMBackend
 from eidolon.core.llm_config_store import load_llm_config, save_llm_config, save_openai_api_key
 from eidolon.core.llm_provider_catalog import build_fallback_chain, normalize_llm_settings
 from eidolon.core.llm_secrets import contains_secret, mask_secret
+from eidolon.core.runtime_problems import healing_visible_problems
 import agent_server
 
 
@@ -396,3 +397,27 @@ def test_chat_and_operate_apply_general_settings_and_reject_invalid():
     finally:
         agent_server.settings_store.set_area('ui', original_ui)
         agent_server.settings_store.set_area('llm', original_llm)
+
+
+def test_healing_visible_problems_are_honest_not_placebo():
+    assert healing_visible_problems(None) == []
+    stopped = healing_visible_problems({'running': False, 'blocked': {}, 'error_counts': {}})
+    assert stopped == ['SelfHealingService ist verdrahtet, läuft aber aktuell nicht.']
+    blocked = healing_visible_problems({
+        'running': True,
+        'blocked': {'ollama': True},
+        'error_counts': {'ollama': 2},
+    })
+    assert 'Healing-Check blockiert: ollama' in blocked
+    assert 'Healing-Fehler ollama: 2' in blocked
+    client = TestClient(agent_server.app)
+    status = client.get('/healing/status').json()
+    assert 'checks_registered' in status
+    assert 'SelfHealingService' in (status.get('detail') or '')
+    reply = client.post('/chat', json={'message': 'Welche Fehler sind erkannt?', 'source': 'test-healing-visible'}).json()
+    assert reply['ok'] is True
+    assert SECRET not in reply['response']
+    if not status.get('available'):
+        assert 'SelfHealingService' in reply['response']
+    if reply.get('session_id'):
+        client.delete(f"/chat/sessions/{reply['session_id']}")
