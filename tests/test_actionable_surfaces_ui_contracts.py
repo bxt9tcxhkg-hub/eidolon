@@ -197,6 +197,7 @@ def test_planning_board_is_horizontal_kanban_with_compact_cards():
     assert 'overflow-x: auto' in css
     assert 'grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))' not in css
     assert '.plan-card-menu[hidden]' in css
+    assert '@media (hover: none)' in css
     assert 'planning-column-header' in html
     assert 'planning-column-title' in html
     assert 'planning-column-body' in html

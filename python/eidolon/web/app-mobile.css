@@ -132,7 +132,11 @@
                 font-size: 0.82rem;
             }
             .planning-board {
-                min-height: 260px;
+                min-height: min(52dvh, 420px);
                 scroll-snap-type: x proximity;
+            }
+            .plan-card-menu-btn {
+                opacity: 1;
+                color: var(--text-muted);
             }
         }

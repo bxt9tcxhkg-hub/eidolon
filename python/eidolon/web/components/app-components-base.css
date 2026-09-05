@@ -691,6 +691,13 @@
     background: var(--accent-subtle);
 }
 
+@media (hover: none) {
+    .plan-card-menu-btn {
+        opacity: 1;
+        color: var(--text-muted);
+    }
+}
+
 .plan-card-menu {
     display: flex;
     flex-direction: column;
