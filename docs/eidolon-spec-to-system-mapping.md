@@ -317,7 +317,7 @@
 - live route path+method duplicates → 0
 - live `GET /identity` → returns `product_role: "Zentrales agentisches Hauptsystem"`
 - live `GET /chat/context` → returns runtime context including chat/workspace/operate state
-- live `python -m pytest -q` → passes for new formation/work-truth/planning contracts (127 passed, 2 warnings); this Cloud-Agent environment additionally failed 4 pre-existing checks: no live Ollama (`test_chat_endpoint_returns_real_model_response`), missing `aioquic`, and `oauth_supported is False` without Codex CLI. `EIDOLON_STATE_DIR` collapses tmp_path stores; tests here used `LOCALAPPDATA` so AppData layout stayed untouched.
+- live `python -m pytest -q` → 146 passed for formation/board-seed/Freigabe and prior contracts (2 warnings); this Cloud-Agent environment additionally failed 5 pre-existing checks: no live Ollama (`test_chat_endpoint_returns_real_model_response`), missing `aioquic`, `oauth_supported is False` without Codex CLI (2 tests), and a stale Chat-header copy assert from an earlier idle-copy change. `EIDOLON_STATE_DIR` collapses tmp_path stores; tests here used `LOCALAPPDATA=/tmp/AppData/Local`.
 - repo runtime-state roots `python/data/` and `data/` → removed from the repo
 - active runtime-state root → `%LOCALAPPDATA%/Eidolon/state/`
 
@@ -387,13 +387,15 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 - `POST /workspaces/formation` persists the transition; `project_candidate` → `active_project` requires `confirmed=true` and may create a real project
 - Chat shows the pending transition (`#chat-formation`) and calls the same formation API
 - heuristic mapping no longer silent-promotes runtime `active` to `active_project`
+- work-oriented chat messages persist a visible `project_candidate` without an LLM; confirm seeds generic board cards and may request a real Operate approval for booking/external-write steps
 
 ### Remaining mismatch
-- topic detection is still heuristic for proposing `chat_topic` vs `project_candidate`
+- first-hop title/summary extraction is deterministic, not model-enriched
 - Operate `context_kind` is updated on confirmed transitions, but not every historical session is backfilled
+- Freigaben are created only for consequential external/booking-class steps, not for every next_step
 
 ### Verdict
-**Canonical transition contract is now real and tested; proposal heuristics remain for the first hop.**
+**Canonical transition contract is visible in Chat without Ollama; confirm fills the board and can open a real Freigabe door.**
 
 ## Area 4 — Autonomy and approval
 ### Current evidence
@@ -401,10 +403,11 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 - role registry enforces explicit approval for persistent approved roles
 
 ### Remaining mismatch
-- chat shows more of this state now, but is not yet the full execution front door for every approval/interrupt path
+- Chat and Arbeit now show Freigeben/Ablehnen when a pending gate exists; Weiter is only the continue-next action
+- Interrupts are still a thinner path than approvals
 
 ### Verdict
-**Grounded but not fully surfaced.**
+**Approval door is wired for pending gates and consequential external-write steps; not every next step invents a Freigabe.**
 
 ## Area 5 — Bot organization
 ### Current evidence

@@ -57,6 +57,7 @@ Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gem
 - Chat zeigt ausstehende Freigaben, Blocker und Next Action und löst dieselben Operate-APIs aus
 - Chat, Arbeit und Projektfläche lesen denselben `work_kernel`-/Operate-Snapshot; Projektmutationen geben denselben Snapshot zurück
 - Projektbildung ist über `POST /workspaces/formation` explizit; `active_project` braucht sichtbare Bestätigung
+- Chat-Kandidaten entstehen deterministisch aus Vorhaben-Nachrichten; Bestätigung füllt generische Board-Karten und kann eine echte Operate-Freigabe öffnen
 - Projektfläche zeigt im Idle **Neues Projekt** plus leeres Planungsboard; der Operate-Überblick (Zustand/Ziel/Blocker/Freigaben) bleibt im Idle verborgen
 - Offenes Projekt: editierbarer Titel und Status, Board als Hauptfläche; Chat/Arbeit nur als kleine Nebenwege
 - Projekt- und Elementmutationen (Rename, Status, Gruppe, Reihenfolge, Archiv, Streichen) schreiben gegen bestehende Projekt-APIs

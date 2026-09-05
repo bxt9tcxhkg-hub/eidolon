@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from eidolon.work_context_support import active_workspace, candidate_workspace, lower_text, recent_messages, workspace_summary, normalize_text
+from eidolon.workspaces.vorhaben_extract import looks_like_vorhaben
 
 
 OPEN_WORK_PATTERNS = [
@@ -58,7 +59,8 @@ def resolve_open_intent(message: str, workspace_payload: dict[str, Any] | None =
     if not open_work and '?' in text and len(text.split()) <= 10 and any(token in lowered for token in ('können', 'koennen', 'machen', 'weiter', 'start', 'anstellen', 'angehen')):
         open_work = True
     social_chat = _is_social_chat(text, lowered, explicit_mode)
-    work_oriented = not social_chat and (open_work or explicit_mode != 'unknown')
+    vorhaben = looks_like_vorhaben(text)
+    work_oriented = not social_chat and (open_work or explicit_mode != 'unknown' or vorhaben)
 
     if social_chat:
         classification, mode_hint = 'casual_chat', 'chat'
@@ -75,6 +77,8 @@ def resolve_open_intent(message: str, workspace_payload: dict[str, Any] | None =
         mode_hint = 'explore' if open_work else explicit_mode
     elif open_work:
         classification, mode_hint = 'start_from_nothing', 'explore'
+    elif vorhaben:
+        classification, mode_hint = 'plan', 'plan'
     elif explicit_mode != 'unknown':
         classification = mode_hint = explicit_mode
     elif recent and any(token in lower_text(recent) for token in ('projekt', 'issue', 'bug', 'fix', 'plan', 'task', 'umsetzen')):
@@ -96,6 +100,7 @@ def resolve_open_intent(message: str, workspace_payload: dict[str, Any] | None =
             'active_workspace_present' if active else
             'project_candidate_present' if candidate else
             'chat_topic_present' if context_model.get('chat_topic_count') else
-            'open_work_prompt' if open_work else 'message_pattern'
+            'open_work_prompt' if open_work else
+            'vorhaben_signal' if vorhaben else 'message_pattern'
         ),
     }

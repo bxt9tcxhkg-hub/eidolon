@@ -78,7 +78,10 @@ class RuntimeApp:
         return quic_runtime_status(self)
 
     def chat_runtime_payload(self, message: str, source: str, session: dict[str, Any] | None) -> dict[str, Any]:
+        from eidolon.workspaces.message_candidate import capture_message_candidate
         workspace_ui = self._ns('workspace_ui_service', self.services.workspace_ui_service)
+        if message:
+            capture_message_candidate(workspace_ui, message, session, source=source)
         workspace_payload = workspace_ui.get_runtime_payload()
         capability_payload = get_capability_registry().list()
         user_model = self._ns('user_model_store', self.services.user_model_store).get()

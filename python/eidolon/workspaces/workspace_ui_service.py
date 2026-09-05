@@ -49,8 +49,8 @@ class WorkspaceUIService:
     def get_work_truth(self, *, project: dict | None = None) -> dict:
         return work_truth_fields(self.get_overview(), project=project)
 
-    def apply_formation(self, workspace_id: str, to_state: str, *, confirmed: bool = False, reason: str = '') -> dict:
-        return apply_workspace_formation(self, workspace_id, to_state, confirmed=confirmed, reason=reason)
+    def apply_formation(self, workspace_id: str, to_state: str, *, confirmed: bool = False, reason: str = '', seed_board: bool | None = None) -> dict:
+        return apply_workspace_formation(self, workspace_id, to_state, confirmed=confirmed, reason=reason, seed_board=seed_board)
 
     def get_workspace(self, workspace_id: str) -> dict | None:
         return workspace_detail_payload(self._project_service, self._registry, self._operate_service, workspace_id)

@@ -14,5 +14,6 @@ def present_approvals(records):
             'resolved_at': item.resolved_at,
             'resolved_by': item.resolved_by,
             'is_pending': item.status == 'pending',
+            'requires_decision': item.status == 'pending',
         })
     return result

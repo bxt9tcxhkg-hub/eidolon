@@ -1077,6 +1077,10 @@ def test_chat_is_operate_execute_door():
     assert 'function renderChatFormation' in js
     assert "applyChatFormation" in js
     assert "'/workspaces/formation'" in js
+    assert 'Daraus ein Projekt machen?' in js
+    assert 'Ja, übernehmen' in js
+    assert 'Nein, nur im Chat' in js
+    assert 'seed_board' in js
     assert "resolveOperateApproval" in js
     assert "advanceOperateRun" in js
     assert "resolveOperateBlocker" in js

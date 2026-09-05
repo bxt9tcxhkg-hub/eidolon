@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
+from eidolon.workspaces.board_seed import finish_confirmed_project
 from eidolon.workspaces.project_formation import FormationError, apply_transition
 
 
@@ -24,7 +25,7 @@ def _sync_operate_context_kind(operate_service, to_state: str, workspace_id: str
     operate_service.store.update_session(session.id, context_kind=to_state, linked_workspace_id=workspace_id, surface_reason=reason)
 
 
-def apply_workspace_formation(ui_service, workspace_id: str, to_state: str, *, confirmed: bool = False, reason: str = '') -> dict[str, Any]:
+def apply_workspace_formation(ui_service, workspace_id: str, to_state: str, *, confirmed: bool = False, reason: str = '', seed_board: bool | None = None) -> dict[str, Any]:
     snapshot = ui_service._registry.snapshot()
     workspace = _find_workspace(snapshot, workspace_id)
     if workspace is None:
@@ -33,8 +34,18 @@ def apply_workspace_formation(ui_service, workspace_id: str, to_state: str, *, c
         raise FormationError(f'Workspace nicht gefunden: {workspace_id}')
     from_state = str(workspace.get('product_state') or 'chat_topic')
     result = apply_transition(from_state, to_state, confirmed=confirmed, reason=reason)
+    should_seed = seed_board if seed_board is not None else bool(to_state == 'active_project' and confirmed)
     if not result['changed']:
-        return {**result, 'workspace': workspace, 'project': None}
+        project = None
+        seeded: list[Any] = []
+        approval = None
+        if to_state == 'active_project' and should_seed:
+            project_id = workspace_id.removeprefix('project_') if str(workspace_id).startswith('project_') else str((workspace.get('metadata') or {}).get('project_id') or '')
+            project = ui_service._project_service.get_project(project_id) if project_id else None
+            project, seeded, approval = finish_confirmed_project(ui_service, workspace, project, seed_board=True)
+            if project is not None:
+                workspace = ui_service._project_to_workspace(project)
+        return {**result, 'workspace': workspace, 'project': project.to_dict() if project else None, 'seeded_elements': [item.to_dict() for item in seeded], 'approval': approval}
 
     project = None
     if to_state == 'active_project' and not str(workspace_id).startswith('project_'):
@@ -49,6 +60,7 @@ def apply_workspace_formation(ui_service, workspace_id: str, to_state: str, *, c
             'formation_source': 'user_confirmed_promotion',
             'product_state': 'active_project',
             'source_workspace_id': workspace_id,
+            'source_message': (workspace.get('metadata') or {}).get('source_message') or '',
         }
         project.status = 'in_progress'
         project.updated_at = _now()
@@ -57,9 +69,10 @@ def apply_workspace_formation(ui_service, workspace_id: str, to_state: str, *, c
             ui_service._registry.set_workspace_state(workspace_id, 'suspended')
         except KeyError:
             pass
+        project, seeded, approval = finish_confirmed_project(ui_service, workspace, project, seed_board=should_seed)
         created = ui_service._project_to_workspace(project)
         _sync_operate_context_kind(ui_service._operate_service, 'active_project', created.get('workspace_id') or f'project_{project.id}', result['reason'])
-        return {**result, 'workspace': created, 'project': project.to_dict()}
+        return {**result, 'workspace': created, 'project': project.to_dict(), 'seeded_elements': [item.to_dict() for item in seeded], 'approval': approval}
 
     if str(workspace_id).startswith('project_'):
         project_id = workspace_id.removeprefix('project_')
@@ -76,9 +89,13 @@ def apply_workspace_formation(ui_service, workspace_id: str, to_state: str, *, c
             project_obj.status = 'in_progress'
         project_obj.updated_at = _now()
         ui_service._project_service._store.save_project(project_obj)
+        if to_state == 'active_project' and should_seed:
+            project_obj, seeded, approval = finish_confirmed_project(ui_service, workspace, project_obj, seed_board=True)
+        else:
+            seeded, approval = [], None
         updated = ui_service._project_to_workspace(project_obj)
         _sync_operate_context_kind(ui_service._operate_service, to_state, updated.get('workspace_id') or workspace_id, result['reason'])
-        return {**result, 'workspace': updated, 'project': project_obj.to_dict()}
+        return {**result, 'workspace': updated, 'project': project_obj.to_dict(), 'seeded_elements': [item.to_dict() for item in seeded], 'approval': approval}
 
     metadata = dict(workspace.get('metadata') or {})
     metadata['formation_confirmed'] = bool(result.get('formation_confirmed'))
@@ -95,5 +112,5 @@ def apply_workspace_formation(ui_service, workspace_id: str, to_state: str, *, c
                 item['state'] = 'prepared'
             ui_service._registry._save(data)
             _sync_operate_context_kind(ui_service._operate_service, to_state, workspace_id, result['reason'])
-            return {**result, 'workspace': item, 'project': None}
+            return {**result, 'workspace': item, 'project': None, 'seeded_elements': [], 'approval': None}
     raise FormationError(f'Workspace konnte nicht persistiert werden: {workspace_id}')

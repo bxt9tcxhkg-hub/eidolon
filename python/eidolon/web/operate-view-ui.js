@@ -47,7 +47,7 @@
                 renderBlockers(null, []);
                 renderSubagents([]);
                 renderEvidence([]);
-                renderNextAction(null, { kind: 'none' });
+                renderNextAction(null, { kind: 'none' }, []);
                 renderHistory([]);
                 renderWorkGraph({ nodes: [], edges: [] });
                 renderTransitions([]);
@@ -67,7 +67,7 @@
             renderBlockers(run.id, blockers);
             renderSubagents(activePods);
             renderEvidence(evidence);
-            renderNextAction(run.id, nextAction);
+            renderNextAction(run.id, nextAction, approvals);
             renderHistory(history);
             renderWorkGraph(workGraph);
             renderTransitions(transitions);
