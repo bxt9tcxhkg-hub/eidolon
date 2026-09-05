@@ -37,7 +37,7 @@ def test_vorhaben_extract_is_generic_not_a_travel_pack():
     titles = [card['title'] for card in extracted['cards']]
     assert any('Anreise' in title and 'Laden' in title for title in titles)
     assert any('Unterkunft' in title and 'Bad' in title for title in titles)
-    assert any('Dauer' in title or 'Termin' in title for title in titles)
+    assert any('Zeitraum' in title or 'Dauer' in title or 'Termin' in title for title in titles)
     assert any('Packen' in title or 'Vorbereitung' in title for title in titles)
     assert extracted['approval']['action_type'] == 'external_write'
     assert extracted['approval']['title'] == 'Buchung vorschlagen'

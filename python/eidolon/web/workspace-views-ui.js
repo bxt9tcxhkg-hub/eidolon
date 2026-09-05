@@ -83,6 +83,7 @@
             '<div class="goal-stripe"></div><div class="goal-body">' +
             '<div class="comp-detail">' + escapeHtml(ws.elementTypeLabel(item.element_type)) + (related ? ' · ' + escapeHtml(related) : '') + '</div>' +
             '<input class="plan-card-title" data-plan-field="title" data-element-id="' + escapeHtml(item.id) + '" value="' + escapeHtml(item.title || '') + '">' +
+            (item.description ? '<div class="plan-card-notes">' + escapeHtml(item.description) + '</div>' : '') +
             '<select class="plan-card-status" data-plan-field="status" data-element-id="' + escapeHtml(item.id) + '">' + statusOptions(item.status || 'idea') + '</select>' +
             '<select class="plan-card-related" data-plan-field="parent_id" data-element-id="' + escapeHtml(item.id) + '">' + relatedOptions(item, elements) + '</select>' +
             '<select class="plan-card-priority" data-plan-field="priority" data-element-id="' + escapeHtml(item.id) + '">' + priorityOptions(item.priority) + '</select>' +

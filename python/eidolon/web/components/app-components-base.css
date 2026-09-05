@@ -424,6 +424,13 @@
     cursor: grab;
 }
 
+.plan-card-notes {
+    margin-top: 4px;
+    color: var(--text-muted);
+    font-size: 0.74rem;
+    line-height: 1.35;
+}
+
 .plan-card-title,
 .plan-card-status,
 .plan-card-related,

@@ -387,7 +387,8 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 - `POST /workspaces/formation` persists the transition; `project_candidate` → `active_project` requires `confirmed=true` and may create a real project
 - Chat shows the pending transition (`#chat-formation`) and calls the same formation API
 - heuristic mapping no longer silent-promotes runtime `active` to `active_project`
-- work-oriented chat messages persist a visible `project_candidate` without an LLM; confirm seeds generic board cards and may request a real Operate approval for booking/external-write steps
+- work-oriented chat messages persist a visible `project_candidate` without an LLM; confirm seeds generic, constraint-aware board cards from the Vorhaben text and may request a real Operate approval for booking/external-write steps
+- board seed is idempotent (`seed:vorhaben` + `slot:*`); user-owned cards are not duplicated or rewritten
 
 ### Remaining mismatch
 - first-hop title/summary extraction is deterministic, not model-enriched
