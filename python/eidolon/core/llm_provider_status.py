@@ -53,4 +53,4 @@ def openai_connection_status() -> dict[str, Any]:
         if login['logged_in']:
             return {'configured': True, 'source': 'codex_login', 'oauth_supported': True, 'auth_method': 'chatgpt_login', 'detail': 'OpenAI wird über deinen ChatGPT-Login via Codex-CLI verbunden.'}
         return {'configured': False, 'source': 'codex_available', 'oauth_supported': True, 'auth_method': 'chatgpt_login', 'detail': 'Codex-CLI gefunden, aber nicht eingeloggt. Führe `codex login` aus.'}
-    return {'configured': False, 'source': 'missing', 'oauth_supported': False, 'auth_method': 'none', 'detail': 'Codex-CLI nicht gefunden. Installiere OpenAI Codex.'}
+    return {'configured': False, 'source': 'missing', 'oauth_supported': False, 'auth_method': 'chatgpt_login', 'detail': 'Codex-CLI nicht gefunden. Installiere OpenAI Codex.'}

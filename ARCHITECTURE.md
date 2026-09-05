@@ -38,7 +38,7 @@ Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gem
 - Integrationspunkt für API, Produktlogik und UI-Auslieferung
 - **Einzige live Runtime:** Python FastAPI auf `EIDOLON_HTTP_PORT` (Standard `8002`)
 - Runtime-Service-Erzeugung läuft über kleine Contracts-/Bootstrap-/Auth-Module statt über eine dichte Einzeldatei
-- Live geprüft: 148 Routes im aktuellen App-Objekt
+- Live geprüft: 161 Routes im aktuellen App-Objekt
 
 ### 5b. Rust-Quarantäne
 - `crates/` bleiben im Repo (CLI gegen FastAPI, experimentelle Runtime, Bibliotheken)

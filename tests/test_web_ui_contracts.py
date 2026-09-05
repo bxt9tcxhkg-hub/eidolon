@@ -340,7 +340,7 @@ def test_openai_connection_supports_oauth_via_codex_login():
     assert providers['openai_oauth']['oauth_supported'] is True
     assert providers['openai']['oauth_supported'] is False
     assert providers['ollama']['oauth_supported'] is False
-    assert status['openai']['auth_method'] in {'chatgpt_login', 'none'}
+    assert status['openai']['auth_method'] == 'chatgpt_login'
     assert 'oauth_supported' in status['openai']
     if status['openai']['source'] == 'missing':
         assert status['openai']['oauth_supported'] is False

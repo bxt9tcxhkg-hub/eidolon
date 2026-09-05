@@ -319,7 +319,7 @@
 - `python/eidolon/web/operate-render-ui.js` → 94 lines
 - `python/eidolon/web/operate-actions-ui.js` → 43 lines
 - `python/eidolon/web/operate-view-ui.js` → 61 lines
-- live app object → 152 routes
+- live app object → 161 routes
 - live route path+method duplicates → 0
 - live `GET /identity` → returns `product_role: "Zentrales agentisches Hauptsystem"`
 - live `GET /chat/context` → returns runtime context including chat/workspace/operate state
