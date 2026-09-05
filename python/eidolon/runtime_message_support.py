@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from eidolon.core.runtime_problems import describe_runtime_problems
+
 
 def human_duration(seconds: int) -> str:
     if seconds < 60:
@@ -24,7 +26,7 @@ def latest_session_user_message(session: dict[str, Any] | None) -> str:
     return ''
 
 
-def chat_runtime_truth_reply(message: str, llm_backend: Any) -> str | None:
+def chat_runtime_truth_reply(message: str, llm_backend: Any, runtime_context: dict[str, Any] | None = None) -> str | None:
     lowered = str(message or '').strip().casefold()
     if any(token in lowered for token in ('welches modell', 'which model', 'what model', 'welcher provider', 'which provider', 'running on', 'läufst du', 'laeufst du')):
         status = llm_backend.status()
@@ -33,6 +35,10 @@ def chat_runtime_truth_reply(message: str, llm_backend: Any) -> str | None:
             f"Aktuell läuft der Chat mit dem Modell {status.get('model') or 'unbekannt'} "
             f"über den Provider {status.get('provider') or 'unbekannt'}."
         )
+    if any(token in lowered for token in ('verbindungsstatus', 'llm status', 'welche fehler', 'was ist kaputt', 'was fehlt', 'systemprobleme', 'erkannte probleme')):
+        status = llm_backend.status()
+        problems = list((runtime_context or {}).get('runtime_problems') or status.get('problems') or [])
+        return describe_runtime_problems(problems, llm_status=status)
     if any(token in lowered for token in ('wer bist du', 'stell dich vor', 'erzähl mir von dir', 'erzaehl mir von dir', 'kennenlern')):
         return (
             'Ich bin Eidolon, das zentrale agentische Hauptsystem dieses Produkts. '

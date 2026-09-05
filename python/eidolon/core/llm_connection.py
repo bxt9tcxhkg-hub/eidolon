@@ -5,6 +5,7 @@ from typing import Any
 from eidolon.core.llm_provider_catalog import KIND_OLLAMA, KIND_OPENAI_COMPAT, catalog_payload, provider_spec, resolve_base_url
 from eidolon.core.llm_provider_status import openai_connection_status
 from eidolon.core.llm_secrets import secret_status
+from eidolon.core.runtime_problems import llm_visible_problems
 
 
 def selected_connection(backend) -> dict[str, Any]:
@@ -57,4 +58,10 @@ def backend_status(backend) -> dict[str, Any]:
         'key_present': secrets['key_present'],
         'key_masked': secrets['key_masked'],
         'key_source': secrets['source'],
+        'problems': llm_visible_problems({
+            'provider': getattr(backend, 'provider', 'ollama'),
+            'connection': connection,
+            'openai': openai_connection_status(),
+            'fallback_chain': list(getattr(backend, 'fallback_chain', []) or []),
+        }),
     }

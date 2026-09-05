@@ -23,7 +23,7 @@ def register_chat_and_code_routes(
     system_prompt: str,
     chat_runtime_payload: Callable[[str, str, dict[str, Any] | None], dict[str, Any]],
     latest_session_user_message: Callable[[dict[str, Any] | None], str],
-    chat_runtime_truth_reply: Callable[[str], str | None],
+    chat_runtime_truth_reply: Callable[..., str | None],
     self_reflect_candidates: Callable[[int], list[dict[str, Any]]],
     apply_llm_code_mutation: Callable[..., Any],
     code_analyzer,

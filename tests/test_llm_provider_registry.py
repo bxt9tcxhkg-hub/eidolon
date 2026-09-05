@@ -203,3 +203,188 @@ def test_normalize_rejects_fake_oauth_on_key_provider():
     assert normalized['auth_method'] == 'api_key'
     assert 'auth_method' in changed
     assert normalized['base_url'] == 'https://api.groq.com/openai/v1'
+
+
+def test_settings_apply_requires_explicit_user_request_and_never_returns_secrets():
+    client = TestClient(agent_server.app)
+    original = agent_server.settings_store.get_area('llm')
+    try:
+        denied = client.post('/settings/apply', json={
+            'user_requested': False,
+            'area': 'llm',
+            'values': {'fallback_chain': ['openai', 'ollama']},
+        }).json()
+        assert denied['ok'] is False
+        assert denied['applied'] is False
+        assert 'ausdrücklichen Wunsch' in denied['error']
+
+        secret_try = client.post('/settings/apply', json={
+            'user_requested': True,
+            'area': 'llm',
+            'values': {'api_key': SECRET, 'fallback_chain': ['openai', 'ollama']},
+        }).json()
+        assert SECRET not in json.dumps(secret_try)
+
+        applied = client.post('/settings/apply', json={
+            'user_requested': True,
+            'area': 'llm',
+            'values': {'fallback_chain': ['openai', 'ollama'], 'provider': 'openai'},
+            'reason': 'Testauftrag',
+        }).json()
+        assert applied['ok'] is True
+        assert applied['applied'] is True
+        assert applied['settings']['fallback_chain'] == ['openai', 'ollama']
+        assert 'api_key' not in applied.get('settings', {})
+        assert SECRET not in json.dumps(applied)
+        assert agent_server.llm_backend.status()['fallback_chain'] == ['openai', 'ollama']
+    finally:
+        agent_server.settings_store.set_area('llm', original)
+        agent_server.llm_backend.configure(**{key: original[key] for key in original if key in {
+            'provider', 'model', 'ollama_url', 'base_url', 'preset', 'auth_method', 'fallback_chain', 'temperature', 'max_tokens'
+        }})
+
+
+def test_chat_applies_fallback_chain_only_on_explicit_request():
+    client = TestClient(agent_server.app)
+    original = agent_server.settings_store.get_area('llm')
+    try:
+        question = client.post('/chat', json={'message': 'Was wäre eine gute Ersatzkette?', 'source': 'test-settings-question'})
+        assert question.status_code == 200
+        assert agent_server.settings_store.get_area('llm')['fallback_chain'] == original['fallback_chain']
+        assert question.json().get('settings_apply') is None
+
+        applied = client.post('/chat', json={'message': 'Setze die Ersatzkette auf openai, dann ollama.', 'source': 'test-settings-apply'})
+        assert applied.status_code == 200
+        body = applied.json()
+        assert body['settings_apply']['applied'] is True
+        assert body['settings_apply']['updated']
+        assert 'openai' in body['response'] and 'ollama' in body['response']
+        assert SECRET not in body['response']
+        assert agent_server.settings_store.get_area('llm')['fallback_chain'] == ['openai', 'ollama']
+        client.delete(f"/chat/sessions/{body['session_id']}")
+        if question.json().get('session_id'):
+            client.delete(f"/chat/sessions/{question.json()['session_id']}")
+    finally:
+        agent_server.settings_store.set_area('llm', original)
+        agent_server.llm_backend.configure(**{key: original[key] for key in original if key in {
+            'provider', 'model', 'ollama_url', 'base_url', 'preset', 'auth_method', 'fallback_chain', 'temperature', 'max_tokens'
+        }})
+
+
+def test_chat_rejects_secret_and_invalid_fallback_from_intent():
+    client = TestClient(agent_server.app)
+    original = agent_server.settings_store.get_area('llm')
+    try:
+        secret = client.post('/chat', json={'message': 'Setze den API-Key auf sk-secret-test-key-1234567890', 'source': 'test-settings-secret'}).json()
+        assert secret['settings_apply']['applied'] is False
+        assert 'Schlüssel' in secret['response']
+        assert SECRET not in secret['response']
+
+        invalid = client.post('/chat', json={'message': 'Setze die Ersatzkette auf foo, dann bar', 'source': 'test-settings-invalid'}).json()
+        assert invalid['settings_apply']['applied'] is False
+        assert 'leer oder ungültig' in invalid['response']
+        assert agent_server.settings_store.get_area('llm')['fallback_chain'] == original['fallback_chain']
+        client.delete(f"/chat/sessions/{secret['session_id']}")
+        client.delete(f"/chat/sessions/{invalid['session_id']}")
+    finally:
+        agent_server.settings_store.set_area('llm', original)
+
+
+def test_connection_and_chat_truth_surface_visible_problems():
+    client = TestClient(agent_server.app)
+    status = client.get('/llm/connection').json()
+    assert 'problems' in status
+    assert isinstance(status['problems'], list)
+    health = client.get('/health').json()
+    reply = client.post('/chat', json={'message': 'Welche Fehler sind erkannt?', 'source': 'test-runtime-problems'}).json()
+    assert reply['ok'] is True
+    assert 'Aktiver Anbieter' in reply['response'] or 'keine erkannten' in reply['response'] or 'Erkannte Probleme' in reply['response']
+    assert SECRET not in reply['response']
+    runtime_problems = (reply.get('runtime_context') or {}).get('runtime_problems') or []
+    assert isinstance(runtime_problems, list)
+    for item in health.get('problems') or []:
+        assert item in runtime_problems
+        assert item in reply['response']
+    if reply.get('session_id'):
+        client.delete(f"/chat/sessions/{reply['session_id']}")
+
+
+def test_chat_does_not_treat_work_phrase_as_settings_apply():
+    client = TestClient(agent_server.app)
+    original = agent_server.settings_store.get_area('llm')
+    original_complete = agent_server.llm_backend.complete
+    try:
+        captured = {}
+
+        async def fake_complete(system: str, user: str) -> str:
+            captured['system'] = system
+            captured['user'] = user
+            return 'Ich setze die vorhandene Arbeit fort.'
+
+        agent_server.llm_backend.complete = fake_complete
+        body = client.post('/chat', json={'message': 'setz das um', 'source': 'test-settings-work-phrase'}).json()
+        assert body.get('settings_apply') is None
+        assert captured.get('user')
+        assert 'setz das um' in captured['user']
+        assert agent_server.settings_store.get_area('llm')['fallback_chain'] == original['fallback_chain']
+        if body.get('session_id'):
+            client.delete(f"/chat/sessions/{body['session_id']}")
+    finally:
+        agent_server.llm_backend.complete = original_complete
+        agent_server.settings_store.set_area('llm', original)
+
+
+def test_chat_and_operate_apply_general_settings_and_reject_invalid():
+    client = TestClient(agent_server.app)
+    original_ui = agent_server.settings_store.get_area('ui')
+    original_llm = agent_server.settings_store.get_area('llm')
+    try:
+        chat = client.post('/chat', json={'message': 'Ändere das Thema auf light', 'source': 'test-settings-theme'}).json()
+        assert chat['settings_apply']['applied'] is True
+        assert agent_server.settings_store.get_area('ui')['theme'] == 'light'
+        assert 'light' in chat['response']
+        assert SECRET not in chat['response']
+
+        invalid = client.post('/settings/apply', json={
+            'user_requested': True,
+            'area': 'ui',
+            'values': {'theme': 'neon'},
+        }).json()
+        assert invalid['ok'] is False
+        assert invalid['applied'] is False
+        assert agent_server.settings_store.get_area('ui')['theme'] == 'light'
+
+        empty_chain = client.post('/settings/apply', json={
+            'user_requested': True,
+            'area': 'llm',
+            'values': {'fallback_chain': []},
+        }).json()
+        assert empty_chain['ok'] is False
+        assert 'nicht-leere Liste' in (empty_chain.get('error') or '')
+        assert agent_server.settings_store.get_area('llm')['fallback_chain'] == original_llm['fallback_chain']
+
+        operate = client.post('/api/v1/operate/settings/apply', json={
+            'user_requested': True,
+            'area': 'ui',
+            'values': {'theme': 'dark'},
+            'reason': 'Test über Operate',
+        }).json()
+        assert operate['ok'] is True
+        assert operate['data']['applied'] is True
+        assert operate['data']['settings']['theme'] == 'dark'
+        assert 'api_key' not in (operate['data'].get('settings') or {})
+        assert SECRET not in json.dumps(operate)
+        assert agent_server.settings_store.get_area('ui')['theme'] == 'dark'
+
+        denied = client.post('/api/v1/operate/settings/apply', json={
+            'user_requested': False,
+            'area': 'ui',
+            'values': {'theme': 'light'},
+        })
+        assert denied.status_code == 400
+        assert agent_server.settings_store.get_area('ui')['theme'] == 'dark'
+        if chat.get('session_id'):
+            client.delete(f"/chat/sessions/{chat['session_id']}")
+    finally:
+        agent_server.settings_store.set_area('ui', original_ui)
+        agent_server.settings_store.set_area('llm', original_llm)

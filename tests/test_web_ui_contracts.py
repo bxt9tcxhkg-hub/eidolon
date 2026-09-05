@@ -334,6 +334,11 @@ def test_openai_connection_supports_oauth_via_codex_login():
     assert 'OpenAI-kompatibel (API-Key)' in js
     assert 'Ollama lokal' in js
     assert 'OAuth gibt es für diesen Anbieter nicht' in js
+    assert 'function moveFallbackProvider' in js
+    assert 'Ersatzkette ist leer' in js
+    assert 'Anbieter anhängen' in js
+    assert 'Erkannte Probleme' in js
+    assert "api('POST', '/settings/' + area" in js
     client = TestClient(agent_server.app)
     status = client.get('/llm/connection').json()
     providers = {item['id']: item for item in status['providers']}
@@ -935,6 +940,8 @@ def test_chat_ui_renders_live_runtime_context_contract():
     assert 'id="chat-context-state"' in html
     assert 'id="chat-intent-mode"' in html
     assert 'id="chat-next-step"' in html
+    assert 'id="chat-runtime-problems"' in html
+    assert 'function renderChatRuntimeProblems' in js
     assert "async function loadChatRuntimeContext(sessionId)" in js
     assert "'/chat/context?session_id=' + encodeURIComponent(sessionId)" in js
     assert 'renderChatRuntimeContext(r.runtime_context);' in js
@@ -1099,6 +1106,7 @@ def test_chat_is_operate_execute_door():
     assert "resolveOperateApproval" in js
     assert "advanceOperateRun" in js
     assert "resolveOperateBlocker" in js
+    assert '/api/v1/operate/settings/apply' in (ROOT / 'python' / 'eidolon' / 'operate_api_action_routes.py').read_text(encoding='utf-8')
     assert "'/api/v1/runs/' + runId + '/approval/'" in operate_js
     assert "'/api/v1/runs/' + runId + '/advance'" in operate_js
     assert 'refreshOperateSurfaces' in operate_js

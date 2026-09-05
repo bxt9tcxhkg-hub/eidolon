@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException
 
 from eidolon.core.llm_config_store import load_openai_api_key
 from eidolon.core.llm_secrets import contains_secret
+from eidolon.core.settings_apply import apply_user_settings
 
 VALID_TABS = ["chat", "dashboard", "workspaces", "mesh", "goals", "identity", "code", "healing", "skills"]
 SECRET_SETTING_KEYS = {'api_key', 'openai_api_key', 'client_secret', 'secret', 'raw_key'}
@@ -55,6 +56,18 @@ def register_settings_routes(
     async def get_all_settings():
         payload = settings_store().get_all_with_meta()
         return _public_payload({'ok': True, 'settings': payload['settings'], 'settings_meta': payload['meta'], 'source_counts': payload['source_counts']})
+
+    @app.post('/settings/apply')
+    async def apply_settings_from_agent(request: dict):
+        payload = {
+            'user_requested': bool(request.get('user_requested')),
+            'area': request.get('area'),
+            'values': request.get('values') or {},
+            'reason': request.get('reason') or 'Ausdrücklicher Nutzerwunsch',
+            'error': request.get('error'),
+        }
+        result = apply_user_settings(settings_store(), payload, after_llm=reconfigure_llm)
+        return _public_payload(result)
 
     @app.get('/settings/{area}')
     async def get_settings_area(area: str):

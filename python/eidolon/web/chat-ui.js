@@ -15,6 +15,19 @@ function syncChatIdleLayout(runtimeContext) {
     }
 }
 
+function renderChatRuntimeProblems(runtimeContext) {
+    const el = document.getElementById('chat-runtime-problems');
+    if (!el) return;
+    const problems = (runtimeContext && runtimeContext.runtime_problems) || [];
+    if (!problems.length) {
+        el.textContent = '';
+        el.style.display = 'none';
+        return;
+    }
+    el.style.display = '';
+    el.textContent = 'Erkannte Probleme: ' + problems.join(' · ');
+}
+
 function renderChatRuntimeContext(runtimeContext) {
     lastChatRuntimeContext = runtimeContext || null;
     syncChatIdleLayout(runtimeContext);
@@ -44,6 +57,7 @@ function renderChatRuntimeContext(runtimeContext) {
     const workOriented = Boolean(intent.is_work_oriented);
 
     renderChatFormation((runtimeContext && runtimeContext.formation) || null);
+    renderChatRuntimeProblems(runtimeContext);
     if (!workOriented || classification === 'casual_chat' || classification === 'general_chat' || classification === 'general_chat_with_work_context') {
         stateEl.textContent = (readableFocus && readableFocus !== 'Kein Fokus')
             ? (readableFocus + ' • Arbeitskontext verfügbar, aber für dieses Gespräch nicht erzwungen')

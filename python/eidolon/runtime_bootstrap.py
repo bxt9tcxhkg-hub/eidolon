@@ -92,7 +92,29 @@ class RuntimeApp:
         sync_fn(operate_service, workspace_payload)
         build_snapshot = self._ns('build_operate_snapshot', build_operate_snapshot)
         operate_snapshot = build_snapshot(operate_service)
-        return build_runtime_context(message=message, session=session, source=source, workspace_payload=workspace_payload, llm_status=llm_status, capability_payload=capability_payload, user_model=user_model, operate_snapshot=operate_snapshot)
+        context = build_runtime_context(message=message, session=session, source=source, workspace_payload=workspace_payload, llm_status=llm_status, capability_payload=capability_payload, user_model=user_model, operate_snapshot=operate_snapshot)
+        from eidolon.core.runtime_problems import collect_visible_problems, health_visible_problems
+        healing_state = {}
+        try:
+            healing_state = self._ns('healing_service', self.services.healing_service).get_state()
+        except Exception:
+            healing_state = {}
+        certs = {}
+        backup_stats = {}
+        try:
+            certs = self.certificate_health()
+        except Exception:
+            certs = {}
+        try:
+            backup_stats = self._ns('backup_service', self.services.backup_service).get_stats()
+        except Exception:
+            backup_stats = {}
+        context['runtime_problems'] = collect_visible_problems(
+            llm_status=llm_status,
+            healing_state=healing_state,
+            health_problems=health_visible_problems(certs=certs, backup_stats=backup_stats),
+        )
+        return context
 
     def self_reflect_candidates(self, limit: int = 5) -> list[dict[str, Any]]:
         return self_reflect_candidates_impl(limit)

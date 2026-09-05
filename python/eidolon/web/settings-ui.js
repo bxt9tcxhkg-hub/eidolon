@@ -61,6 +61,8 @@ function settingField(area, key, value, meta) {
             '<option value="mistral"' + (value === 'mistral' ? ' selected' : '') + '>Mistral</option>' +
             '<option value="gemini"' + (value === 'gemini' ? ' selected' : '') + '>Gemini (OpenAI-kompatibel)</option>' +
             '<option value="local"' + (value === 'local' ? ' selected' : '') + '>Lokales Gateway</option></select>';
+    } else if (key === 'fallback_chain') {
+        input = renderFallbackChainEditor(Array.isArray(value) ? value : String(displayValue || '').split(',').map(item => item.trim()).filter(Boolean));
     } else if (key === 'model') {
         input = '<input id="' + id + '" list="llm-model-suggestions" data-setting-area="' + area + '" data-setting-key="' + key + '" type="text" value="' + escapeHtml(String(displayValue ?? '')) + '"><datalist id="llm-model-suggestions"></datalist>';
     } else if (key === 'level') {
@@ -94,6 +96,68 @@ function renderSettingsArea(area, settingsByArea, metaByArea) {
     html += '<div class="form-actions"><button class="btn btn-primary btn-sm" onclick="saveSettingsArea(\'' + area + '\', this)">Änderungen speichern</button></div>';
     return html || '<div class="empty">Keine Einstellungen</div>';
 }
+const FALLBACK_PROVIDER_LABELS = {
+    ollama: 'Ollama lokal',
+    openai: 'OpenAI-kompatibel',
+    openai_oauth: 'OpenAI (ChatGPT-Login)'
+};
+function renderFallbackChainEditor(chain) {
+    const clean = (chain || []).filter(item => FALLBACK_PROVIDER_LABELS[item]);
+    const unused = Object.keys(FALLBACK_PROVIDER_LABELS).filter(item => !clean.includes(item));
+    let rows = clean.map((item, index) => {
+        return '<div class="fallback-row" data-fallback-id="' + escapeHtml(item) + '">' +
+            '<span class="fallback-index">' + (index + 1) + '.</span>' +
+            '<span class="fallback-label">' + escapeHtml(FALLBACK_PROVIDER_LABELS[item]) + '</span>' +
+            '<span class="fallback-actions">' +
+            '<button type="button" class="btn btn-sm" onclick="moveFallbackProvider(' + index + ', -1)" ' + (index === 0 ? 'disabled' : '') + '>Hoch</button> ' +
+            '<button type="button" class="btn btn-sm" onclick="moveFallbackProvider(' + index + ', 1)" ' + (index === clean.length - 1 ? 'disabled' : '') + '>Runter</button> ' +
+            '<button type="button" class="btn btn-sm" onclick="removeFallbackProvider(' + index + ')">Entfernen</button>' +
+            '</span></div>';
+    }).join('');
+    if (!clean.length) {
+        rows = '<div class="muted" id="llm-fallback-empty">Ersatzkette ist leer — das wird nicht stillschweigend ergänzt. Beim Speichern lehnt der Server das ab, und Chat nutzt dann nur den gewählten Anbieter.</div>';
+    }
+    const addOptions = unused.map(item => '<option value="' + escapeHtml(item) + '">' + escapeHtml(FALLBACK_PROVIDER_LABELS[item]) + '</option>').join('');
+    return '<input type="hidden" id="setting-llm-fallback_chain" data-setting-area="llm" data-setting-key="fallback_chain" value="' + escapeHtml(clean.join(', ')) + '">' +
+        '<div class="muted" style="margin-bottom:8px;">Reihenfolge der Fallback-Anbieter nach dem gewählten Anbieter. Leer oder unbekannt wird ehrlich abgelehnt, nicht still korrigiert. Zur Laufzeit: gewählter Anbieter zuerst, dann diese Liste ohne Duplikate.</div>' +
+        '<div id="llm-fallback-list">' + rows + '</div>' +
+        '<div id="llm-fallback-error" class="tag err" style="display:' + (clean.length ? 'none' : 'inline-block') + ';margin-top:8px;">' + (clean.length ? '' : 'Leer oder ungültig') + '</div>' +
+        '<div class="fallback-add" style="margin-top:8px;display:flex;gap:8px;align-items:center;">' +
+        '<select id="llm-fallback-add"' + (addOptions ? '' : ' disabled') + '>' + (addOptions || '<option>Alle Anbieter sind gesetzt</option>') + '</select>' +
+        '<button type="button" class="btn btn-sm" onclick="addFallbackProvider()" ' + (addOptions ? '' : 'disabled') + '>Anbieter anhängen</button></div>';
+}
+function currentFallbackChain() {
+    const hidden = document.getElementById('setting-llm-fallback_chain');
+    if (!hidden) return [];
+    return String(hidden.value || '').split(',').map(item => item.trim()).filter(Boolean);
+}
+function redrawFallbackChain(chain) {
+    const host = document.querySelector('#settings-llm [data-llm-field="fallback_chain"]');
+    if (!host) return;
+    const label = host.querySelector('label');
+    host.innerHTML = (label ? label.outerHTML : '') + renderFallbackChainEditor(chain);
+}
+function moveFallbackProvider(index, delta) {
+    const chain = currentFallbackChain();
+    const next = index + delta;
+    if (next < 0 || next >= chain.length) return;
+    const copy = chain.slice();
+    const [item] = copy.splice(index, 1);
+    copy.splice(next, 0, item);
+    redrawFallbackChain(copy);
+}
+function removeFallbackProvider(index) {
+    const chain = currentFallbackChain().filter((_, idx) => idx !== index);
+    redrawFallbackChain(chain);
+}
+function addFallbackProvider() {
+    const select = document.getElementById('llm-fallback-add');
+    const value = select && select.value;
+    if (!value || !FALLBACK_PROVIDER_LABELS[value]) return;
+    const chain = currentFallbackChain();
+    if (chain.includes(value)) return;
+    redrawFallbackChain(chain.concat([value]));
+}
 function parseSettingValue(raw, currentValue) {
     if (typeof currentValue === 'boolean') return raw === 'true';
     if (typeof currentValue === 'number') return Number(raw);
@@ -105,6 +169,12 @@ async function saveSettingsArea(area, btn) {
     const current = (window.__lastSettings && window.__lastSettings[area]) || {};
     const payload = {};
     controls.forEach(ctrl => { const key = ctrl.dataset.settingKey; payload[key] = parseSettingValue(ctrl.value, current[key]); });
+    if (area === 'llm' && Array.isArray(payload.fallback_chain) && !payload.fallback_chain.length) {
+        const err = document.getElementById('llm-fallback-error');
+        if (err) { err.style.display = 'inline-block'; err.textContent = 'Ersatzkette ist leer oder ungültig — nicht gespeichert.'; }
+        showNotice('Ersatzkette ist leer oder ungültig. Das wird nicht stillschweigend ergänzt.', 'error');
+        return;
+    }
     btn && (btn.disabled = true);
     try {
         const result = await api('POST', '/settings/' + area, payload);
@@ -143,6 +213,11 @@ async function loadLLMConnection() {
         }
         if (Array.isArray(d.fallback_chain) && d.fallback_chain.length) {
             rows.push('<div class="comp-row"><span class="comp-name">Ersatzkette</span><span class="comp-detail">' + escapeHtml(d.fallback_chain.join(' → ')) + '</span></div>');
+        } else {
+            rows.push('<div class="comp-row"><span class="comp-name">Ersatzkette</span><span class="comp-detail">leer — nur der gewählte Anbieter, nichts still ergänzt</span></div>');
+        }
+        if (Array.isArray(d.problems) && d.problems.length) {
+            rows.push('<div class="comp-row"><span class="comp-name">Erkannte Probleme</span><span class="comp-detail">' + escapeHtml(d.problems.join(' · ')) + '</span></div>');
         }
         el.innerHTML = rows.join('');
     } catch (e) { el.textContent = e.message; }

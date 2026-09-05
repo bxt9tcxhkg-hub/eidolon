@@ -4,6 +4,9 @@ from fastapi import FastAPI
 
 from eidolon.chat_error_support import sanitize_chat_error
 from eidolon.chat_route_support import session_payload, truth_quality
+from eidolon.core.llm_backend import configure_from_settings
+from eidolon.core.settings_apply import apply_user_settings, format_settings_apply_reply
+from eidolon.core.settings_intent import parse_settings_intent
 
 
 def register_chat_routes(app: FastAPI, *, chat_session_store, llm_backend, settings_store, topic_attention_store, build_chat_prompts, build_grounded_fallback_reply, finalize_chat_reply, system_prompt: str, chat_runtime_payload, chat_runtime_truth_reply) -> None:
@@ -18,11 +21,23 @@ def register_chat_routes(app: FastAPI, *, chat_session_store, llm_backend, setti
         session_id = session.get('session_id')
         chat_session_store.append_message(session_id, 'user', message, source=source)
         session, runtime_context = session_payload(chat_session_store, session_id, source, message, chat_runtime_payload)
-        truth_reply = chat_runtime_truth_reply(message)
+        truth_reply = chat_runtime_truth_reply(message, runtime_context)
         if truth_reply is not None:
             quality = truth_quality(runtime_context)
             chat_session_store.append_message(session_id, 'assistant', truth_reply)
             return {'ok': True, 'response': truth_reply, 'provider': llm_backend.status(), 'session_id': session_id, 'runtime_context': runtime_context, 'response_quality': quality}
+        settings_intent = parse_settings_intent(message)
+        if settings_intent is not None:
+            result = apply_user_settings(
+                settings_store,
+                settings_intent,
+                after_llm=lambda: configure_from_settings(settings_store.get_area('llm'), llm_backend),
+            )
+            reply = format_settings_apply_reply(result, llm_backend.status())
+            quality = {**truth_quality(runtime_context), 'path': 'settings_apply', 'settings_applied': bool(result.get('applied'))}
+            runtime_context = {**runtime_context, 'settings_apply': {'ok': result.get('ok'), 'applied': result.get('applied'), 'area': result.get('area'), 'updated': result.get('updated') or [], 'error': result.get('error')}}
+            chat_session_store.append_message(session_id, 'assistant', reply)
+            return {'ok': bool(result.get('ok')), 'response': reply, 'provider': llm_backend.status(), 'session_id': session_id, 'runtime_context': runtime_context, 'response_quality': quality, 'settings_apply': runtime_context['settings_apply']}
         topic_attention_store.record_interaction(message, source=source)
         try:
             area = settings_store.get_area('llm')

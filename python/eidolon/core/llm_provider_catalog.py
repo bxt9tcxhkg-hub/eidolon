@@ -114,10 +114,11 @@ def normalize_llm_settings(values: dict[str, Any]) -> tuple[dict[str, Any], list
 
 
 def build_fallback_chain(primary: str, fallback_chain: list[str] | None) -> list[str]:
-    chain = [primary] if primary in PROVIDER_IDS else []
-    for item in fallback_chain or []:
-        if item in PROVIDER_IDS and item not in chain:
-            chain.append(item)
-    if not chain:
-        chain = [PROVIDER_OLLAMA]
-    return chain
+    """Selected provider first, then the user-ordered remainder. Empty chain → only primary."""
+    selected = primary if primary in PROVIDER_IDS else PROVIDER_OLLAMA
+    rest = [item for item in (fallback_chain or []) if item in PROVIDER_IDS and item != selected]
+    seen: list[str] = []
+    for item in rest:
+        if item not in seen:
+            seen.append(item)
+    return [selected, *seen]
