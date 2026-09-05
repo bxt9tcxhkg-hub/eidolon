@@ -63,6 +63,8 @@ def parse_settings_intent(message: str) -> dict[str, Any] | None:
     explicit = any(verb in lowered for verb in _APPLY_VERBS) or any(phrase in lowered for phrase in _APPLY_PHRASES)
     if not explicit:
         return None
+    if any(token in lowered for token in ('api-key', 'api key', 'api_key', 'schlüssel', 'schluessel')):
+        return {'user_requested': True, 'error': 'API-Schlüssel setze ich nicht über den Chat. Nutze die Einstellungen; der Wert wird nie zurückgegeben.'}
     if not any(noun in lowered for noun in _SETTINGS_NOUNS):
         return None
     values_by_area: dict[str, dict[str, Any]] = {}
@@ -74,8 +76,6 @@ def parse_settings_intent(message: str) -> dict[str, Any] | None:
     _extract_named_values(lowered, values_by_area)
     if 'llm' in values_by_area:
         _apply_preset_provider_hints(lowered, values_by_area['llm'])
-    if any(token in lowered for token in ('api-key', 'api key', 'api_key', 'schlüssel', 'schluessel', 'secret')) and 'key' in lowered:
-        return {'user_requested': True, 'error': 'API-Schlüssel setze ich nicht über den Chat. Nutze die Einstellungen; der Wert wird nie zurückgegeben.'}
     areas = [area for area, values in values_by_area.items() if values]
     if not areas:
         return {'user_requested': True, 'error': 'Ich habe den Änderungswunsch erkannt, aber keine gültigen Einstellungswerte gelesen.'}
