@@ -81,6 +81,7 @@ def test_projektflaeche_open_project_is_board_first():
     assert '.ws-project-chrome' in css
     assert '.ws-project-meta-body' in css
     assert '.planning-column-title' in css
+    assert 'workspaces-has-open-project.active' in (ROOT / 'python' / 'eidolon' / 'web' / 'app-mobile.css').read_text(encoding='utf-8')
 
 
 def test_arbeit_idle_has_three_clear_paths():
