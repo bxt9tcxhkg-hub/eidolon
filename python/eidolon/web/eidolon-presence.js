@@ -1,7 +1,7 @@
-const PRESENCE_ASSET_VERSION = '20260906-transcript';
+const PRESENCE_ASSET_VERSION = '20260906-composer';
 const PRESENCE_STILL_PNG = '/assets/media/eidolon-presence.png';
 
-// Idle must swirl at transcript/sidebar mark size within 1–2s. Previous warp:0.055 read as still.
+// Idle must swirl at composer/sidebar mark size within 1–2s. Previous warp:0.055 read as still.
 const PRESENCE_PHASES = {
     idle: { warp: 0.48, pulse: 0.92, mote: 0.98, gaze: 0.55 },
     denkt: { warp: 0.82, pulse: 1.18, mote: 1.08, gaze: 0.85 },
@@ -116,8 +116,7 @@ function presenceGaze(root, phase) {
     const cy = rect.top + rect.height * 0.5;
     let target = null;
     if (phase === 'antwortet') {
-        const turn = root.closest ? root.closest('.chat-turn') : null;
-        target = (turn && turn.querySelector('.chat-turn-body')) || document.getElementById('chat-messages');
+        target = document.getElementById('chat-messages');
     } else if (phase === 'denkt' || phase === 'arbeitet') {
         target = document.getElementById('chat-input') || document.getElementById('chat-agent-status');
     } else if (presenceFocusComposer) {

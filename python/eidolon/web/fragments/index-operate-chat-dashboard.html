@@ -13,21 +13,21 @@
                             <div id="chat-operate-actions" class="chat-operate-actions" hidden></div>
                             <div class="chat-layout">
                                 <div class="chat-messages" id="chat-messages"></div>
-                                <div id="chat-eidolon-presence-park" class="chat-eidolon-presence-park" hidden>
-                                    <div id="chat-eidolon-presence" class="eidolon-presence eidolon-presence-turn" data-eidolon-presence data-presence-engine="still" data-turn-phase="idle" role="img" aria-label="Eidolon ist bereit">
-                                        <span class="eidolon-presence-cloud" aria-hidden="true">
-                                            <picture class="eidolon-presence-picture">
-                                                <source type="image/webp" srcset="/assets/media/eidolon-presence.webp">
-                                                <img class="eidolon-presence-still" src="/assets/media/eidolon-presence.png" alt="" width="512" height="512" decoding="async">
-                                            </picture>
-                                            <canvas class="eidolon-presence-live" width="96" height="96" hidden aria-hidden="true"></canvas>
-                                        </span>
-                                    </div>
-                                </div>
                                 <div class="chat-input-shell">
                                     <div class="chat-input-caption" id="chat-idle-prompt">Woran sollen wir arbeiten?</div>
-                                    <div id="chat-agent-status" class="chat-agent-status" data-phase="idle" hidden>
-                                        <span class="chat-agent-status-label" id="chat-agent-status-label" aria-live="polite"></span>
+                                    <div class="chat-composer-chrome">
+                                        <div id="chat-eidolon-presence" class="eidolon-presence" data-eidolon-presence data-presence-engine="still" data-turn-phase="idle" role="img" aria-label="Eidolon ist bereit">
+                                            <span class="eidolon-presence-cloud" aria-hidden="true">
+                                                <picture class="eidolon-presence-picture">
+                                                    <source type="image/webp" srcset="/assets/media/eidolon-presence.webp">
+                                                    <img class="eidolon-presence-still" src="/assets/media/eidolon-presence.png" alt="" width="512" height="512" decoding="async">
+                                                </picture>
+                                                <canvas class="eidolon-presence-live" width="96" height="96" hidden aria-hidden="true"></canvas>
+                                            </span>
+                                        </div>
+                                        <div id="chat-agent-status" class="chat-agent-status" data-phase="idle" hidden>
+                                            <span class="chat-agent-status-label" id="chat-agent-status-label" aria-live="polite"></span>
+                                        </div>
                                     </div>
                                     <div class="chat-input">
                                         <input type="text" id="chat-input" placeholder="Nachricht schreiben…" data-enter-action="sendChat">

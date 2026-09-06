@@ -10,7 +10,12 @@
         @media (max-width: 768px) {
             .sidebar { display: none; }
             .main { margin-left: 0; padding: 16px; padding-bottom: 70px; max-width: 100%; }
-            .chat-thread-panel { min-height: 520px; }
+            .chat-shell {
+                min-height: 360px;
+                height: min(62dvh, 560px);
+                max-height: min(68dvh, 600px);
+            }
+            .chat-thread-panel { min-height: 0; }
             .chat-session-rail { display: none; }
             .chat-messages { padding: 8px 2px 10px; min-height: 0; }
             .chat-turn,
@@ -21,18 +26,13 @@
             .chat-turn-sender,
             .msg .sender { font-size: 0.68rem; }
             .chat-agent-status { font-size: 0.8rem; min-height: 0; }
-            .chat-turn.assistant,
-            .chat-turn[data-role="status"] {
-                column-gap: 8px;
-            }
-            .chat-turn-presence,
-            #chat-eidolon-presence.eidolon-presence,
-            .eidolon-presence-turn {
-                width: 32px;
-                height: 32px;
-                max-width: 32px;
-                max-height: 32px;
-                flex-basis: 32px;
+            .chat-composer-chrome { min-height: 36px; }
+            #chat-eidolon-presence.eidolon-presence {
+                width: 36px;
+                height: 36px;
+                max-width: 36px;
+                max-height: 36px;
+                flex-basis: 36px;
             }
             .chat-home-brand { grid-template-columns: 1fr; }
             .chat-home-status-row { align-items: flex-start; }
