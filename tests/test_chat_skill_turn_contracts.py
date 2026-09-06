@@ -35,6 +35,12 @@ def test_matcher_is_conservative_and_does_not_steal_casual_chat():
     assert match_chat_skill('info über das projekt') is None
     assert match_chat_skill('was ist das ziel') is None
     assert match_chat_skill('welches modell bist du') is None
+    assert match_chat_skill(
+        'Familienwochenende: Anreise mit Laden, Unterkunft mit eigenem Bad, Dauer klären und Packen vorbereiten.'
+    ) is None
+    assert match_chat_skill(
+        'Familienwochenende mit Tesla, 2 Nächte, Unterkunft mit eigenem Bad, CF.'
+    ) is None
     live = match_chat_skill('zeig systeminfo')
     assert live is not None and live.name == 'system_info' and live.wired is True
     note = match_chat_skill('Notiz: Milch kaufen')
@@ -131,9 +137,9 @@ def test_chat_unwired_calendar_skill_is_honest_and_does_not_claim_success():
         assert body['skill']['name'] == 'calendar'
         assert body['skill']['wired'] is False
         assert body['skill']['executed'] is False
-        assert 'nicht verdrahtet' in body['response']
+        assert 'nicht als Runtime verdrahtet' in body['response']
         assert 'Kalender-Skill' not in body['response']
-        assert 'Termine' not in body['response'] or 'erfinde keine Termine' in body['response']
+        assert 'erfinde keine Termine' in body['response']
         assert called['llm'] is False
         after = client.get('/chat/turn-status', params={'session_id': session_id}).json()
         assert after['phase'] == PHASE_ANTWORTET

@@ -46,7 +46,9 @@ _LIVE_PATTERNS: tuple[tuple[str, tuple[str, ...]], ...] = (
         r'\bmesh-geraete\b',
     )),
     ('note', (
-        r'\bnotizen?\b',
+        r'\bnotizen\b',
+        r'\bnotiz:',
+        r'\bnotiz\b',
         r'\bnotiere\b',
         r'\bmerke dir\b',
         r'\bspeichere notiz\b',
