@@ -548,17 +548,87 @@ async function deleteChatSession(sessionId) {
     renderChatSessions(chatSessions);
     loadChatLandingSummary().catch(() => {});
 }
+const CHAT_STATUS_LABELS = {
+    denkt: 'denkt…',
+    arbeitet: 'arbeitet…',
+    antwortet: 'antwortet',
+};
+let chatAgentStatus = null;
+let chatSendInFlight = false;
+let chatStatusPollTimer = null;
+
+function chatStatusLabel(phase) {
+    return CHAT_STATUS_LABELS[phase] || '';
+}
+
+function setChatAgentStatus(phase, source) {
+    const label = chatStatusLabel(phase);
+    chatAgentStatus = label ? { phase, label, source: source || 'local' } : null;
+    renderChatAgentStatus();
+    const el = document.getElementById('chat-messages');
+    if (el && chatMessages.length) renderChat();
+}
+
+function clearChatAgentStatus() {
+    chatAgentStatus = null;
+    renderChatAgentStatus();
+}
+
+function renderChatAgentStatus() {
+    const el = document.getElementById('chat-agent-status');
+    const labelEl = document.getElementById('chat-agent-status-label');
+    if (!el) return;
+    if (!chatAgentStatus) {
+        el.hidden = true;
+        el.classList.remove('is-visible');
+        el.dataset.phase = '';
+        if (labelEl) labelEl.textContent = '';
+        return;
+    }
+    el.hidden = false;
+    el.classList.add('is-visible');
+    el.dataset.phase = chatAgentStatus.phase;
+    if (labelEl) labelEl.textContent = chatAgentStatus.label;
+}
+
+function stopChatStatusPoll() {
+    if (chatStatusPollTimer) {
+        clearInterval(chatStatusPollTimer);
+        chatStatusPollTimer = null;
+    }
+}
+
+function startChatStatusPoll(sessionId) {
+    stopChatStatusPoll();
+    if (!sessionId) return;
+    chatStatusPollTimer = setInterval(async () => {
+        if (!chatSendInFlight) {
+            stopChatStatusPoll();
+            return;
+        }
+        try {
+            const r = await api('GET', '/chat/turn-status?session_id=' + encodeURIComponent(sessionId));
+            if (r && r.phase && chatStatusLabel(r.phase)) {
+                setChatAgentStatus(r.phase, 'server');
+            }
+        } catch (_) {}
+    }, 400);
+}
+
 async function sendChat() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
-    if (!text) return;
+    if (!text || chatSendInFlight) return;
     if (!currentChatSessionId) {
         await ensureChatSession();
     }
+    chatSendInFlight = true;
     chatMessages.push({ role: 'user', content: text });
     persistChatMessages();
+    setChatAgentStatus('denkt', 'local');
     renderChat();
     input.value = '';
+    startChatStatusPoll(currentChatSessionId);
     try {
         const pairedDevice = getStoredMobileDevice();
         const isMetaQuestion = /selbstreflexion|analysiere dich|was würdest du verbessern|reflektiere|was ist deine schwäche|was ist deine stärke/i.test(text);
@@ -573,6 +643,7 @@ async function sendChat() {
         } else {
             await loadChatRuntimeContext(currentChatSessionId);
         }
+        setChatAgentStatus('antwortet', 'response');
         if (r?.ok === false) {
             chatMessages.push({ role: 'assistant', content: 'Fehler: ' + (r.error || 'Keine Modellantwort erhalten') });
         } else if (typeof r?.response === 'string' && r.response.trim()) {
@@ -584,19 +655,39 @@ async function sendChat() {
         await loadChatRuntimeContext(currentChatSessionId);
         chatMessages.push({ role: 'assistant', content: 'Fehler: ' + e.message });
     }
+    stopChatStatusPoll();
+    chatSendInFlight = false;
+    clearChatAgentStatus();
     persistChatMessages();
     renderChat();
     loadChatLandingSummary().catch(() => {});
+}
+function renderChatTurn(m) {
+    const role = m.role === 'user' ? 'user' : 'assistant';
+    return '<div class="chat-turn msg ' + role + '" data-role="' + role + '">'
+        + '<div class="chat-turn-meta"><span class="chat-turn-sender sender">' + escapeHtml(m.role === 'user' ? 'Du' : 'Eidolon') + '</span></div>'
+        + '<div class="chat-turn-body">' + escapeHtml(m.content) + '</div>'
+        + '</div>';
+}
+function renderChatStatusTurn() {
+    if (!chatAgentStatus) return '';
+    return '<div class="chat-turn chat-turn-status msg assistant" data-role="status" data-phase="' + escapeHtml(chatAgentStatus.phase) + '">'
+        + '<div class="chat-turn-meta">'
+        + '<span class="chat-turn-sender sender">Eidolon</span>'
+        + '<span class="chat-agent-status-label">' + escapeHtml(chatAgentStatus.label) + '</span>'
+        + '</div>'
+        + '</div>';
 }
 function renderChat() {
     const el = document.getElementById('chat-messages');
     if (!el) return;
     syncChatIdleLayout(lastChatRuntimeContext);
+    renderChatAgentStatus();
     if (!chatMessages.length) {
         el.innerHTML = '<div class="empty chat-idle-hint">Bereit, wenn du es bist.</div>';
         return;
     }
-    el.innerHTML = chatMessages.map(m => '<div class="msg ' + m.role + '"><div class="sender">' + escapeHtml(m.role === 'user' ? 'Du' : 'Eidolon') + '</div><div>' + escapeHtml(m.content) + '</div></div>').join('');
+    el.innerHTML = chatMessages.map(renderChatTurn).join('') + renderChatStatusTurn();
     el.scrollTop = el.scrollHeight;
 }
 
