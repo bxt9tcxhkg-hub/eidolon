@@ -536,18 +536,17 @@ function renderChatAgentStatus() {
     const el = document.getElementById('chat-agent-status');
     const labelEl = document.getElementById('chat-agent-status-label');
     if (!el) return;
-    if (!chatAgentStatus) {
-        el.hidden = true;
-        el.classList.remove('is-visible');
-        el.dataset.phase = '';
-        if (labelEl) labelEl.textContent = '';
-        return;
-    }
+    const phase = chatAgentStatus ? chatAgentStatus.phase : 'idle';
     el.hidden = false;
-    el.classList.add('is-visible');
-    el.dataset.phase = chatAgentStatus.phase;
-    if (labelEl) labelEl.textContent = chatAgentStatus.label;
-    el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    el.classList.toggle('is-visible', Boolean(chatAgentStatus));
+    el.dataset.phase = phase;
+    if (labelEl) labelEl.textContent = chatAgentStatus ? chatAgentStatus.label : '';
+    if (typeof setEidolonTurnPhase === 'function') {
+        setEidolonTurnPhase(phase);
+    }
+    if (chatAgentStatus) {
+        el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
 }
 
 function stopChatStatusPoll() {

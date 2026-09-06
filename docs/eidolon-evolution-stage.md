@@ -102,9 +102,9 @@ Was ein Messenger-Agent (OpenClaw, Hermes, Grok Bot) können muss und Eidolon **
 |---|---|
 | **Status** | `required for parity` · `already in Eidolon` (Kernel + Chat-Phasen) |
 | **Soll** | Sichtbar, ob der Agent bereit ist, denkt, arbeitet, wartet, blockiert oder fertig ist — aus echtem Zustand, nicht aus Dekor. |
-| **Ist** | Signature-Object und Presence (`idle` / `thinking` / `acting` / `waiting` / `blocked` / `done`) aus Operate (`describeOperatePresence` → `setEidolonPresence`). Chat-Turn-Status `denkt` / `arbeitet` / `antwortet` über `GET /chat/turn-status`. `POST /chat` setzt `denkt` und `antwortet`. Healing-/LLM-Probleme erscheinen in Connection/Systemstatus, nicht als Fake-Erfolg. |
-| **Gap innerhalb der Phase** | `arbeitet` wird im normalen `/chat`-Pfad **nicht** gesetzt; nur der Self-Reflection-Chat setzt `PHASE_ARBEITET`. Gaze/Blick existiert nur in `sketches/`, nicht in der Produkt-UI. |
-| **Beleg** | `python/eidolon/chat_turn_status.py`, `python/eidolon/chat_message_routes.py`, `python/eidolon/operate_api_self_reflection_chat.py`, `python/eidolon/web/app-shell.js`, `python/eidolon/web/components/shell/shell-layout.css` |
+| **Ist** | Signature-Object und Presence (`idle` / `thinking` / `acting` / `waiting` / `blocked` / `done`) aus Operate (`describeOperatePresence` → `setEidolonPresence`). Chat-Turn-Status `denkt` / `arbeitet` / `antwortet` über `GET /chat/turn-status`. `POST /chat` setzt `denkt` und `antwortet`. Der Chat-Presence-Slot (`#chat-eidolon-presence`) und die Sidebar-Signature zeigen dasselbe genehmigte Still; CSS-Motion folgt `data-turn-phase` aus dem echten Turn-Status (`setEidolonTurnPhase`). Idle: langsamer Rauch + weicher Lichtpuls. `denkt`: etwas heller, schnellere Mikro-Bewegung. `antwortet`: ruhigeres Licht, leichte Lichtverschiebung Richtung Transcript. `prefers-reduced-motion` und Settings `ui.animations=off` frieren auf das Still ein. Healing-/LLM-Probleme erscheinen in Connection/Systemstatus, nicht als Fake-Erfolg. |
+| **Gap innerhalb der Phase** | `arbeitet` wird im normalen `/chat`-Pfad **nicht** gesetzt; nur der Self-Reflection-Chat setzt `PHASE_ARBEITET`. Die UI faked diese Phase nicht. Keine Emotions-, Stimmen- oder Tool-Work-Visuals. |
+| **Beleg** | `python/eidolon/chat_turn_status.py`, `python/eidolon/chat_message_routes.py`, `python/eidolon/operate_api_self_reflection_chat.py`, `python/eidolon/web/app-shell.js`, `python/eidolon/web/chat-ui.js`, `python/eidolon/web/components/shell/eidolon-presence.css`, `tests/test_presence_avatar_contracts.py` |
 
 ### 1.7 Always-on-Erreichbarkeit
 
@@ -127,7 +127,7 @@ Was ein Messenger-Agent (OpenClaw, Hermes, Grok Bot) können muss und Eidolon **
 | Semantisches Langzeitgedächtnis | `required for parity` | `gap` | kein Cross-Session-Recall, Generator entkoppelt |
 | Steuerfläche (kein Slash nötig) | `required for parity` | `already in Eidolon` | Freigabe/Weiter/Formation/CLI/Settings-Intent |
 | Slash-Grammatik | optional, wenn Äquivalent ehrlich | `gap` | nicht vorhanden, nicht behaupten |
-| Status/Presence | `required for parity` | `already in Eidolon` | Signature + Turn-Status; Gaze `gap` |
+| Status/Presence | `required for parity` | `already in Eidolon` | Signature + Turn-Status; Avatar-Motion an echte Phasen; `arbeitet` nur wenn gemeldet |
 | Always-on lokal | `required for parity` | `already in Eidolon` | FastAPI-Prozess + Pairing |
 | Always-on Messenger/Cloud | `required for parity` | `gap` | kein Gateway-Kanal |
 
@@ -223,8 +223,8 @@ Was über einen Messenger-Agenten hinausgeht. Das ist der eigentliche Produktker
 
 **Ist:**
 
-- `already in Eidolon`: dunkle Schale, Chat-Tür statt Dashboard, Signature atmet entlang Operate-Presence, Chat-Status `denkt…` / `antwortet` am Turn, Action-Motion nur nach Mutation, `prefers-reduced-motion` + Settings `ui.animations`.
-- `gap`: Gaze/Blickkontakt nur in `sketches/2026-08-30_*embodiment*`. `arbeitet` nicht im normalen Chat-Turn. Signature im Idle-Chat bewusst **kein** Hero mehr (`test_idle_chat_door_is_title_composer_and_one_project_line`).
+- `already in Eidolon`: dunkle Schale, Chat-Tür statt Dashboard, genehmigtes Presence-Still im Chat-Status-Slot und in der Sidebar-Signature, CSS-Motion an `denkt` / `arbeitet` / `antwortet` gebunden, Chat-Status `denkt…` / `antwortet` am Turn, Action-Motion nur nach Mutation, `prefers-reduced-motion` + Settings `ui.animations` → statisches Still.
+- `gap`: `arbeitet` nicht im normalen Chat-Turn. Kein zweites Maskottchen-Zoo, kein Hero auf der Idle-Tür. Embodied Gaze in Skizzen bleibt Skizze; im Produkt gibt es nur die verdrahtete Lichtverschiebung bei `antwortet`, keine Emotionserkennung.
 
 ---
 
@@ -274,7 +274,11 @@ Regeln:
 - `GET /chat/turn-status` ist die Serverquelle; der Client pollt nur während eines echten Sends.
 - `arbeitet` darf nicht dekorativ zwischen `denkt` und `antwortet` geblinkt werden, solange `/chat` diese Phase nicht setzt.
 - Signature-Presence folgt Operate, nicht einem Zufallsgenerator.
-- Gaze/Blick darf erst Produkt werden, wenn er an dieselben Phasen/Operate-States hängt. Skizzen bleiben Skizzen.
+- Der Chat-Avatar lebt nur im vorhandenen Presence-Slot (`#chat-eidolon-presence`) plus der bestehenden Sidebar-Signature — kein zweites dekoratives Maskottchen.
+- Idle-Motion (Rauchdrift + Lichtpuls) ist ruhige Präsenz, kein Arbeitsclaim.
+- `antwortet` darf das Licht leicht Richtung Transcript verschieben. Das ist Phasen-Gaze, keine Emotions- oder Stimm-Erkennung.
+- `prefers-reduced-motion` und `ui.animations=off` zeigen nur das genehmigte Still.
+- Embodiment-Skizzen unter `sketches/2026-08-30_*` bleiben Skizzen.
 
 ---
 
@@ -299,7 +303,7 @@ Prüfsatz:
 
 - Keine Feature-für-Feature-Kopie von OpenClaw, Hermes oder Grok Bot.
 - Keine Übernahme von `SPECS/` oder Rust-Crates als live Produkt.
-- Keine Gaze-/Embodiment-Skizze als Ist.
+- Keine Gaze-/Embodiment-Skizze als Ist. Die verdrahtete Lichtverschiebung bei `antwortet` ist Phasen-Gaze, kein Embodiment-Theater.
 - Kein Anspruch auf Multi-Channel, MCP, Skill-Import oder Video, solange der Code das nicht tut.
 - Kein „wir sind schon die nächste Stufe in allen Flächen“ — Kernel und Formation sind real; Consumer-Reichweite und Tool-Loop sind `gap`.
 

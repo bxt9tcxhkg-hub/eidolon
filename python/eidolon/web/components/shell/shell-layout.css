@@ -53,107 +53,10 @@
             line-height: 1.45;
         }
 
-        .eidolon-signature {
-            position: relative;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            flex: 0 0 42px;
-            background:
-                radial-gradient(circle at 50% 48%, rgba(255, 244, 226, 0.96), rgba(255, 228, 190, 0.2) 18%, transparent 52%),
-                radial-gradient(circle at 50% 50%, rgba(217, 161, 92, 0.32), rgba(217, 161, 92, 0.06) 48%, transparent 75%),
-                linear-gradient(180deg, rgba(28, 22, 16, 0.96), rgba(22, 18, 13, 0.92));
-            border: 1px solid rgba(217, 161, 92, 0.28);
-            box-shadow: inset 0 1px 0 rgba(255,244,226,0.08), 0 10px 30px rgba(18, 10, 4, 0.36);
-            overflow: hidden;
-        }
-
         .eidolon-signature.hero {
             width: 56px;
             height: 56px;
             flex-basis: 56px;
-        }
-
-        .signature-ring,
-        .signature-core {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-        }
-
-        .signature-ring-outer {
-            inset: 5px;
-            border: 1px solid rgba(242, 214, 170, 0.22);
-            opacity: 0.8;
-        }
-
-        .signature-ring-inner {
-            inset: 11px;
-            border: 1px solid rgba(255, 244, 226, 0.16);
-            opacity: 0.75;
-        }
-
-        .signature-core {
-            inset: 15px;
-            background: radial-gradient(circle at 50% 50%, rgba(255,248,236,0.96), rgba(242, 206, 150, 0.78) 45%, rgba(140, 88, 36, 0.24) 75%, transparent 100%);
-            box-shadow: 0 0 20px rgba(217, 161, 92, 0.42);
-        }
-
-        .eidolon-signature[data-presence-state="idle"] .signature-ring-outer,
-        .eidolon-signature[data-presence-state="idle"] .signature-ring-inner,
-        .eidolon-signature[data-presence-state="idle"] .signature-core {
-            animation: signature-breathe 4.8s ease-in-out infinite;
-        }
-
-        .eidolon-signature[data-presence-state="thinking"] .signature-ring-outer,
-        .eidolon-signature[data-presence-state="thinking"] .signature-ring-inner {
-            animation: signature-breathe 3.4s ease-in-out infinite;
-        }
-
-        .eidolon-signature[data-presence-state="acting"] .signature-ring-outer,
-        .eidolon-signature[data-presence-state="acting"] .signature-ring-inner {
-            animation: signature-pulse 1.7s ease-in-out infinite;
-        }
-
-        .eidolon-signature[data-presence-state="waiting"] .signature-ring-outer,
-        .eidolon-signature[data-presence-state="waiting"] .signature-ring-inner {
-            animation: signature-pulse 2.2s ease-in-out infinite;
-            border-color: rgba(245, 158, 11, 0.36);
-        }
-
-        .eidolon-signature[data-presence-state="blocked"] {
-            border-color: rgba(239, 68, 68, 0.4);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 30px rgba(43, 8, 8, 0.42);
-        }
-
-        .eidolon-signature[data-presence-state="blocked"] .signature-ring-outer,
-        .eidolon-signature[data-presence-state="blocked"] .signature-ring-inner {
-            border-color: rgba(239, 68, 68, 0.42);
-            animation: signature-alert 1.4s ease-in-out infinite;
-        }
-
-        .eidolon-signature[data-presence-state="done"] .signature-core {
-            box-shadow: 0 0 22px rgba(34, 197, 94, 0.34);
-        }
-
-        .eidolon-signature[data-presence-state="done"] .signature-ring-outer,
-        .eidolon-signature[data-presence-state="done"] .signature-ring-inner {
-            border-color: rgba(34, 197, 94, 0.28);
-        }
-
-        @keyframes signature-breathe {
-            0%, 100% { transform: scale(0.96); opacity: 0.68; }
-            50% { transform: scale(1.02); opacity: 1; }
-        }
-
-        @keyframes signature-pulse {
-            0%, 100% { transform: scale(0.97); opacity: 0.78; }
-            50% { transform: scale(1.05); opacity: 1; }
-        }
-
-        @keyframes signature-alert {
-            0%, 100% { transform: scale(0.98); opacity: 0.7; }
-            50% { transform: scale(1.06); opacity: 1; }
         }
         
         .sidebar-header .version {
@@ -247,8 +150,9 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .eidolon-signature .signature-ring,
-            .eidolon-signature .signature-core {
+            .eidolon-signature .eidolon-presence-cloud,
+            .eidolon-signature .eidolon-presence-mote,
+            .eidolon-signature .eidolon-presence-still {
                 animation: none !important;
             }
         }

@@ -1,0 +1,161 @@
+.eidolon-presence,
+.eidolon-signature[data-eidolon-presence] {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    isolation: isolate;
+    background: #000;
+    border: 1px solid rgba(217, 161, 92, 0.22);
+    box-shadow: 0 8px 22px rgba(8, 4, 2, 0.38);
+}
+
+.eidolon-presence {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+}
+
+.eidolon-presence-cloud,
+.eidolon-presence-picture,
+.eidolon-presence-still,
+.eidolon-presence-mote {
+    position: absolute;
+    inset: 0;
+    display: block;
+}
+
+.eidolon-presence-picture {
+    width: 100%;
+    height: 100%;
+}
+
+.eidolon-presence-still {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 56% 42%;
+    transform-origin: 56% 42%;
+}
+
+.eidolon-presence-mote {
+    pointer-events: none;
+    background: radial-gradient(
+        circle at 58% 40%,
+        rgba(255, 248, 236, 0.42) 0%,
+        rgba(217, 161, 92, 0.18) 16%,
+        rgba(217, 161, 92, 0.04) 34%,
+        transparent 58%
+    );
+    mix-blend-mode: screen;
+}
+
+[data-eidolon-presence][data-turn-phase="idle"] .eidolon-presence-cloud {
+    animation: presence-smoke-drift 8.4s ease-in-out infinite;
+}
+
+[data-eidolon-presence][data-turn-phase="idle"] .eidolon-presence-mote {
+    animation: presence-mote-pulse 4.8s ease-in-out infinite;
+}
+
+[data-eidolon-presence][data-turn-phase="denkt"] .eidolon-presence-cloud {
+    animation: presence-smoke-micro 2.6s ease-in-out infinite;
+}
+
+[data-eidolon-presence][data-turn-phase="denkt"] .eidolon-presence-still {
+    filter: brightness(1.14) saturate(1.08);
+}
+
+[data-eidolon-presence][data-turn-phase="denkt"] .eidolon-presence-mote {
+    animation: presence-mote-pulse 2.1s ease-in-out infinite;
+    opacity: 1;
+}
+
+[data-eidolon-presence][data-turn-phase="arbeitet"] .eidolon-presence-cloud {
+    animation: presence-smoke-micro 1.8s ease-in-out infinite;
+}
+
+[data-eidolon-presence][data-turn-phase="arbeitet"] .eidolon-presence-still {
+    filter: brightness(1.18) saturate(1.1);
+}
+
+[data-eidolon-presence][data-turn-phase="arbeitet"] .eidolon-presence-mote {
+    animation: presence-mote-pulse 1.5s ease-in-out infinite;
+}
+
+[data-eidolon-presence][data-turn-phase="antwortet"] .eidolon-presence-cloud {
+    animation: presence-smoke-drift 9.6s ease-in-out infinite;
+}
+
+[data-eidolon-presence][data-turn-phase="antwortet"] .eidolon-presence-still {
+    object-position: 44% 32%;
+    filter: brightness(1.06);
+}
+
+[data-eidolon-presence][data-turn-phase="antwortet"] .eidolon-presence-mote {
+    transform: translate(-16%, -14%);
+    animation: presence-mote-steady 6.2s ease-in-out infinite;
+}
+
+.eidolon-signature[data-presence-state="waiting"] {
+    border-color: rgba(245, 158, 11, 0.36);
+}
+
+.eidolon-signature[data-presence-state="blocked"] {
+    border-color: rgba(239, 68, 68, 0.4);
+    box-shadow: 0 8px 22px rgba(43, 8, 8, 0.42);
+}
+
+.eidolon-signature[data-presence-state="done"] {
+    border-color: rgba(34, 197, 94, 0.28);
+}
+
+@keyframes presence-smoke-drift {
+    0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    40% { transform: translate(-1.4%, 1.1%) scale(1.035) rotate(-0.5deg); }
+    72% { transform: translate(1.1%, -0.8%) scale(1.02) rotate(0.4deg); }
+}
+
+@keyframes presence-smoke-micro {
+    0%, 100% { transform: translate(0, 0) scale(1.01) rotate(0deg); }
+    35% { transform: translate(-0.9%, 0.7%) scale(1.045) rotate(-0.8deg); }
+    68% { transform: translate(0.8%, -0.6%) scale(1.03) rotate(0.7deg); }
+}
+
+@keyframes presence-mote-pulse {
+    0%, 100% { opacity: 0.72; transform: scale(0.96); }
+    50% { opacity: 1; transform: scale(1.06); }
+}
+
+@keyframes presence-mote-steady {
+    0%, 100% { opacity: 0.86; }
+    50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-eidolon-presence] .eidolon-presence-cloud,
+    [data-eidolon-presence] .eidolon-presence-mote,
+    [data-eidolon-presence] .eidolon-presence-still {
+        animation: none !important;
+        filter: none !important;
+        transform: none !important;
+    }
+
+    [data-eidolon-presence] .eidolon-presence-still {
+        object-position: 56% 42%;
+    }
+}
+
+[data-animations="off"] [data-eidolon-presence] .eidolon-presence-cloud,
+[data-animations="off"] [data-eidolon-presence] .eidolon-presence-mote,
+[data-animations="off"] [data-eidolon-presence] .eidolon-presence-still {
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
+}
+
+[data-animations="off"] [data-eidolon-presence] .eidolon-presence-still {
+    object-position: 56% 42%;
+}

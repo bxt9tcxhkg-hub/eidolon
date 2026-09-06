@@ -42,6 +42,7 @@ def test_chat_transcript_is_flat_rows_not_bubbles():
     assert 'function renderChatTurn' in js
     assert "class=\"chat-turn msg '" in js
     assert 'id="chat-agent-status"' in html
+    assert 'id="chat-eidolon-presence"' in html
     assert 'denkt…' in js
     assert 'arbeitet…' in js
     assert 'antwortet' in js
@@ -57,6 +58,7 @@ def test_chat_status_is_honest_and_german():
     assert "'/chat/turn-status?session_id='" in js
     assert "setChatAgentStatus('antwortet', 'response')" in js
     assert "setChatAgentStatus('arbeitet'" not in js
+    assert 'setEidolonTurnPhase(phase)' in js
     assert "PHASE_DENKT, 'build_runtime_context')" in routes or "PHASE_DENKT, 'llm_complete')" in routes
     assert "PHASE_ANTWORTET" in routes
     assert "PHASE_ARBEITET" not in routes
