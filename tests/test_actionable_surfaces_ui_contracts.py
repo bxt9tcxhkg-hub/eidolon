@@ -189,7 +189,8 @@ def test_planning_board_is_horizontal_kanban_with_compact_cards():
     assert 'plan-card-related' in views_js
     assert 'plan-card-priority' in views_js
     assert 'plan-card-actions' in views_js
-    assert views_js.find('class="plan-card-menu"') < views_js.find('plan-card-status')
+    assert views_js.find('class="plan-card-menu"') < views_js.find('class="plan-card-status"')
+    assert 'plan-card-status-chip' in views_js
     assert '.planning-board' in css
     assert '.planning-column-title' in css
     assert 'overflow-wrap: anywhere' in css

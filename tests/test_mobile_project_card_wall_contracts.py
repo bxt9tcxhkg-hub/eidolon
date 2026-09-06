@@ -66,7 +66,7 @@ def test_mobile_projektflaeche_is_vertical_card_wall_at_390px():
     assert "matchMedia('(max-width: 768px)')" in views
     assert 'function renderPlanningWall' in views
     assert 'class="planning-board planning-wall"' in views
-    assert 'class="plan-card-status-chip"' in views
+    assert 'plan-card-status-chip' in views
     assert 'class="planning-wall-list"' in views
     assert 'Noch keine Karten. Schreib oben eine Idee.' in views
     assert 'id="ws-idea-line"' in html
