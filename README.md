@@ -30,8 +30,8 @@ Rust-Crates bleiben im Repo (CLI, experimentelle Runtime, Mesh-Bibliotheken), si
 - Operate-Kernel mit Run-/Objective-/Approval-/Blocker-/Evidence-Modell vorhanden
 - Workspace-Bridge in Operate vorhanden
 - Web-UI startet in Chat; Projektfläche und Arbeit (Operate) sind erreichbar, ohne die Starttür zu sein
-- Idle-Chat bleibt schlank (Frage + Eingabe); Dark-Theme ist wärmer, Arbeitsspur zeigt Bereit/Wartet/Nächstes aus echten Kernel- und Sessiondaten
-- Chat zeigt ausstehende Freigaben, Blocker und den nächsten Schritt und löst dieselben Operate-APIs aus
+- Idle-Chat ist eine Tür (Titel + Composer, optional eine Projektzeile); Dark-Theme ist wärmer, Arbeitsspur zeigt Bereit/Wartet/Nächstes in Arbeit/Projektfläche aus echten Kernel- und Sessiondaten
+- Freigaben, Blocker und nächster Schritt bleiben in Arbeit und lösen dieselben Operate-APIs aus; Chat listet sie nicht als Landing-Dashboard
 - Projektplanung erlaubt Rename, Status, Gruppe, Reihenfolge, Ablegen und Streichen gegen persistierte Projekt-APIs
 - Chat, Arbeit und Projektfläche lesen Freigaben/Blocker/Next aus demselben `work_kernel`/`operate`-Snapshot; Projektmutationen geben denselben Snapshot zurück statt eines leeren Parallelpfads
 - Projektbildung `chat_topic` → `project_candidate` → `active_project` ist ein expliziter Vertrag mit sichtbarer Bestätigung vor dauerhaftem Projekt; stille Projekt-Bots gibt es nicht. Kandidaten entstehen auch ohne LLM; Bestätigung füllt unterscheidbare Board-Karten aus dem Vorhaben-Text (Bedingungen in Notizen, idempotentes Seed)

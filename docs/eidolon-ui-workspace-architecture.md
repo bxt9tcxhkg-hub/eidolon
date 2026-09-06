@@ -76,7 +76,7 @@ Immer sichtbar oder sofort auffindbar sein müssen:
 - nächster sinnvoller Schritt
 
 ## Charakter ohne Placebo
-Die Kernschale bleibt dunkel. Wärme kommt aus Typografie, Abstand, Radius und einem reicheren Akzent — nicht aus einem erzwungenen Light-Theme und nicht aus einer zweiten Startwand im Chat.
+Die Kernschale bleibt dunkel. Wärme kommt aus Typografie, Abstand, Radius und einem reicheren Akzent — nicht aus einem erzwungenen Light-Theme und nicht aus einer zweiten Startwand im Chat. Die Chat-Tür ist Sessiontitel plus Composer; ein aktives Projekt darf als eine Zeile (`Titel · öffnen`) sichtbar sein, nicht als Dashboard.
 
 Lebendigkeit im Leerlauf ist erlaubt, wenn sie ehrlich ist:
 - ein ruhiger Atem/Puls für „bereit“

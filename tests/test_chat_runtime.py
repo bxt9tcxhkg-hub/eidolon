@@ -327,8 +327,10 @@ def test_chat_open_work_prompt_uses_grounded_fallback_when_model_returns_generic
     body = response.json()
     assert body['ok'] is True
     assert 'Wie kann ich helfen' not in body['response']
-    assert 'Sinnvolle Richtungen jetzt:' in body['response']
-    assert 'Ich empfehle:' in body['response']
+    assert 'Sinnvolle Richtungen jetzt:' not in body['response']
+    assert 'Ich empfehle:' not in body['response']
+    assert 'Lege ich als Karte an' in body['response']
+    assert len([line for line in body['response'].splitlines() if line.strip()]) <= 5
     assert body['response_quality']['used_fallback'] is True
     assert body['response_quality']['generic_assistant_pattern'] is True
     assert body['runtime_context']['workflow_state']['current_context_state'] == 'active_project'
@@ -381,7 +383,10 @@ def test_chat_prompt_includes_work_leading_contract_and_runtime_context(monkeypa
     assert response.status_code == 200
     body = response.json()
     assert body['ok'] is True
-    assert 'Du bist nicht primär ein allgemeiner Chat-Assistent' in captured['system']
+    assert 'höchstens 3–5 kurzen Zeilen' in captured['system']
+    assert 'Kein Schema aus Intention, Richtungen oder Empfehlung' in captured['system']
+    assert 'lege ich als Karte an' in captured['system']
+    assert '2-4 plausible Richtungen' not in captured['system']
     assert 'RUNTIME_CONTEXT_JSON:' in captured['system']
     assert 'project_candidate' in captured['system']
     assert 'SESSION_VERLAUF:' in captured['user']

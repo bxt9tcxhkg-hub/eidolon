@@ -9,7 +9,6 @@ def build_chat_prompts(base_prompt: str | None, runtime_context: dict[str, Any])
     identity = normalize_text(base_prompt) or 'Du bist Eidolon.'
     intent = runtime_context.get('user_intent') or {}
     classification = intent.get('classification') or 'unknown'
-    work_oriented = bool(intent.get('is_work_oriented'))
     latest_message = intent.get('latest_message', '')
 
     system_parts = [identity]
@@ -30,18 +29,17 @@ def build_chat_prompts(base_prompt: str | None, runtime_context: dict[str, Any])
         return '\n\n'.join(part for part in system_parts if part), user_prompt
 
     system_parts.extend([
-        'Du bist nicht primär ein allgemeiner Chat-Assistent. Du bist der arbeitsführende Agent innerhalb eines laufenden Projekt- und Operate-Kontexts.',
-        'Deine Aufgabe ist, Nutzerintention, Projektkontext, Workflow-Zustand und reale Fähigkeiten in Struktur, Richtung, Empfehlung und konkrete nächste Schritte zu überführen.',
-        'Wenn genug Kontext vorhanden ist, antworte nicht mit generischen Hilfsangeboten.',
-        'Bei offenen, arbeitsorientierten Eingaben sollst du die wahrscheinliche Intention benennen, 2-4 plausible Richtungen aus dem Kontext ableiten, eine begründete Empfehlung geben und einen konkreten nächsten Schritt anbieten.',
-        'Frage nur dann zurück, wenn ohne die fehlende Information kein verantwortbarer nächster Schritt möglich ist.',
+        'Du bist Eidolon. Bei arbeitsorientierten Nachrichten antwortest du als knapper Mitspieler, nicht als Essay-Berater.',
+        'Antworte in höchstens 3–5 kurzen Zeilen. Kein Schema aus Intention, Richtungen oder Empfehlung. Keine Follow-up-Kataloge.',
+        'Höchstens eine nächste Aktion oder eine Klärungsfrage — nicht beides, nicht eine Liste.',
+        'Struktur lieber aufs Board legen („lege ich als Karte an“) statt im Chat aufzulisten.',
+        'Frage nur zurück, wenn ohne die fehlende Information kein verantwortbarer nächster Zug möglich ist.',
         'Erfinde keinen Projektzustand, keine Fähigkeiten, keine Evidenz und keine bereits erfolgte Ausführung.',
-        'Eine starke Antwort ist kompakt, geerdet, richtungsbildend und umsetzbar.',
         'RUNTIME_CONTEXT_JSON:\n' + runtime_context_json(runtime_context),
     ])
     user_prompt = (
-        'Arbeite auf Basis dieses aktuellen Verlaufs und der letzten Nachricht. '
-        'Falls die Nachricht offen ist, führe die Arbeit mit Richtung, Empfehlung und nächstem Schritt.\n\n'
+        'Antworte auf Basis dieses Verlaufs und der letzten Nachricht. '
+        'Kurz halten. Wenn Struktur nötig ist, biete eine Karte an statt eines Katalogs.\n\n'
         f'SESSION_VERLAUF:\n{session_history(runtime_context)}\n\n'
         f'LETZTE_NACHRICHT:\n{latest_message}\n'
     )

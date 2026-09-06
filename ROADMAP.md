@@ -5,7 +5,7 @@
 
 ## Bereits konsolidiert
 - Produktidentität als **zentrales agentisches Hauptsystem** explizit gemacht
-- Chat-Antwortvertrag auf arbeitsführende Erstreaktionen gehärtet
+- Chat-Antwortvertrag auf knappe Mitspieler-Antworten gehärtet (kein Intention/Richtungen/Empfehlung-Essay)
 - Rollenmodell trennt aktive Rollen von definierten Vorlagen
 - Operate-Kernel mit Run-, Approval-, Blocker-, Evidence- und Next-Action-Verträgen vorhanden
 - Workspace-Bridge speist Operate aus aktivem Projektkontext
@@ -25,7 +25,7 @@
 - Operate-Panel ist wieder verdrahtet und über `#operate` erreichbar, ohne Default zu sein
 - Projektfläche öffnet in der Planungsansicht (Zusammengehörig / Geplant / In Arbeit / Fertig / Archiv) mit Umbenennen, Status, Gruppe, Reihenfolge, Ablegen und Streichen gegen echte Projekt-APIs
 - Projektstatus planned/in_progress/done/archived ist über `PUT /projects/{id}` editierbar
-- Chat zeigt ausstehende Freigaben, offene Blocker und den nächsten Schritt und löst dieselben Operate-APIs aus wie die Arbeitsfläche
+- Chat-Tür bleibt schlank (Titel + Composer, optional eine Projektzeile); Freigaben, Blocker und nächster Schritt leben in Arbeit und bleiben im Chat nur als echte Handlung erreichbar
 - Chat, Arbeit und Projektfläche teilen denselben Operate-/Kernel-Snapshot für Freigaben, Blocker und Next Action; Projektmutationen schreiben nicht mehr in einen leeren parallelen `operate`-Pfad
 - Projektbildung ist ein expliziter Vertrag (`POST /workspaces/formation`): `chat_topic` → `project_candidate` sichtbar, `project_candidate` → `active_project` nur mit Nutzerbestätigung
 - Arbeitsorientierte Chat-Nachrichten erzeugen den Kandidaten deterministisch (ohne Ollama); Chat zeigt Bestätigen/Ablehnen
@@ -37,14 +37,14 @@
 - Idle-Projektfläche ist handlungsfähig: große Primäraktion „Neues Projekt“ plus leeres Board, ohne Operate-Überblickswand
 - Idle-Arbeit zeigt drei klare Wege (Chat, Übernahme aus Projektfläche, Hinweis auf Freigaben) statt einer leeren Sektionswand
 - Kurze Action-Motion bestätigt nur reale Mutationen und respektiert `prefers-reduced-motion` sowie Settings `animations`
-- Idle-UI bleibt schlank (Chat: Frage + Eingabe); Dark-Theme ist wärmer, Arbeitsspur atmet aus Kernel-/Sessiondaten ohne Fake-Läufe
+- Idle-UI bleibt schlank (Chat: Titel + Composer, keine Landing-Wand); Dark-Theme ist wärmer, Arbeitsspur atmet in Arbeit/Projektfläche aus Kernel-/Sessiondaten ohne Fake-Läufe
 - Findings- und Root-History-Dokumentation haben jetzt explizite Supersession-/Archiv-Readmes
 - `/identity` liefert konsistente Produktrolle
 - Runtime-State wurde aus dem Repo nach `%LOCALAPPDATA%/Eidolon/state/` ausgelagert
 - `python -m pytest -q` → Formation-/Board-Karten-/Freigabe- und Altverträge; vorbestehende Env-Fehler (kein Live-Ollama, kein `aioquic`, Codex-CLI/`oauth_supported` false) bleiben außerhalb dieses Schnitts
 - Bestätigtes Vorhaben füllt das Board mit unterscheidbaren, textgebundenen Karten (Fakten/Bedingungen in Notizen); erneutes Seed verdoppelt nicht
 - LLM-Anbieter liegen in einer Registry: Ollama, OpenAI-kompatibel (`base_url` + Key + Modell, optionale Presets wie Groq) und Codex-OAuth; OAuth wird nur für den Codex-Pfad gezeigt; `complete()` folgt der Ersatzkette (gewählt zuerst, dann `fallback_chain`); Schlüssel erscheinen nicht in Settings-/Connection-/Chat-Antworten
-- Ersatzkette ist in den Settings sortierbar und persistent; leer/ungültig wird ehrlich abgelehnt. Chat und Operate wenden Settings nur auf ausdrücklichen Wunsch an (`POST /settings/apply`, `POST /api/v1/operate/settings/apply`); Schema lehnt ungültige Werte ab, Secrets bleiben draußen. Erkannte `/health`-, LLM- und SelfHealing-Probleme erscheinen im Connection-Status und im Chat, ohne Placebo. Kein neues Self-Repair-OS in diesem Schnitt.
+- Ersatzkette ist in den Settings sortierbar und persistent; leer/ungültig wird ehrlich abgelehnt. Chat und Operate wenden Settings nur auf ausdrücklichen Wunsch an (`POST /settings/apply`, `POST /api/v1/operate/settings/apply`); Schema lehnt ungültige Werte ab, Secrets bleiben draußen. Erkannte `/health`-, LLM- und SelfHealing-Probleme erscheinen im Connection-Status, Systemstatus und Stabilität, nicht als Chat-Tür-Diagnose. Kein neues Self-Repair-OS in diesem Schnitt.
 
 ## Offene Prioritäten
 

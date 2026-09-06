@@ -2,65 +2,13 @@
                 <div class="card chat-entry-card">
                     <div class="chat-shell">
                         <div class="chat-thread-panel">
-                            <div class="chat-panel-header chat-idle-header" style="margin-bottom:12px;">
-                                <div>
-                                    <h3 id="chat-session-title" style="margin:0;">Neue Unterhaltung</h3>
-                                    <div class="chat-panel-meta" id="chat-session-meta">Wähle links eine Unterhaltung oder starte eine neue.</div>
-                                </div>
-                                <button class="btn btn-sm btn-primary" data-ui-action="createChatSession">Neue Unterhaltung</button>
+                            <div class="chat-panel-header chat-idle-header">
+                                <h3 id="chat-session-title">Neue Unterhaltung</h3>
+                                <button class="chat-new-session" type="button" data-ui-action="createChatSession">Neu</button>
                             </div>
-                            <div class="chat-home-hero" id="chat-landing-panels">
-                                <div class="chat-home-brand">
-                                    <div class="eidolon-signature hero" data-presence-state="idle" aria-hidden="true">
-                                        <span class="signature-ring signature-ring-outer"></span>
-                                        <span class="signature-ring signature-ring-inner"></span>
-                                        <span class="signature-core"></span>
-                                    </div>
-                                    <div>
-                                        <div class="chat-home-eyebrow">Eidolon</div>
-                                        <h3>Arbeite mit mir direkt am Ziel, nicht an der Tool-Struktur.</h3>
-                                        <p>Beschreibe deine Aufgabe, setze eine bestehende Unterhaltung fort oder springe zurück in laufende Arbeit. Ich zeige dir nur das, was gerade zählt.</p>
-                                    </div>
-                                </div>
-                                <div class="chat-home-status-row">
-                                    <div class="chat-home-status-pill" id="chat-presence-badge">Bereit für neue Arbeit</div>
-                                    <div class="chat-home-status-note" id="chat-presence-note">Noch keine laufende Arbeit erkannt.</div>
-                                </div>
-                                <div class="chat-home-actions">
-                                    <button class="btn btn-sm btn-primary" data-tab-target="operate">Arbeit öffnen</button>
-                                    <button class="btn btn-sm" data-tab-target="workspaces">Projektfläche</button>
-                                </div>
-                                <div class="chat-home-grid">
-                                    <div class="chat-home-card-block">
-                                        <div class="chat-panel-title">Gerade aktiv</div>
-                                        <div id="chat-active-summary" class="chat-home-summary"><div class="empty">Lade aktuelle Arbeit…</div></div>
-                                    </div>
-                                    <div class="chat-home-card-block">
-                                        <div class="chat-panel-title">Braucht deine Entscheidung</div>
-                                        <div id="chat-decision-summary" class="chat-home-summary"><div class="empty">Prüfe Freigaben und Blocker…</div></div>
-                                    </div>
-                                </div>
-                                <details class="chat-home-recent">
-                                    <summary>Zuletzt aktiv</summary>
-                                    <div id="chat-recent-summary" class="chat-home-summary"><div class="empty">Lade letzte Unterhaltungen…</div></div>
-                                </details>
-                            </div>
-                            <div class="card chat-work-context" id="chat-context-summary" style="margin:0 0 12px 0;padding:12px 14px;">
-                                <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-                                    <div>
-                                        <div class="chat-panel-title">Arbeitskontext</div>
-                                        <div class="chat-panel-meta" id="chat-context-state">Noch kein belastbarer Arbeitskontext.</div>
-                                    </div>
-                                    <div>
-                                        <div class="chat-panel-title">Antwortmodus</div>
-                                        <div class="chat-panel-meta" id="chat-intent-mode">Warte auf Arbeitssignal</div>
-                                    </div>
-                                </div>
-                                <div class="chat-panel-meta" id="chat-next-step" style="margin-top:10px;">Sobald ein echter Kontext da ist, erscheint hier der nächste sinnvolle Schritt.</div>
-                                <div class="chat-panel-meta" id="chat-runtime-problems" style="margin-top:8px;display:none;"></div>
-                                <div id="chat-formation" class="chat-formation"><div class="empty">Keine sichtbare Projektbildung.</div></div>
-                                <div id="chat-operate-actions" class="chat-operate-actions"><div class="empty">Keine ausführbare Operate-Aktion im aktuellen Kontext.</div></div>
-                            </div>
+                            <div id="chat-project-door" class="chat-project-door" hidden></div>
+                            <div id="chat-formation" class="chat-formation" hidden></div>
+                            <div id="chat-operate-actions" class="chat-operate-actions" hidden></div>
                             <div class="chat-layout">
                                 <div class="chat-messages" id="chat-messages"></div>
                                 <div class="chat-input-shell">
@@ -68,16 +16,6 @@
                                     <div id="chat-agent-status" class="chat-agent-status" hidden data-phase="" aria-live="polite">
                                         <span class="chat-agent-status-dot" aria-hidden="true"></span>
                                         <span class="chat-agent-status-label" id="chat-agent-status-label"></span>
-                                    </div>
-                                    <div id="chat-work-trace" class="work-trace" data-work-trace data-work-trace-state="ready">
-                                        <span class="work-trace-pulse" aria-hidden="true"></span>
-                                        <p class="work-trace-line">
-                                            <span class="work-trace-ready" data-work-trace-ready>Bereit</span>
-                                            <span class="work-trace-sep" aria-hidden="true">·</span>
-                                            <span class="work-trace-waiting" data-work-trace-waiting>nichts wartet</span>
-                                            <span class="work-trace-sep" aria-hidden="true">·</span>
-                                            <span class="work-trace-next"><span data-work-trace-next-label>als Nächstes</span> <span data-work-trace-next>dein Impuls</span></span>
-                                        </p>
                                     </div>
                                     <div class="chat-input">
                                         <input type="text" id="chat-input" placeholder="Nachricht schreiben…" data-enter-action="sendChat">
