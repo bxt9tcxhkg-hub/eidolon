@@ -50,7 +50,9 @@ PROJECT_ROUTES = ROOT / 'python' / 'eidolon' / 'project_routes.py'
 def test_referenced_web_assets_are_allowlisted_and_served():
     client = TestClient(agent_server.app)
     web_root = ROOT / 'python' / 'eidolon' / 'web'
-    referenced_assets = set(re.findall(r'(?:src|href)="/assets/([^"]+)"', INDEX_HTML.read_text()))
+    referenced_assets = set()
+    for raw in re.findall(r'(?:src|href)="/assets/([^"]+)"', INDEX_HTML.read_text()):
+        referenced_assets.add(raw.split('?', 1)[0])
     for css_path in web_root.rglob('*.css'):
         css_text = css_path.read_text(encoding='utf-8')
         for rel in re.findall(r"@import url\('./([^']+)'\)", css_text):

@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import sys
 
 from fastapi.testclient import TestClient
@@ -25,6 +26,7 @@ def test_chat_presence_slot_uses_approved_still_and_german_aria():
     html = _html()
     assert 'id="chat-eidolon-presence"' in html
     assert 'data-eidolon-presence' in html
+    assert 'data-presence-engine="still"' in html
     assert 'data-turn-phase="idle"' in html
     assert 'aria-label="Eidolon ist bereit"' in html
     assert 'src="/assets/media/eidolon-presence.png"' in html
@@ -35,6 +37,7 @@ def test_chat_presence_slot_uses_approved_still_and_german_aria():
     assert 'chat-panel-heading' in html
     assert html.count('id="chat-eidolon-presence"') == 1
     assert html.count('data-eidolon-presence') == 2
+    assert html.count('data-presence-engine="still"') == 2
     assert html.index('id="chat-eidolon-presence"') < html.index('id="chat-session-title"')
     assert html.index('id="chat-eidolon-presence"') < html.index('id="chat-agent-status"')
 
@@ -76,11 +79,45 @@ def test_presence_uses_internal_warp_not_bitmap_pan_zoom():
     assert 'rotate(' not in css
     assert 'scale(' not in css
     assert 'getContext(\'webgl\'' in live
+    assert "getContext('experimental-webgl'" in live
     assert 'curl(' in live
     assert 'createPresenceCanvas2D' in live
     assert 'class="eidolon-presence-live"' in html
     assert 'function startEidolonPresence' in live
     assert 'function syncEidolonPresenceMotion' in live
+    assert 'data-presence-engine' in live
+    assert "setAttribute('data-presence-engine'" in live
+    assert "kind: 'webgl'" in live
+    assert "kind: 'canvas2d'" in live
+    assert "'still'" in live
+
+
+def test_presence_idle_motion_is_readable_at_mark_size():
+    live = PRESENCE_JS.read_text(encoding='utf-8')
+    idle = re.search(r'idle:\s*\{\s*warp:\s*([0-9.]+),\s*pulse:\s*([0-9.]+),\s*mote:\s*([0-9.]+)', live)
+    denkt = re.search(r'denkt:\s*\{\s*warp:\s*([0-9.]+),\s*pulse:\s*([0-9.]+),\s*mote:\s*([0-9.]+)', live)
+    arbeitet = re.search(r'arbeitet:\s*\{\s*warp:\s*([0-9.]+),\s*pulse:\s*([0-9.]+),\s*mote:\s*([0-9.]+)', live)
+    antwortet = re.search(r'antwortet:\s*\{\s*warp:\s*([0-9.]+),\s*pulse:\s*([0-9.]+),\s*mote:\s*([0-9.]+)', live)
+    assert idle and denkt and arbeitet and antwortet
+    idle_warp, idle_pulse, idle_mote = (float(idle.group(1)), float(idle.group(2)), float(idle.group(3)))
+    denkt_warp = float(denkt.group(1))
+    arbeitet_warp = float(arbeitet.group(1))
+    antwortet_warp = float(antwortet.group(1))
+    assert idle_warp >= 0.35
+    assert idle_pulse >= 0.8
+    assert idle_mote >= 0.85
+    assert denkt_warp > idle_warp
+    assert arbeitet_warp > denkt_warp
+    assert antwortet_warp < denkt_warp
+    assert '0.010 + move * 0.036' not in live
+    assert 'flow * (0.045 + move * 0.14)' in live
+    assert 'filament' in live
+    assert 'driftT' in live
+    assert 'loadPresenceTextureImage' in live
+    assert "PRESENCE_STILL_PNG = '/assets/media/eidolon-presence.png'" in live
+    assert 'presenceTextureUrl' in live
+    assert 'replacePresenceCanvas' in live
+    assert 'presenceWebGLUsable' in live
 
 
 def test_presence_reduced_motion_and_animation_setting_freeze_to_still():
@@ -94,6 +131,7 @@ def test_presence_reduced_motion_and_animation_setting_freeze_to_still():
     assert "getAttribute('data-animations') === 'off'" in live
     assert "prefers-reduced-motion: reduce" in live
     assert 'syncEidolonPresenceMotion()' in shell
+    assert "setPresenceEngineAttr(mark.root, 'still')" in live
 
 
 def test_presence_stays_a_mark_near_title_not_a_hero():
@@ -128,3 +166,12 @@ def test_presence_assets_are_allowlisted_and_served_as_images():
     assert png.content[:8] == b'\x89PNG\r\n\x1a\n'
     assert webp.content[:4] == b'RIFF'
     assert b'function startEidolonPresence' in js.content
+    assert 'no-cache' in js.headers.get('cache-control', '').lower()
+    assert 'no-store' in js.headers.get('cache-control', '').lower()
+    html = _html()
+    assert '/assets/eidolon-presence.js?v=20260906-visible' in html
+    assert "PRESENCE_ASSET_VERSION = '20260906-visible'" in PRESENCE_JS.read_text(encoding='utf-8')
+    versioned = client.get('/assets/eidolon-presence.js?v=20260906-visible')
+    assert versioned.status_code == 200
+    assert 'no-cache' in versioned.headers.get('cache-control', '').lower()
+    assert b'PRESENCE_STILL_PNG' in versioned.content
