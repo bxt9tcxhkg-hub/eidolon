@@ -43,6 +43,9 @@ def test_chat_transcript_is_flat_rows_not_bubbles():
     assert "class=\"chat-turn msg '" in js
     assert 'id="chat-agent-status"' in html
     assert 'id="chat-eidolon-presence"' in html
+    assert 'id="chat-eidolon-presence-park"' in html
+    assert 'data-presence-host="live"' in js
+    assert 'function mountChatPresenceMark' in js
     assert 'denkt…' in js
     assert 'arbeitet…' in js
     assert 'antwortet' in js

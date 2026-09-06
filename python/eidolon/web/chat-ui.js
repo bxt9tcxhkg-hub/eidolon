@@ -621,32 +621,88 @@ async function sendChat() {
     renderChat();
     loadChatLandingSummary().catch(() => {});
 }
-function renderChatTurn(m) {
+function presenceStillMarkHtml() {
+    return '<span class="eidolon-presence eidolon-presence-turn" aria-hidden="true">'
+        + '<span class="eidolon-presence-cloud" aria-hidden="true">'
+        + '<picture class="eidolon-presence-picture">'
+        + '<source type="image/webp" srcset="/assets/media/eidolon-presence.webp">'
+        + '<img class="eidolon-presence-still" src="/assets/media/eidolon-presence.png" alt="" width="512" height="512" decoding="async">'
+        + '</picture>'
+        + '</span></span>';
+}
+
+function renderChatPresenceSlot(live) {
+    if (live) {
+        return '<div class="chat-turn-presence" data-presence-host="live"></div>';
+    }
+    return '<div class="chat-turn-presence" data-presence-host="still">' + presenceStillMarkHtml() + '</div>';
+}
+
+function lastAssistantTurnIndex(messages) {
+    for (let i = (messages || []).length - 1; i >= 0; i -= 1) {
+        if (messages[i] && messages[i].role !== 'user') return i;
+    }
+    return -1;
+}
+
+function parkChatPresenceMark() {
+    const mark = document.getElementById('chat-eidolon-presence');
+    const park = document.getElementById('chat-eidolon-presence-park');
+    if (mark && park && mark.parentElement !== park) {
+        park.appendChild(mark);
+    }
+}
+
+function mountChatPresenceMark() {
+    const mark = document.getElementById('chat-eidolon-presence');
+    const host = document.querySelector('#chat-messages [data-presence-host="live"]');
+    const park = document.getElementById('chat-eidolon-presence-park');
+    if (!mark) return;
+    if (host) {
+        if (mark.parentElement !== host) host.appendChild(mark);
+    } else if (park && mark.parentElement !== park) {
+        park.appendChild(mark);
+    }
+    if (typeof refreshEidolonPresenceMarks === 'function') {
+        refreshEidolonPresenceMarks();
+    }
+}
+
+function renderChatTurn(m, live) {
     const role = m.role === 'user' ? 'user' : 'assistant';
+    const avatar = role === 'assistant' ? renderChatPresenceSlot(!!live) : '';
     return '<div class="chat-turn msg ' + role + '" data-role="' + role + '">'
+        + avatar
+        + '<div class="chat-turn-main">'
         + '<div class="chat-turn-meta"><span class="chat-turn-sender sender">' + escapeHtml(m.role === 'user' ? 'Du' : 'Eidolon') + '</span></div>'
         + '<div class="chat-turn-body">' + escapeHtml(m.content) + '</div>'
-        + '</div>';
+        + '</div></div>';
 }
 function renderChatStatusTurn() {
     if (!chatAgentStatus) return '';
     return '<div class="chat-turn chat-turn-status msg assistant" data-role="status" data-phase="' + escapeHtml(chatAgentStatus.phase) + '">'
+        + renderChatPresenceSlot(true)
+        + '<div class="chat-turn-main">'
         + '<div class="chat-turn-meta">'
         + '<span class="chat-turn-sender sender">Eidolon</span>'
         + '<span class="chat-agent-status-label">' + escapeHtml(chatAgentStatus.label) + '</span>'
         + '</div>'
-        + '</div>';
+        + '</div></div>';
 }
 function renderChat() {
     const el = document.getElementById('chat-messages');
     if (!el) return;
     syncChatIdleLayout(lastChatRuntimeContext);
     renderChatAgentStatus();
+    parkChatPresenceMark();
     if (!chatMessages.length) {
         el.innerHTML = '<div class="empty chat-idle-hint">Bereit, wenn du es bist.</div>';
+        mountChatPresenceMark();
         return;
     }
-    el.innerHTML = chatMessages.map(renderChatTurn).join('') + renderChatStatusTurn();
+    const liveIdx = chatAgentStatus ? -1 : lastAssistantTurnIndex(chatMessages);
+    el.innerHTML = chatMessages.map((m, i) => renderChatTurn(m, i === liveIdx)).join('') + renderChatStatusTurn();
+    mountChatPresenceMark();
     el.scrollTop = el.scrollHeight;
 }
 

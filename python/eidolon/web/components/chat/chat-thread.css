@@ -232,6 +232,23 @@
     font-size: 0.92rem;
     color: var(--text);
 }
+.chat-turn.assistant,
+.chat-turn[data-role="status"] {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 10px;
+    align-items: start;
+}
+.chat-turn-presence {
+    width: 36px;
+    padding-top: 1px;
+}
+.chat-turn-main {
+    min-width: 0;
+}
+.chat-eidolon-presence-park[hidden] {
+    display: none !important;
+}
 .msg-user,
 .msg.user,
 .msg-eidolon,
@@ -296,7 +313,7 @@
     color: var(--text);
 }
 @media (prefers-reduced-motion: reduce) {
-    .chat-panel-heading .eidolon-presence-live {
+    .chat-turn-presence .eidolon-presence-live {
         display: none !important;
     }
 }

@@ -21,12 +21,18 @@
             .chat-turn-sender,
             .msg .sender { font-size: 0.68rem; }
             .chat-agent-status { font-size: 0.8rem; min-height: 0; }
-            #chat-eidolon-presence.eidolon-presence {
-                width: 42px;
-                height: 42px;
-                max-width: 42px;
-                max-height: 42px;
-                flex-basis: 42px;
+            .chat-turn.assistant,
+            .chat-turn[data-role="status"] {
+                column-gap: 8px;
+            }
+            .chat-turn-presence,
+            #chat-eidolon-presence.eidolon-presence,
+            .eidolon-presence-turn {
+                width: 32px;
+                height: 32px;
+                max-width: 32px;
+                max-height: 32px;
+                flex-basis: 32px;
             }
             .chat-home-brand { grid-template-columns: 1fr; }
             .chat-home-status-row { align-items: flex-start; }
