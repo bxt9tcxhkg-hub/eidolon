@@ -379,6 +379,7 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 - operate snapshot provides run/objective/blocker/approval/evidence state
 - `/chat/context` exposes pending approvals, open blockers, and next_action for Chat execute actions
 - `POST /chat` can execute a small live skill set (`note`, `system_info`, `device_status`) and honestly refuses catalog-only skills
+- `POST /chat` with `stream: true` emits SSE; OpenAI-compatible/Groq yields real `delta` chunks, other paths return a single `done` without invented tokens
 
 ### Remaining mismatch
 - the full conversation→operate→workspace loop is still distributed across several modules rather than one explicit kernel boundary

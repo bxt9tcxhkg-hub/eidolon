@@ -145,6 +145,7 @@ def test_openai_compat_complete_uses_base_url_key_and_model(monkeypatch):
         assert seen['auth'] == f'Bearer {SECRET}'
         assert seen['user_agent'] == USER_AGENT
         assert seen['payload']['model'] == 'llama-3.1-8b-instant'
+        assert seen['payload'].get('stream') in {None, False}
     finally:
         save_openai_api_key('')
         save_llm_config(original_cfg)

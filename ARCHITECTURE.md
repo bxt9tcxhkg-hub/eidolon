@@ -12,6 +12,7 @@ Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gem
 - `python/eidolon/chat_route_support.py`
 - Erzwingt knappen Mitspieler-Vertrag für Arbeit (3–5 kurze Zeilen, höchstens eine Aktion oder eine Frage, kein Intention/Richtungen/Empfehlung-Schema)
 - `POST /chat` und `GET /chat/context` ziehen ihren Runtime-Kontext über denselben `session_payload`-Pfad
+- `POST /chat` mit `stream: true` liefert SSE; `delta` nur von echten Provider-Chunks (OpenAI-kompatibel/Groq). Nicht-streamfähige Pfade (Codex, Skills, Truth, Settings) enden als ein `done` ohne Fake-Tokens. Ohne `stream` bleibt die JSON-Antwort.
 - `POST /chat` kann nach Wahrheits- und Settings-Pfad eine kleine Skill-Runtime ausführen (`note`, `system_info`, `device_status`); unverdrahtete Katalog-Skills antworten ehrlich statt mit Echo-Erfolg
 - Baut Runtime-Kontext aus Chat, Workspace und Operate-Snapshot auf Basis des `work_context_kernel`
 - Fängt generische Assistentenantworten und Essay-Schema ab und fällt auf eine kurze, geerdete Board-Angebot-Antwort zurück
@@ -71,6 +72,7 @@ Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gem
 ### 7. LLM-Provider-Registry
 - `python/eidolon/core/llm_provider_catalog.py` beschreibt Ollama, den OpenAI-kompatiblen HTTP-Stecker und Codex-OAuth
 - Chat/`complete()` geht über `llm_fallback.py`: gewählter Anbieter zuerst, danach die eindeutige `fallback_chain`
+- Chat-Streaming geht über `stream_openai_compat` / `iter_stream_or_complete`: nur der OpenAI-kompatible Stecker streamt; andere Provider fallen ehrlich auf `complete()` zurück
 - Die Ersatzkette ist in den Settings sortierbar und liegt in Settings/Registry; leer oder ungültig wird ehrlich abgelehnt, nicht still korrigiert
 - Chat (Execute-Tür) und Operate setzen Settings nur auf ausdrücklichen Wunsch: `POST /settings/apply` und `POST /api/v1/operate/settings/apply`; Secrets bleiben draußen
 - `/llm/connection`, Chat-Kontext und „Welche Fehler…“ zeigen erkannte LLM-/Healing-/Health-Probleme ohne Schlüsselwerte

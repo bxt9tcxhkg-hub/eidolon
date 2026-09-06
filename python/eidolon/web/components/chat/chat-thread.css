@@ -264,6 +264,12 @@
     white-space: pre-wrap;
     overflow-wrap: anywhere;
 }
+.chat-turn.is-streaming .chat-turn-body::after {
+    content: '▍';
+    margin-left: 1px;
+    color: var(--text-muted);
+    opacity: 0.55;
+}
 .chat-turn-status,
 .msg.status {
     border-bottom: none;
