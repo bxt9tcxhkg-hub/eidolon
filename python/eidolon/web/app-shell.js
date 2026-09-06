@@ -176,6 +176,7 @@ function showNotice(message, type = 'info', duration = 3000) {
 
 const CHAT_TURN_ARIA = {
     idle: 'Eidolon ist bereit',
+    schreibt: 'Eidolon achtet auf die Eingabe',
     denkt: 'Eidolon denkt',
     arbeitet: 'Eidolon arbeitet',
     antwortet: 'Eidolon antwortet',
@@ -185,10 +186,11 @@ function setEidolonTurnPhase(phase) {
     const next = (phase === 'denkt' || phase === 'arbeitet' || phase === 'antwortet') ? phase : 'idle';
     document.querySelectorAll('[data-eidolon-presence]').forEach((el) => {
         el.dataset.turnPhase = next;
-        if (el.getAttribute('role') === 'img') {
+        if (el.getAttribute('role') === 'img' && typeof applyPresencePhaseAttrs !== 'function') {
             el.setAttribute('aria-label', CHAT_TURN_ARIA[next] || CHAT_TURN_ARIA.idle);
         }
     });
+    if (typeof applyPresencePhaseAttrs === 'function') applyPresencePhaseAttrs();
 }
 
 function setEidolonPresence(state, title, detail) {

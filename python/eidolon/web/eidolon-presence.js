@@ -1,13 +1,26 @@
-const PRESENCE_ASSET_VERSION = '20260906-composer';
+const PRESENCE_ASSET_VERSION = '20260906-phases';
 const PRESENCE_STILL_PNG = '/assets/media/eidolon-presence.png';
 
-// Idle must swirl at composer/sidebar mark size within 1–2s. Previous warp:0.055 read as still.
-const PRESENCE_PHASES = {
-    idle: { warp: 0.48, pulse: 0.92, mote: 0.98, gaze: 0.55 },
-    denkt: { warp: 0.82, pulse: 1.18, mote: 1.08, gaze: 0.85 },
-    arbeitet: { warp: 1.05, pulse: 1.32, mote: 1.16, gaze: 0.8 },
-    antwortet: { warp: 0.4, pulse: 0.78, mote: 1.02, gaze: 1 },
+const PRESENCE_ARIA = {
+    idle: 'Eidolon ist bereit',
+    schreibt: 'Eidolon achtet auf die Eingabe',
+    denkt: 'Eidolon denkt',
+    arbeitet: 'Eidolon arbeitet',
+    antwortet: 'Eidolon antwortet',
 };
+
+// Distinct motion signatures, readable at 36–42px within ~1s.
+// schreibt = slow horizontal drift + soft glow; denkt = filament churn + quick pulse;
+// antwortet = speaking rhythm + gaze toward transcript; idle quieter than all three.
+const PRESENCE_PHASES = {
+    idle: { warp: 0.38, pulse: 0.82, mote: 0.86, gaze: 0.28, drift: 0.18, churn: 0.22, rhythm: 1.35, mode: 0 },
+    schreibt: { warp: 0.22, pulse: 0.9, mote: 0.96, gaze: 1.2, drift: 1.0, churn: 0.06, rhythm: 1.2, mode: 1 },
+    denkt: { warp: 1.18, pulse: 1.42, mote: 1.38, gaze: 0.45, drift: 0.05, churn: 1.15, rhythm: 6.8, mode: 2 },
+    arbeitet: { warp: 1.36, pulse: 1.52, mote: 1.44, gaze: 0.42, drift: 0.06, churn: 1.32, rhythm: 7.4, mode: 3 },
+    antwortet: { warp: 0.26, pulse: 1.22, mote: 1.2, gaze: 1.28, drift: 0.04, churn: 0.12, rhythm: 3.05, mode: 4 },
+};
+
+const PRESENCE_PHASE_CLASSES = ['is-schreibt', 'is-denkt', 'is-antwortet'];
 
 const PRESENCE_VERT = [
     'attribute vec2 aPos;',
@@ -27,6 +40,10 @@ const PRESENCE_FRAG = [
     'uniform float uPulse;',
     'uniform float uMote;',
     'uniform vec2 uGaze;',
+    'uniform float uDrift;',
+    'uniform float uChurn;',
+    'uniform float uRhythm;',
+    'uniform float uMode;',
     'float hash(vec2 p) {',
     '  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);',
     '}',
@@ -62,20 +79,39 @@ const PRESENCE_FRAG = [
     'void main() {',
     '  vec2 uv = vUv;',
     '  float dens = max(texture2D(uStill, uv).r, texture2D(uStill, uv).g * 0.72);',
-    '  vec2 flow = curl(uv * 3.15, uTime * uWarp);',
-    '  vec2 filament = curl(uv * 6.4 + vec2(0.4, 1.1), uTime * uWarp * 1.35);',
-    '  vec2 billow = curl(uv * 1.28 + vec2(2.2, 0.35), uTime * uWarp * 0.46);',
     '  float move = smoothstep(0.02, 0.38, dens);',
-    '  vec2 warped = uv + flow * (0.045 + move * 0.14) + filament * move * 0.06 + billow * move * 0.055;',
+    '  float isWrite = step(0.5, uMode) * (1.0 - step(1.5, uMode));',
+    '  float isThink = step(1.5, uMode) * (1.0 - step(3.5, uMode));',
+    '  float isSpeak = step(3.5, uMode);',
+    '  vec2 flow = curl(uv * 3.15, uTime * uWarp);',
+    '  vec2 filament = curl(uv * 7.4 + vec2(0.4, 1.1), uTime * (uWarp + uChurn) * 1.85);',
+    '  vec2 billow = curl(uv * 1.18 + vec2(2.2, 0.35), uTime * uWarp * 0.42);',
+    '  float horiz = sin(uTime * 0.82 + uv.y * 3.1) * 0.12 * uDrift;',
+    '  vec2 drift = vec2(horiz, sin(uTime * 0.31) * 0.014 * uDrift);',
+    '  vec2 churn = filament * (0.05 + move * 0.22) * uChurn;',
+    '  vec2 speak = vec2(0.0, sin(uTime * uRhythm) * 0.05) * isSpeak;',
+    '  vec2 warped = uv + flow * (0.018 + move * 0.07) + drift * move + churn + billow * move * 0.035 + speak * move;',
     '  vec4 ink = texture2D(uStill, clamp(warped, 0.0, 1.0));',
-    '  float driftT = uTime * 0.9;',
-    '  vec2 mote = vec2(0.56, 0.58) + uGaze * 0.13 + vec2(sin(driftT), cos(driftT * 0.81)) * 0.05;',
+    '  float moteSpeed = mix(0.7, 3.4, clamp(uChurn, 0.0, 1.0));',
+    '  vec2 moteWalk = vec2(sin(uTime * moteSpeed), cos(uTime * moteSpeed * 0.78));',
+    '  moteWalk.x += sin(uTime * 0.88) * 0.09 * uDrift;',
+    '  moteWalk.y *= mix(1.0, 0.2, clamp(uDrift, 0.0, 1.0));',
+    '  vec2 mote = vec2(0.56, 0.58) + uGaze * mix(0.12, 0.24, isSpeak) + moteWalk * mix(0.028, 0.075, clamp(uChurn, 0.0, 1.0));',
+    '  mote += vec2(-0.08, 0.1) * isSpeak;',
+    '  mote += vec2(0.0, -0.08) * isWrite;',
+    '  float beat = 0.62 + 0.38 * sin(uTime * uRhythm);',
+    '  float speakBeat = 0.36 + 0.64 * pow(0.5 + 0.5 * sin(uTime * uRhythm), 2.0);',
+    '  float thinkBeat = 0.42 + 0.58 * sin(uTime * uRhythm);',
+    '  beat = mix(beat, thinkBeat, isThink);',
+    '  beat = mix(beat, speakBeat, isSpeak);',
+    '  float coreTight = mix(20.0, 50.0, clamp(uChurn + isThink * 0.35, 0.0, 1.0));',
+    '  float haloWide = mix(8.4, 3.1, clamp(uDrift + isWrite * 0.4, 0.0, 1.0));',
     '  vec2 md = (uv - mote) * vec2(1.0, 1.06);',
     '  float d2 = dot(md, md);',
-    '  float core = exp(-d2 * 32.0);',
-    '  float halo = exp(-d2 * 7.2);',
+    '  float core = exp(-d2 * coreTight);',
+    '  float halo = exp(-d2 * haloWide);',
     '  vec3 gold = vec3(1.0, 0.88, 0.62);',
-    '  ink.rgb += gold * (core * 0.98 + halo * 0.5) * uMote * uPulse;',
+    '  ink.rgb += gold * (core * 1.08 + halo * 0.58) * uMote * uPulse * beat;',
     '  gl_FragColor = ink;',
     '}',
 ].join('\n');
@@ -100,9 +136,32 @@ function setPresenceEngineAttr(root, kind) {
     root.setAttribute('data-presence-engine', kind);
 }
 
-function presencePhaseName(root) {
+function presenceTurnPhase(root) {
     const phase = root && root.dataset ? root.dataset.turnPhase : 'idle';
-    return PRESENCE_PHASES[phase] ? phase : 'idle';
+    return PRESENCE_PHASES[phase] && phase !== 'schreibt' ? phase : 'idle';
+}
+
+function presenceVisualPhase(root) {
+    const turn = presenceTurnPhase(root);
+    if (turn === 'idle' && presenceFocusComposer) return 'schreibt';
+    return turn;
+}
+
+function presencePhaseName(root) {
+    return presenceVisualPhase(root);
+}
+
+function applyPresencePhaseAttrs() {
+    document.querySelectorAll('[data-eidolon-presence]').forEach(function (el) {
+        const visual = presenceVisualPhase(el);
+        el.setAttribute('data-presence-phase', visual);
+        PRESENCE_PHASE_CLASSES.forEach(function (cls) {
+            el.classList.toggle(cls, cls === 'is-' + visual);
+        });
+        if (el.getAttribute('role') === 'img') {
+            el.setAttribute('aria-label', PRESENCE_ARIA[visual] || PRESENCE_ARIA.idle);
+        }
+    });
 }
 
 function presenceClamp(value, lo, hi) {
@@ -119,7 +178,7 @@ function presenceGaze(root, phase) {
         target = document.getElementById('chat-messages');
     } else if (phase === 'denkt' || phase === 'arbeitet') {
         target = document.getElementById('chat-input') || document.getElementById('chat-agent-status');
-    } else if (presenceFocusComposer) {
+    } else if (phase === 'schreibt' || presenceFocusComposer) {
         target = document.getElementById('chat-input');
     }
     if (!target) return { x: 0, y: 0 };
@@ -128,10 +187,13 @@ function presenceGaze(root, phase) {
     const tx = box.left + box.width * 0.5;
     const ty = box.top + Math.min(box.height * 0.28, 36);
     const knobs = PRESENCE_PHASES[phase] || PRESENCE_PHASES.idle;
-    return {
-        x: presenceClamp(((tx - cx) / Math.max(window.innerWidth, 1)) * 2.6 * knobs.gaze, -1, 1),
-        y: presenceClamp(((cy - ty) / Math.max(window.innerHeight, 1)) * 2.6 * knobs.gaze, -1, 1),
-    };
+    let x = presenceClamp(((tx - cx) / Math.max(window.innerWidth, 1)) * 2.6 * knobs.gaze, -1, 1);
+    let y = presenceClamp(((cy - ty) / Math.max(window.innerHeight, 1)) * 2.6 * knobs.gaze, -1, 1);
+    if (phase === 'antwortet') {
+        x = presenceClamp(x - 0.22, -1, 1);
+        y = presenceClamp(y + 0.34, -1, 1);
+    }
+    return { x: x, y: y };
 }
 
 function compilePresenceShader(gl, type, source) {
@@ -215,6 +277,10 @@ function createPresenceWebGL(canvas, image) {
         pulse: gl.getUniformLocation(program, 'uPulse'),
         mote: gl.getUniformLocation(program, 'uMote'),
         gaze: gl.getUniformLocation(program, 'uGaze'),
+        drift: gl.getUniformLocation(program, 'uDrift'),
+        churn: gl.getUniformLocation(program, 'uChurn'),
+        rhythm: gl.getUniformLocation(program, 'uRhythm'),
+        mode: gl.getUniformLocation(program, 'uMode'),
         still: gl.getUniformLocation(program, 'uStill'),
     };
     return {
@@ -238,6 +304,10 @@ function createPresenceWebGL(canvas, image) {
             gl.uniform1f(loc.pulse, knobs.pulse);
             gl.uniform1f(loc.mote, knobs.mote);
             gl.uniform2f(loc.gaze, gaze.x, gaze.y);
+            gl.uniform1f(loc.drift, knobs.drift);
+            gl.uniform1f(loc.churn, knobs.churn);
+            gl.uniform1f(loc.rhythm, knobs.rhythm);
+            gl.uniform1f(loc.mode, knobs.mode);
             gl.drawArrays(gl.TRIANGLES, 0, 3);
         },
     };
@@ -326,12 +396,30 @@ function createPresenceCanvas2D(canvas, image) {
                         const i = (ly * lumW + lx) * 4;
                         dens = Math.max(data[i] / 255, data[i + 1] / 255 * 0.72);
                     }
-                    const n1 = valuePresenceNoise(u * 3.2 + time * knobs.warp * 1.8, v * 3.2 + time * knobs.warp * 0.45);
-                    const n2 = valuePresenceNoise(u * 1.3 + 2.1 - time * knobs.warp * 0.75, v * 1.3 - time * knobs.warp * 0.95);
-                    const n3 = valuePresenceNoise(u * 6.1 + time * knobs.warp * 2.1, v * 6.1);
                     const move = Math.max(0, (dens - 0.04) / 0.36);
-                    const ox = (n1 - 0.5) * srcCellW * (0.55 + move * 1.35) + (n3 - 0.5) * srcCellW * move * 0.55;
-                    const oy = (n2 - 0.5) * srcCellH * (0.5 + move * 1.25) + (n3 - 0.5) * srcCellH * move * 0.4;
+                    const mode = knobs.mode || 0;
+                    let ox = 0;
+                    let oy = 0;
+                    if (mode === 1) {
+                        ox = Math.sin(time * 0.82 + v * 3.1) * srcCellW * (1.2 + move * 0.55) * knobs.drift;
+                        oy = Math.sin(time * 0.31) * srcCellH * 0.14 * knobs.drift;
+                    } else if (mode === 2 || mode === 3) {
+                        const n1 = valuePresenceNoise(u * 6.4 + time * knobs.churn * 4.2, v * 6.4 + time * knobs.churn * 3.1);
+                        const n2 = valuePresenceNoise(u * 5.1 - time * knobs.churn * 3.6, v * 5.1 + time * knobs.churn * 2.4);
+                        const n3 = valuePresenceNoise(u * 9.2 + time * knobs.churn * 5.0, v * 9.2);
+                        ox = (n1 - 0.5) * srcCellW * (1.45 + move * 1.85) * knobs.churn;
+                        oy = (n2 - 0.5) * srcCellH * (1.4 + move * 1.7) * knobs.churn + (n3 - 0.5) * srcCellH * move * 0.85;
+                    } else if (mode === 4) {
+                        const n1 = valuePresenceNoise(u * 2.1 + time * 0.35, v * 2.1);
+                        ox = (n1 - 0.5) * srcCellW * 0.28;
+                        oy = Math.sin(time * knobs.rhythm) * srcCellH * (0.62 + move * 0.32);
+                    } else {
+                        const n1 = valuePresenceNoise(u * 3.2 + time * knobs.warp * 1.8, v * 3.2 + time * knobs.warp * 0.45);
+                        const n2 = valuePresenceNoise(u * 1.3 + 2.1 - time * knobs.warp * 0.75, v * 1.3 - time * knobs.warp * 0.95);
+                        const n3 = valuePresenceNoise(u * 6.1 + time * knobs.warp * 2.1, v * 6.1);
+                        ox = (n1 - 0.5) * srcCellW * (0.4 + move * 0.85) + (n3 - 0.5) * srcCellW * move * 0.35;
+                        oy = (n2 - 0.5) * srcCellH * (0.36 + move * 0.75) + (n3 - 0.5) * srcCellH * move * 0.28;
+                    }
                     const sx = Math.min(Math.max(0, x * srcCellW + ox), Math.max(0, srcW - srcCellW));
                     const sy = Math.min(Math.max(0, y * srcCellH + oy), Math.max(0, srcH - srcCellH));
                     ctx.drawImage(
@@ -347,13 +435,35 @@ function createPresenceCanvas2D(canvas, image) {
                     );
                 }
             }
-            const driftX = Math.sin(time * 0.9) * 0.05;
-            const driftY = Math.cos(time * 0.73) * 0.045;
-            const mx = (0.56 + gaze.x * 0.13 + driftX) * width;
-            const my = (1 - (0.58 + gaze.y * 0.13 + driftY)) * height;
-            const radius = Math.max(width, height) * 0.68;
+            const mode = knobs.mode || 0;
+            let mx;
+            let my;
+            let pulse;
+            let radius = Math.max(width, height) * 0.68;
+            if (mode === 1) {
+                mx = (0.56 + gaze.x * 0.16 + Math.sin(time * 0.88) * 0.1) * width;
+                my = (1 - (0.44 + gaze.y * 0.1)) * height;
+                pulse = knobs.mote * knobs.pulse * (0.86 + 0.14 * Math.sin(time * knobs.rhythm));
+                radius = Math.max(width, height) * 0.86;
+            } else if (mode === 2 || mode === 3) {
+                mx = (0.56 + gaze.x * 0.1 + Math.sin(time * 3.4) * 0.075) * width;
+                my = (1 - (0.58 + gaze.y * 0.1 + Math.cos(time * 2.9) * 0.065)) * height;
+                pulse = knobs.mote * knobs.pulse * (0.48 + 0.52 * Math.sin(time * knobs.rhythm));
+                radius = Math.max(width, height) * 0.52;
+            } else if (mode === 4) {
+                const beat = Math.pow(0.5 + 0.5 * Math.sin(time * knobs.rhythm), 2);
+                mx = (0.4 + gaze.x * 0.22) * width;
+                my = (1 - (0.7 + gaze.y * 0.16)) * height;
+                pulse = knobs.mote * knobs.pulse * (0.4 + 0.6 * beat);
+                radius = Math.max(width, height) * 0.62;
+            } else {
+                const driftX = Math.sin(time * 0.9) * 0.04;
+                const driftY = Math.cos(time * 0.73) * 0.035;
+                mx = (0.56 + gaze.x * 0.1 + driftX) * width;
+                my = (1 - (0.58 + gaze.y * 0.1 + driftY)) * height;
+                pulse = knobs.mote * knobs.pulse * (0.82 + 0.18 * Math.sin(time * knobs.rhythm));
+            }
             const glow = ctx.createRadialGradient(mx, my, 0, mx, my, radius);
-            const pulse = knobs.mote * knobs.pulse;
             glow.addColorStop(0, 'rgba(255, 240, 196,' + (0.78 * pulse).toFixed(3) + ')');
             glow.addColorStop(0.22, 'rgba(217, 161, 92,' + (0.38 * pulse).toFixed(3) + ')');
             glow.addColorStop(1, 'rgba(0,0,0,0)');
@@ -498,15 +608,14 @@ function drawPresenceFrame(now) {
         return;
     }
     const time = now * 0.001;
-    const pulseWave = 0.58 + 0.42 * Math.sin(time * 2.6);
     presenceMarks.forEach(function (mark) {
         if (!mark.visible || !mark.engine) {
             showPresenceStill(mark);
             return;
         }
-        const phase = presencePhaseName(mark.root);
+        const phase = presenceVisualPhase(mark.root);
         const knobs = Object.assign({}, PRESENCE_PHASES[phase]);
-        knobs.pulse = knobs.pulse * (0.72 + pulseWave * 0.28);
+        knobs.pulse = presencePulseAmount(time, phase, knobs);
         const size = presenceBackingSize(mark.root);
         showPresenceLive(mark);
         mark.engine.draw(size, size, time, knobs, presenceGaze(mark.root, phase));
@@ -527,13 +636,31 @@ function startPresenceLoop() {
     presenceRaf = window.requestAnimationFrame(drawPresenceFrame);
 }
 
+function presencePulseAmount(time, phase, knobs) {
+    if (phase === 'schreibt') return knobs.pulse * (0.88 + 0.12 * Math.sin(time * knobs.rhythm));
+    if (phase === 'denkt' || phase === 'arbeitet') return knobs.pulse * (0.5 + 0.5 * Math.sin(time * knobs.rhythm));
+    if (phase === 'antwortet') {
+        const beat = Math.sin(time * knobs.rhythm);
+        return knobs.pulse * (0.42 + 0.58 * (beat * beat));
+    }
+    return knobs.pulse * (0.84 + 0.16 * Math.sin(time * knobs.rhythm));
+}
+
+function setPresenceComposerFocus(next) {
+    const focused = !!next;
+    if (presenceFocusComposer === focused) return;
+    presenceFocusComposer = focused;
+    applyPresencePhaseAttrs();
+}
+
 function bindPresenceChrome() {
     if (presenceListening) return;
     presenceListening = true;
     const input = document.getElementById('chat-input');
     if (input) {
-        input.addEventListener('focus', function () { presenceFocusComposer = true; });
-        input.addEventListener('blur', function () { presenceFocusComposer = false; });
+        input.addEventListener('focus', function () { setPresenceComposerFocus(true); });
+        input.addEventListener('blur', function () { setPresenceComposerFocus(false); });
+        input.addEventListener('input', function () { setPresenceComposerFocus(true); });
         presenceFocusComposer = document.activeElement === input;
     }
     try {
@@ -544,6 +671,9 @@ function bindPresenceChrome() {
     } catch (_) { /* ignore */ }
     new MutationObserver(function () { syncEidolonPresenceMotion(); })
         .observe(document.documentElement, { attributes: true, attributeFilter: ['data-animations'] });
+    new MutationObserver(function () { applyPresencePhaseAttrs(); })
+        .observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['data-turn-phase'] });
+    applyPresencePhaseAttrs();
 }
 
 function pruneDetachedPresenceMarks() {
@@ -578,6 +708,8 @@ function syncEidolonPresenceMotion() {
 window.startEidolonPresence = startEidolonPresence;
 window.refreshEidolonPresenceMarks = refreshEidolonPresenceMarks;
 window.syncEidolonPresenceMotion = syncEidolonPresenceMotion;
+window.applyPresencePhaseAttrs = applyPresencePhaseAttrs;
+window.PRESENCE_ARIA = PRESENCE_ARIA;
 window.PRESENCE_ASSET_VERSION = PRESENCE_ASSET_VERSION;
 
 if (document.readyState === 'loading') {
