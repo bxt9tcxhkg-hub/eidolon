@@ -150,9 +150,7 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .eidolon-signature .eidolon-presence-cloud,
-            .eidolon-signature .eidolon-presence-mote,
-            .eidolon-signature .eidolon-presence-still {
-                animation: none !important;
+            .eidolon-signature .eidolon-presence-live {
+                display: none !important;
             }
         }
