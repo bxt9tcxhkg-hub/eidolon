@@ -16,7 +16,7 @@ async function loadHealth() {
                 : '';
         }
         let html = '<div class="comp-row"><span class="comp-dot ok"></span><span class="comp-name">Laufzeit</span><span class="comp-detail">' + (d.uptime_human || '-') + '</span></div>';
-        html += '<div class="comp-row"><span class="comp-dot ok"></span><span class="comp-name">Status</span><span class="comp-detail">' + (d.status || '-') + '</span></div>';
+        html += '<div class="comp-row"><span class="comp-dot ' + (d.status === 'ok' ? 'ok' : 'warn') + '"></span><span class="comp-name">Status</span><span class="comp-detail">' + (d.status || '-') + '</span></div>';
         if (comps.skills) html += '<div class="comp-row"><span class="comp-dot ' + (comps.skills.available ? 'ok' : 'warn') + '"></span><span class="comp-name">Skills</span><span class="comp-detail">' + escapeHtml(comps.skills.detail || ((comps.skills.count ?? 0) + '/' + (comps.skills.enabled ?? 0) + ' Katalog')) + '</span></div>';
         if (comps.capabilities) {
             const capAvail = comps.capabilities.available ?? 0;
