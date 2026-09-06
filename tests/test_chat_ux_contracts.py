@@ -30,6 +30,8 @@ def test_chat_transcript_is_flat_rows_not_bubbles():
     html = INDEX_HTML.read_text()
     assert '.chat-turn,' in css or '.chat-turn' in css
     assert 'max-width: none' in css
+    assert 'background: transparent' in css
+    assert '.chat-messages' in css
     assert 'margin-left: auto' not in css
     assert 'border-bottom-right-radius: 2px' not in css
     assert 'border-bottom-left-radius: 2px' not in css
