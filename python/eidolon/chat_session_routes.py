@@ -3,9 +3,14 @@ from __future__ import annotations
 from fastapi import FastAPI
 
 from eidolon.chat_route_support import session_payload
+from eidolon.chat_turn_status import snapshot_chat_turn
 
 
 def register_chat_session_routes(app: FastAPI, *, chat_session_store, latest_session_user_message, chat_runtime_payload) -> None:
+    @app.get('/chat/turn-status')
+    async def chat_turn_status(session_id: str | None = None):
+        return {'ok': True, **snapshot_chat_turn(session_id)}
+
     @app.get('/chat/context')
     async def chat_context(session_id: str | None = None):
         session = chat_session_store.get_session(session_id) if session_id else None
