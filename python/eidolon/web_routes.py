@@ -26,6 +26,7 @@ ALLOWED_ASSETS = {
     'components/shell/eidolon-presence.css': 'text/css',
     'media/eidolon-presence.png': 'image/png',
     'media/eidolon-presence.webp': 'image/webp',
+    'eidolon-presence.js': 'application/javascript',
     'code-repair-ui.js': 'application/javascript',
     'healing-ui.js': 'application/javascript',
     'skills-backups-ui.js': 'application/javascript',

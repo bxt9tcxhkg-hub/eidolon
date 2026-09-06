@@ -13,6 +13,19 @@
     padding: 0 0 12px 0;
     border-bottom: 1px solid var(--border-subtle);
 }
+.chat-panel-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+.chat-panel-heading #chat-session-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 #chat-session-title {
     margin: 0;
     font-size: 1.05rem;

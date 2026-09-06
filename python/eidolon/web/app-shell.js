@@ -438,6 +438,7 @@ function actionMotionEnabled() {
 function applyUiMotionPreference(settings) {
     const enabled = !(settings && settings.ui && settings.ui.animations === false);
     document.documentElement.setAttribute('data-animations', enabled ? 'on' : 'off');
+    if (typeof syncEidolonPresenceMotion === 'function') syncEidolonPresenceMotion();
 }
 
 function confirmAction(target, kind) {

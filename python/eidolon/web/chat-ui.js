@@ -537,7 +537,7 @@ function renderChatAgentStatus() {
     const labelEl = document.getElementById('chat-agent-status-label');
     if (!el) return;
     const phase = chatAgentStatus ? chatAgentStatus.phase : 'idle';
-    el.hidden = false;
+    el.hidden = !chatAgentStatus;
     el.classList.toggle('is-visible', Boolean(chatAgentStatus));
     el.dataset.phase = phase;
     if (labelEl) labelEl.textContent = chatAgentStatus ? chatAgentStatus.label : '';

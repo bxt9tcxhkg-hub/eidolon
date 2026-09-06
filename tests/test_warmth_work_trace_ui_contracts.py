@@ -38,9 +38,10 @@ def test_dark_theme_keeps_warm_character_without_light_flip():
     assert '#4a7dff' not in theme
     assert '[data-theme="light"]' in theme
     assert 'data-theme="light"' not in html
-    assert 'presence-smoke-drift' in presence
-    assert 'presence-mote-pulse 4.8s' in presence
+    assert 'presence-smoke-drift' not in presence
+    assert 'eidolon-presence-live' in presence
     assert 'data-eidolon-presence' in html
+    assert 'class="eidolon-presence-live"' in html
     assert 'prefers-reduced-motion' in presence
     assert 'prefers-reduced-motion' in layout
 
