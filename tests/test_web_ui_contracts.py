@@ -62,7 +62,7 @@ def test_referenced_web_assets_are_allowlisted_and_served():
     for asset in sorted(referenced_assets):
         response = client.get(f'/assets/{asset}')
         assert response.status_code == 200, asset
-        assert response.text.strip(), asset
+        assert response.content, asset
 
 
 def test_identity_endpoint_matches_ui_contract():

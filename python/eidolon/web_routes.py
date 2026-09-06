@@ -23,6 +23,9 @@ ALLOWED_ASSETS = {
     'components/shell/shell-theme.css': 'text/css',
     'components/shell/shell-layout.css': 'text/css',
     'components/shell/shell-header.css': 'text/css',
+    'components/shell/eidolon-presence.css': 'text/css',
+    'media/eidolon-presence.png': 'image/png',
+    'media/eidolon-presence.webp': 'image/webp',
     'code-repair-ui.js': 'application/javascript',
     'healing-ui.js': 'application/javascript',
     'skills-backups-ui.js': 'application/javascript',
@@ -80,4 +83,6 @@ def register_web_routes(app: FastAPI, project_root: Path) -> None:
             raise HTTPException(status_code=404, detail='Asset nicht gefunden')
         if not resolved_path.exists():
             raise HTTPException(status_code=404, detail='Asset nicht gefunden')
+        if media_type.startswith('image/'):
+            return Response(content=resolved_path.read_bytes(), media_type=media_type)
         return Response(content=resolved_path.read_text(encoding='utf-8'), media_type=media_type)

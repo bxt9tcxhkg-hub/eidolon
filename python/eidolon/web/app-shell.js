@@ -174,6 +174,23 @@ function showNotice(message, type = 'info', duration = 3000) {
     setTimeout(() => el.remove(), duration);
 }
 
+const CHAT_TURN_ARIA = {
+    idle: 'Eidolon ist bereit',
+    denkt: 'Eidolon denkt',
+    arbeitet: 'Eidolon arbeitet',
+    antwortet: 'Eidolon antwortet',
+};
+
+function setEidolonTurnPhase(phase) {
+    const next = (phase === 'denkt' || phase === 'arbeitet' || phase === 'antwortet') ? phase : 'idle';
+    document.querySelectorAll('[data-eidolon-presence]').forEach((el) => {
+        el.dataset.turnPhase = next;
+        if (el.getAttribute('role') === 'img') {
+            el.setAttribute('aria-label', CHAT_TURN_ARIA[next] || CHAT_TURN_ARIA.idle);
+        }
+    });
+}
+
 function setEidolonPresence(state, title, detail) {
     const next = {
         state: state || 'idle',
@@ -438,6 +455,7 @@ function confirmAction(target, kind) {
 
 Object.assign(window, {
     setEidolonPresence,
+    setEidolonTurnPhase,
     describeOperatePresence,
     describeWorkTrace,
     refreshWorkTraces,

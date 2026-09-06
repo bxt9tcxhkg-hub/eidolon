@@ -19,6 +19,7 @@ OPERATE_VIEW_JS = ROOT / 'python' / 'eidolon' / 'web' / 'operate-view-ui.js'
 WORKSPACE_PROJECT_JS = ROOT / 'python' / 'eidolon' / 'web' / 'workspace-project-ui.js'
 THEME_CSS = ROOT / 'python' / 'eidolon' / 'web' / 'components' / 'shell' / 'shell-theme.css'
 LAYOUT_CSS = ROOT / 'python' / 'eidolon' / 'web' / 'components' / 'shell' / 'shell-layout.css'
+PRESENCE_CSS = ROOT / 'python' / 'eidolon' / 'web' / 'components' / 'shell' / 'eidolon-presence.css'
 THREAD_CSS = ROOT / 'python' / 'eidolon' / 'web' / 'components' / 'chat' / 'chat-thread.css'
 BASE_CSS = ROOT / 'python' / 'eidolon' / 'web' / 'components' / 'app-components-base.css'
 CANVAS_CSS = ROOT / 'python' / 'eidolon' / 'web' / 'app-canvas.css'
@@ -27,6 +28,7 @@ CANVAS_CSS = ROOT / 'python' / 'eidolon' / 'web' / 'app-canvas.css'
 def test_dark_theme_keeps_warm_character_without_light_flip():
     theme = THEME_CSS.read_text(encoding='utf-8')
     layout = LAYOUT_CSS.read_text(encoding='utf-8')
+    presence = PRESENCE_CSS.read_text(encoding='utf-8')
     html = INDEX_HTML.read_text()
     assert 'data-theme="dark"' in html
     assert '--bg: #16130f' in theme
@@ -36,8 +38,10 @@ def test_dark_theme_keeps_warm_character_without_light_flip():
     assert '#4a7dff' not in theme
     assert '[data-theme="light"]' in theme
     assert 'data-theme="light"' not in html
-    assert 'signature-breathe 4.8s' in layout
-    assert 'data-presence-state="idle"' in layout
+    assert 'presence-smoke-drift' in presence
+    assert 'presence-mote-pulse 4.8s' in presence
+    assert 'data-eidolon-presence' in html
+    assert 'prefers-reduced-motion' in presence
     assert 'prefers-reduced-motion' in layout
 
 

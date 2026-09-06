@@ -13,9 +13,17 @@
                                 <div class="chat-messages" id="chat-messages"></div>
                                 <div class="chat-input-shell">
                                     <div class="chat-input-caption" id="chat-idle-prompt">Woran sollen wir arbeiten?</div>
-                                    <div id="chat-agent-status" class="chat-agent-status" hidden data-phase="" aria-live="polite">
-                                        <span class="chat-agent-status-dot" aria-hidden="true"></span>
-                                        <span class="chat-agent-status-label" id="chat-agent-status-label"></span>
+                                    <div id="chat-agent-status" class="chat-agent-status" data-phase="idle">
+                                        <div id="chat-eidolon-presence" class="eidolon-presence" data-eidolon-presence data-turn-phase="idle" role="img" aria-label="Eidolon ist bereit">
+                                            <span class="eidolon-presence-cloud" aria-hidden="true">
+                                                <picture class="eidolon-presence-picture">
+                                                    <source type="image/webp" srcset="/assets/media/eidolon-presence.webp">
+                                                    <img class="eidolon-presence-still" src="/assets/media/eidolon-presence.png" alt="" width="512" height="512" decoding="async">
+                                                </picture>
+                                            </span>
+                                            <span class="eidolon-presence-mote" aria-hidden="true"></span>
+                                        </div>
+                                        <span class="chat-agent-status-label" id="chat-agent-status-label" aria-live="polite"></span>
                                     </div>
                                     <div class="chat-input">
                                         <input type="text" id="chat-input" placeholder="Nachricht schreiben…" data-enter-action="sendChat">

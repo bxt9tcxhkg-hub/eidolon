@@ -15,10 +15,14 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="brand-lockup">
-                    <div class="eidolon-signature" id="eidolon-signature" data-presence-state="idle" aria-hidden="true">
-                        <span class="signature-ring signature-ring-outer"></span>
-                        <span class="signature-ring signature-ring-inner"></span>
-                        <span class="signature-core"></span>
+                    <div class="eidolon-signature" id="eidolon-signature" data-eidolon-presence data-presence-state="idle" data-turn-phase="idle" aria-hidden="true">
+                        <span class="eidolon-presence-cloud" aria-hidden="true">
+                            <picture class="eidolon-presence-picture">
+                                <source type="image/webp" srcset="/assets/media/eidolon-presence.webp">
+                                <img class="eidolon-presence-still" src="/assets/media/eidolon-presence.png" alt="" width="512" height="512" decoding="async">
+                            </picture>
+                        </span>
+                        <span class="eidolon-presence-mote" aria-hidden="true"></span>
                     </div>
                     <div>
                         <h1>Eidolon</h1>
