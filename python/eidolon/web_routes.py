@@ -84,6 +84,13 @@ def register_web_routes(app: FastAPI, project_root: Path) -> None:
             raise HTTPException(status_code=404, detail='Asset nicht gefunden')
         if not resolved_path.exists():
             raise HTTPException(status_code=404, detail='Asset nicht gefunden')
+        headers = {}
+        if normalized == 'eidolon-presence.js':
+            headers = {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            }
         if media_type.startswith('image/'):
-            return Response(content=resolved_path.read_bytes(), media_type=media_type)
-        return Response(content=resolved_path.read_text(encoding='utf-8'), media_type=media_type)
+            return Response(content=resolved_path.read_bytes(), media_type=media_type, headers=headers)
+        return Response(content=resolved_path.read_text(encoding='utf-8'), media_type=media_type, headers=headers)

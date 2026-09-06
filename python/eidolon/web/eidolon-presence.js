@@ -1,8 +1,12 @@
+const PRESENCE_ASSET_VERSION = '20260906-visible';
+const PRESENCE_STILL_PNG = '/assets/media/eidolon-presence.png';
+
+// Idle must swirl at 42–48px within 1–2s. Previous warp:0.055 read as still.
 const PRESENCE_PHASES = {
-    idle: { warp: 0.055, pulse: 0.42, mote: 0.62, gaze: 0.55 },
-    denkt: { warp: 0.16, pulse: 0.86, mote: 0.88, gaze: 0.85 },
-    arbeitet: { warp: 0.22, pulse: 1.05, mote: 0.96, gaze: 0.8 },
-    antwortet: { warp: 0.07, pulse: 0.34, mote: 0.74, gaze: 1 },
+    idle: { warp: 0.48, pulse: 0.92, mote: 0.98, gaze: 0.55 },
+    denkt: { warp: 0.82, pulse: 1.18, mote: 1.08, gaze: 0.85 },
+    arbeitet: { warp: 1.05, pulse: 1.32, mote: 1.16, gaze: 0.8 },
+    antwortet: { warp: 0.4, pulse: 0.78, mote: 1.02, gaze: 1 },
 };
 
 const PRESENCE_VERT = [
@@ -59,17 +63,19 @@ const PRESENCE_FRAG = [
     '  vec2 uv = vUv;',
     '  float dens = max(texture2D(uStill, uv).r, texture2D(uStill, uv).g * 0.72);',
     '  vec2 flow = curl(uv * 3.15, uTime * uWarp);',
-    '  vec2 billow = curl(uv * 1.28 + vec2(2.2, 0.35), uTime * uWarp * 0.34);',
+    '  vec2 filament = curl(uv * 6.4 + vec2(0.4, 1.1), uTime * uWarp * 1.35);',
+    '  vec2 billow = curl(uv * 1.28 + vec2(2.2, 0.35), uTime * uWarp * 0.46);',
     '  float move = smoothstep(0.02, 0.38, dens);',
-    '  vec2 warped = uv + flow * (0.010 + move * 0.036) + billow * move * 0.018;',
+    '  vec2 warped = uv + flow * (0.045 + move * 0.14) + filament * move * 0.06 + billow * move * 0.055;',
     '  vec4 ink = texture2D(uStill, clamp(warped, 0.0, 1.0));',
-    '  vec2 mote = vec2(0.56, 0.58) + uGaze * 0.11;',
+    '  float driftT = uTime * 0.9;',
+    '  vec2 mote = vec2(0.56, 0.58) + uGaze * 0.13 + vec2(sin(driftT), cos(driftT * 0.81)) * 0.05;',
     '  vec2 md = (uv - mote) * vec2(1.0, 1.06);',
     '  float d2 = dot(md, md);',
-    '  float core = exp(-d2 * 38.0);',
-    '  float halo = exp(-d2 * 8.5);',
+    '  float core = exp(-d2 * 32.0);',
+    '  float halo = exp(-d2 * 7.2);',
     '  vec3 gold = vec3(1.0, 0.88, 0.62);',
-    '  ink.rgb += gold * (core * 0.78 + halo * 0.32) * uMote * uPulse;',
+    '  ink.rgb += gold * (core * 0.98 + halo * 0.5) * uMote * uPulse;',
     '  gl_FragColor = ink;',
     '}',
 ].join('\n');
@@ -87,6 +93,11 @@ function presenceMotionAllowed() {
         }
     } catch (_) { /* ignore */ }
     return true;
+}
+
+function setPresenceEngineAttr(root, kind) {
+    if (!root) return;
+    root.setAttribute('data-presence-engine', kind);
 }
 
 function presencePhaseName(root) {
@@ -150,6 +161,23 @@ function createPresenceProgram(gl) {
     return program;
 }
 
+function getPresenceGL(canvas) {
+    const opts = {
+        alpha: false,
+        antialias: false,
+        depth: false,
+        stencil: false,
+        premultipliedAlpha: true,
+        preserveDrawingBuffer: false,
+        powerPreference: 'low-power',
+    };
+    try {
+        return canvas.getContext('webgl', opts) || canvas.getContext('experimental-webgl', opts);
+    } catch (_) {
+        return null;
+    }
+}
+
 function uploadPresenceTexture(gl, image) {
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -158,20 +186,21 @@ function uploadPresenceTexture(gl, image) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    try {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        if (gl.getError() !== gl.NO_ERROR) {
+            gl.deleteTexture(texture);
+            return null;
+        }
+    } catch (_) {
+        gl.deleteTexture(texture);
+        return null;
+    }
     return texture;
 }
 
 function createPresenceWebGL(canvas, image) {
-    const gl = canvas.getContext('webgl', {
-        alpha: false,
-        antialias: false,
-        depth: false,
-        stencil: false,
-        premultipliedAlpha: true,
-        preserveDrawingBuffer: false,
-        powerPreference: 'low-power',
-    });
+    const gl = getPresenceGL(canvas);
     if (!gl) return null;
     const program = createPresenceProgram(gl);
     if (!program) return null;
@@ -179,6 +208,7 @@ function createPresenceWebGL(canvas, image) {
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     const texture = uploadPresenceTexture(gl, image);
+    if (!texture) return null;
     const loc = {
         time: gl.getUniformLocation(program, 'uTime'),
         warp: gl.getUniformLocation(program, 'uWarp'),
@@ -211,6 +241,23 @@ function createPresenceWebGL(canvas, image) {
             gl.drawArrays(gl.TRIANGLES, 0, 3);
         },
     };
+}
+
+function presenceWebGLUsable(image) {
+    const probe = document.createElement('canvas');
+    probe.width = 8;
+    probe.height = 8;
+    try {
+        return !!createPresenceWebGL(probe, image);
+    } catch (_) {
+        return false;
+    }
+}
+
+function replacePresenceCanvas(oldCanvas) {
+    const next = oldCanvas.cloneNode(false);
+    if (oldCanvas.parentNode) oldCanvas.parentNode.replaceChild(next, oldCanvas);
+    return next;
 }
 
 function buildPresenceLuma(image) {
@@ -258,7 +305,7 @@ function createPresenceCanvas2D(canvas, image) {
             if (!ctx) return;
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, width, height);
-            const cells = 14;
+            const cells = 16;
             const srcW = image.naturalWidth || image.width;
             const srcH = image.naturalHeight || image.height;
             const cellW = width / cells;
@@ -279,11 +326,12 @@ function createPresenceCanvas2D(canvas, image) {
                         const i = (ly * lumW + lx) * 4;
                         dens = Math.max(data[i] / 255, data[i + 1] / 255 * 0.72);
                     }
-                    const n1 = valuePresenceNoise(u * 3.2 + time * knobs.warp, v * 3.2);
-                    const n2 = valuePresenceNoise(u * 1.3 + 2.1, v * 1.3 - time * knobs.warp * 0.34);
+                    const n1 = valuePresenceNoise(u * 3.2 + time * knobs.warp * 1.8, v * 3.2 + time * knobs.warp * 0.45);
+                    const n2 = valuePresenceNoise(u * 1.3 + 2.1 - time * knobs.warp * 0.75, v * 1.3 - time * knobs.warp * 0.95);
+                    const n3 = valuePresenceNoise(u * 6.1 + time * knobs.warp * 2.1, v * 6.1);
                     const move = Math.max(0, (dens - 0.04) / 0.36);
-                    const ox = (n1 - 0.5) * srcCellW * (0.18 + move * 0.72);
-                    const oy = (n2 - 0.5) * srcCellH * (0.16 + move * 0.64);
+                    const ox = (n1 - 0.5) * srcCellW * (0.55 + move * 1.35) + (n3 - 0.5) * srcCellW * move * 0.55;
+                    const oy = (n2 - 0.5) * srcCellH * (0.5 + move * 1.25) + (n3 - 0.5) * srcCellH * move * 0.4;
                     const sx = Math.min(Math.max(0, x * srcCellW + ox), Math.max(0, srcW - srcCellW));
                     const sy = Math.min(Math.max(0, y * srcCellH + oy), Math.max(0, srcH - srcCellH));
                     ctx.drawImage(
@@ -294,18 +342,20 @@ function createPresenceCanvas2D(canvas, image) {
                         srcCellH,
                         x * cellW,
                         y * cellH,
-                        cellW + 0.6,
-                        cellH + 0.6
+                        cellW + 0.8,
+                        cellH + 0.8
                     );
                 }
             }
-            const mx = (0.56 + gaze.x * 0.11) * width;
-            const my = (1 - (0.58 + gaze.y * 0.11)) * height;
-            const radius = Math.max(width, height) * 0.52;
+            const driftX = Math.sin(time * 0.9) * 0.05;
+            const driftY = Math.cos(time * 0.73) * 0.045;
+            const mx = (0.56 + gaze.x * 0.13 + driftX) * width;
+            const my = (1 - (0.58 + gaze.y * 0.13 + driftY)) * height;
+            const radius = Math.max(width, height) * 0.68;
             const glow = ctx.createRadialGradient(mx, my, 0, mx, my, radius);
             const pulse = knobs.mote * knobs.pulse;
-            glow.addColorStop(0, 'rgba(255, 240, 196,' + (0.52 * pulse).toFixed(3) + ')');
-            glow.addColorStop(0.28, 'rgba(217, 161, 92,' + (0.22 * pulse).toFixed(3) + ')');
+            glow.addColorStop(0, 'rgba(255, 240, 196,' + (0.78 * pulse).toFixed(3) + ')');
+            glow.addColorStop(0.22, 'rgba(217, 161, 92,' + (0.38 * pulse).toFixed(3) + ')');
             glow.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.globalCompositeOperation = 'screen';
             ctx.fillStyle = glow;
@@ -315,37 +365,107 @@ function createPresenceCanvas2D(canvas, image) {
     };
 }
 
+function presenceTextureUrl(image) {
+    const src = image && image.getAttribute ? String(image.getAttribute('src') || '') : '';
+    if (/\.png(\?|#|$)/i.test(src) && src.toLowerCase().indexOf('.webp') === -1) {
+        return src;
+    }
+    return PRESENCE_STILL_PNG;
+}
+
+function loadPresenceTextureImage(displayImage) {
+    return new Promise(function (resolve, reject) {
+        const url = presenceTextureUrl(displayImage);
+        const tex = new Image();
+        tex.decoding = 'async';
+        const finish = function () {
+            if (!tex.naturalWidth) {
+                reject(new Error('presence png empty'));
+                return;
+            }
+            if (typeof tex.decode === 'function') {
+                tex.decode().then(function () { resolve(tex); }).catch(function () { resolve(tex); });
+                return;
+            }
+            resolve(tex);
+        };
+        tex.onload = finish;
+        tex.onerror = function () { reject(new Error('presence png failed')); };
+        tex.src = url;
+        if (tex.complete && tex.naturalWidth) finish();
+    });
+}
+
+function resolvePresenceTexture(displayImage) {
+    return loadPresenceTextureImage(displayImage).catch(function () {
+        if (displayImage && displayImage.naturalWidth) return displayImage;
+        throw new Error('presence texture unavailable');
+    });
+}
+
+function createPresenceEngine(canvas, image) {
+    if (presenceWebGLUsable(image)) {
+        try {
+            const engine = createPresenceWebGL(canvas, image);
+            if (engine) return { canvas: canvas, engine: engine };
+        } catch (_) { /* canvas may now be WebGL-locked */ }
+        canvas = replacePresenceCanvas(canvas);
+    }
+    try {
+        return { canvas: canvas, engine: createPresenceCanvas2D(canvas, image) };
+    } catch (_) {
+        return { canvas: canvas, engine: null };
+    }
+}
+
 function presenceBackingSize(root) {
     const css = Math.max(root.clientWidth || 48, root.clientHeight || 48);
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    return Math.max(64, Math.round(css * dpr));
+    return Math.max(72, Math.round(css * dpr));
 }
 
 function showPresenceStill(mark) {
     mark.root.classList.remove('is-live');
     mark.canvas.hidden = true;
+    setPresenceEngineAttr(mark.root, 'still');
 }
 
 function showPresenceLive(mark) {
     mark.root.classList.add('is-live');
     mark.canvas.hidden = false;
+    setPresenceEngineAttr(mark.root, mark.engine ? mark.engine.kind : 'still');
 }
 
 function bindPresenceMark(root) {
-    const image = root.querySelector('.eidolon-presence-still');
+    const displayImage = root.querySelector('.eidolon-presence-still');
     const canvas = root.querySelector('.eidolon-presence-live');
-    if (!image || !canvas) return null;
-    const start = function () {
-        if (root._eidolonPresenceBound) return;
-        if (!image.naturalWidth) return;
-        root._eidolonPresenceBound = true;
-        const engine = createPresenceWebGL(canvas, image) || createPresenceCanvas2D(canvas, image);
+    if (!displayImage || !canvas) return null;
+    if (root._eidolonPresenceBound) return null;
+    root._eidolonPresenceBound = true;
+    setPresenceEngineAttr(root, 'still');
+    resolvePresenceTexture(displayImage).then(function (image) {
+        const created = createPresenceEngine(canvas, image);
         const mark = {
             root: root,
-            canvas: canvas,
-            engine: engine,
+            canvas: created.canvas,
+            engine: created.engine,
+            image: image,
             visible: true,
         };
+        if (created.engine && created.engine.kind === 'webgl') {
+            created.canvas.addEventListener('webglcontextlost', function (event) {
+                event.preventDefault();
+                const fresh = replacePresenceCanvas(mark.canvas);
+                mark.canvas = fresh;
+                try {
+                    mark.engine = createPresenceCanvas2D(fresh, image);
+                } catch (_) {
+                    mark.engine = null;
+                }
+                setPresenceEngineAttr(root, mark.engine ? mark.engine.kind : 'still');
+                if (!mark.engine) showPresenceStill(mark);
+            }, false);
+        }
         if (typeof IntersectionObserver === 'function') {
             mark.io = new IntersectionObserver(function (entries) {
                 entries.forEach(function (entry) {
@@ -356,9 +476,11 @@ function bindPresenceMark(root) {
         }
         presenceMarks.push(mark);
         syncEidolonPresenceMotion();
-    };
-    if (image.complete && image.naturalWidth) start();
-    else image.addEventListener('load', start, { once: true });
+    }).catch(function () {
+        root._eidolonPresenceBound = false;
+        setPresenceEngineAttr(root, 'still');
+    });
+    return root;
 }
 
 function presenceAnyVisible() {
@@ -376,7 +498,7 @@ function drawPresenceFrame(now) {
         return;
     }
     const time = now * 0.001;
-    const pulseWave = 0.5 + 0.5 * Math.sin(time * 1.7);
+    const pulseWave = 0.58 + 0.42 * Math.sin(time * 2.6);
     presenceMarks.forEach(function (mark) {
         if (!mark.visible || !mark.engine) {
             showPresenceStill(mark);
@@ -384,7 +506,7 @@ function drawPresenceFrame(now) {
         }
         const phase = presencePhaseName(mark.root);
         const knobs = Object.assign({}, PRESENCE_PHASES[phase]);
-        knobs.pulse = knobs.pulse * (0.82 + pulseWave * 0.18);
+        knobs.pulse = knobs.pulse * (0.72 + pulseWave * 0.28);
         const size = presenceBackingSize(mark.root);
         showPresenceLive(mark);
         mark.engine.draw(size, size, time, knobs, presenceGaze(mark.root, phase));
@@ -440,6 +562,7 @@ function syncEidolonPresenceMotion() {
 
 window.startEidolonPresence = startEidolonPresence;
 window.syncEidolonPresenceMotion = syncEidolonPresenceMotion;
+window.PRESENCE_ASSET_VERSION = PRESENCE_ASSET_VERSION;
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', startEidolonPresence);
