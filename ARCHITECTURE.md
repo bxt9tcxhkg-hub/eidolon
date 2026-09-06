@@ -82,7 +82,7 @@ Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gem
 - mehrere historische Dokumente im Repo können ohne Boundary-Regeln fehlgelesen werden, obwohl Archiv-/Finding-Readmes das jetzt explizit begrenzen
 
 ## Aktuelle Wahrheitsregel
-- Produkt-Soll: `docs/eidolon-specification.md`
+- Produkt-Soll: `docs/eidolon-specification.md` (Parität/Differenz/Ehrlichkeit: `docs/eidolon-evolution-stage.md`)
 - Implementierungs-Ist: Live-Code + Tests + Endpoint-Antworten
 - Aktive Fortschrittsquelle: `ROADMAP.md`
 - Findings und Root-History sind Referenz, nicht Primärwahrheit

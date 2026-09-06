@@ -1,0 +1,314 @@
+# Eidolon Evolution Stage
+
+> Status: verbindlicher Produktvertrag für **Parität**, **nächste Stufe**, **Instinkt-UX** und **Ehrlichkeit**.
+> Dieses Dokument beschreibt **Soll** plus den **heute belegbaren Ist-Abstand**.
+> Es behauptet **nicht**, Eidolon sei Feature-für-Feature OpenClaw, Hermes oder Grok Bot.
+> Es behauptet **nicht**, dass „keine Fehler“ metaphysisch erreichbar sei.
+
+## Zweck
+
+Muhammets Brief: Eidolon muss die nächste Evolution von AI-Agenten sein — alles, was ein Messenger-Agent können muss, plus die Stufe danach; anti-placebo; instinktiv benutzbar.
+
+Die bestehende Spezifikation (`eidolon-specification.md`, `eidolon-product-identity.md`) definiert ein agentisches Hauptsystem, mappt aber **nicht** explizit gegen OpenClaw / Hermes / Grok Bot und benennt **nicht** die nächsten Stufen als Vertrag.
+
+Diese Lücke schließt **dieses** Dokument. Es ist Produktvertrag, keine Marketingfolie.
+
+## Leseregel
+
+Statuswerte in den Checklisten:
+
+| Token | Bedeutung |
+|---|---|
+| `required for parity` | Ohne diese Fähigkeit ist Eidolon kein vollwertiger Agent gegenüber Messenger-Agenten. |
+| `already in Eidolon` | Im **live Python-Produkt** verdrahtet und über Datei/Route/Test belegbar. |
+| `gap` | Im live Produkt **nicht** als diese Fähigkeit vorhanden. Nicht als `echt` framen. |
+
+Zusatzregeln:
+
+- Belege kommen nur aus **diesem Repo** (live `python/`, `tests/`, aktive Docs). Nicht aus `SPECS/`, `sketches/`, `.hermes/plans/`, quarantiniertem Rust oder `docs/eidolon-competitor-comparison.md`.
+- Die Vergleichsmatrix `docs/eidolon-competitor-comparison.md` ist eine **externe** Notiz. Sie darf diesen Vertrag nicht als Ist überschreiben. Mehrere dort genannte Eidolon-Fähigkeiten (volles Tool-Ökosystem, Consumer-Multi-Channel, fertiges Skill-Lernen) sind hier `gap`.
+- Teilweise vorhandene Bausteine machen eine Paritätsfähigkeit **nicht** zu `already in Eidolon`. Was fehlt, bleibt `gap`; vorhandene Bruchstücke stehen in der Spalte *Was real da ist*.
+
+---
+
+## 1. Basisfähigkeiten (Parity)
+
+Was ein Messenger-Agent (OpenClaw, Hermes, Grok Bot) können muss und Eidolon **nicht verlieren** darf. Das ist die Untergrenze, nicht die Differenz.
+
+### 1.1 Chat-Kanal
+
+| | |
+|---|---|
+| **Status** | `required for parity` · `already in Eidolon` |
+| **Soll** | Ein dauerhafter Gesprächskanal: Nachricht senden, Antwort lesen, Session fortsetzen. |
+| **Ist** | Lokaler Web-Chat ist die Starttür (`/#chat`). `POST /chat` und `GET /chat/context` teilen denselben `session_payload`-Pfad. Sessions liegen in `ChatSessionStore` (`state/user/chat_sessions.json`). Mobile Pairing landet in derselben App-Shell `/#chat`. |
+| **Beleg** | `python/eidolon/chat_message_routes.py`, `python/eidolon/chat_session_routes.py`, `python/eidolon/server_chat_sessions.py`, `python/eidolon/web/chat-ui.js`, `ARCHITECTURE.md` |
+| **Nicht behauptet** | Kein Telegram-, WhatsApp-, Slack-, Discord- oder Signal-Kanal. Das ist 1.2. |
+
+### 1.2 Multi-Channel / Messenger-Gateway
+
+| | |
+|---|---|
+| **Status** | `required for parity` · `gap` |
+| **Soll** | Dieselbe Arbeitswahrheit über mehrere Kanäle (Messenger, CLI, Web), nicht nur ein Browser-Tab. |
+| **Ist** | Keine Channel-Adapter für Telegram/WhatsApp/Slack/Discord/Signal/iMessage im live Python. `GET /ws` ist ein Echo-Socket, kein Event-Bus. |
+| **Was real da ist** | Web-UI, gekoppeltes Mobile in derselben Shell, Rust-CLI als HTTP-Client gegen FastAPI (`crates/eidolon-cli`). |
+| **Beleg für das Gap** | Keine Treffer für Telegram/WhatsApp/Discord/Slack als Produktkanal unter `python/eidolon/`. `python/eidolon/system_status_routes.py` (`/ws` echo). |
+
+### 1.3 Tools / Skills als Agent-Handlung
+
+| | |
+|---|---|
+| **Status** | `required for parity` · `gap` |
+| **Soll** | Der Agent ruft im Turn echte Tools/Skills auf (lesen, schreiben, ausführen, recherchieren) und berichtet das Ergebnis. |
+| **Ist** | `POST /chat` geht über LLM/`complete()` plus Wahrheits- und Settings-Pfade. Es gibt **keine** Chat-Route, die `SkillRegistry.execute` oder `SkillRuntime.execute` aufruft. Es gibt **keinen** HTTP-Execute für Skills. MCP ist nicht verdrahtet. |
+| **Was real da ist** | Capability-Katalog mit echten Checks (`file.read/write`, `python.execute`, `browser.control`, `image.generate`, `tts.speak`, `mesh.quic`, …) in `python/eidolon/core/capability_catalog.py`. Skill-Liste und Ein/Aus unter `/skills` (`BUILTIN_SKILLS`). Datei-Skills mit `run()` (z. B. `note.py` schreibt `notes.json`, `system-info.py` liest Host-Daten). Builtin-Lambdas in `skill_catalog.py` sind Echo-Stubs (`Eidolon: {text}`). `SPECS/03-skill-engine.md` plant OpenClaw/Hermes-Import — unerledigte Checkboxen, kein Ist. |
+| **Beleg für das Gap** | `python/eidolon/chat_message_routes.py` (kein Skill-Execute). `python/eidolon/healing_skills_routes.py` (list/enable/disable/priority). `python/eidolon/runtime_builtin_skills.py`. |
+
+### 1.4 Memory — nur wo real
+
+| | |
+|---|---|
+| **Status** | `required for parity` · siehe Zeilen darunter |
+
+**Session- und Arbeitsgedächtnis** — `already in Eidolon`
+
+- Chat-Sessions persistieren Nachrichten serverseitig.
+- Operate speichert `WorkSessionRecord` / `ObjectiveRecord` / `AgentRunRecord` in SQLite.
+- `topic_attention_store.record_interaction` schreibt Gesprächssignale.
+- Beleg: `server_chat_sessions.py`, `operate/store_*.py`, `chat_message_routes.py`.
+
+**Hermes-artige Langzeitgedächtnis / Skill-Selbstverbesserung** — `gap`
+
+- Kein FTS5-Cross-Session-Recall, kein User-Modeling, keine geschlossene Skill-Lernschleife im live Chat.
+- `skill-generator.py` liest `state/persistence/chat_history.json`; der live Store ist `state/user/chat_sessions.json`. Der Generator ist damit vom Produktchat entkoppelt.
+- `KnowledgeGraph` in `/health` wird mit `available: True` und harten Null-Stats gemeldet (`runtime_health_payloads.py`) — das ist **kein** belastbares Memory-Produkt.
+- Orchestration-Memory speichert Modul-Konfidenz, kein Gesprächsgedächtnis.
+
+**Ehrliche Grenze:** Memory darf nur dort als vorhanden gelten, wo ein Store gelesen **und** geschrieben wird und die UI/API denselben Store nutzt. LocalStorage `eidolon-chat-messages` ist UI-Cache, nicht Kernel-Wahrheit.
+
+### 1.5 Steuerfläche (Slash / Commands oder ehrliches Äquivalent)
+
+| | |
+|---|---|
+| **Status** | `required for parity` · `already in Eidolon` (Äquivalent) |
+| **Soll** | Der Nutzer steuert den Agenten explizit: fortsetzen, freigeben, ablehnen, Status, Geräte, Settings. Entweder Slash-Grammatik **oder** eine gleich ehrliche Fläche. |
+| **Ist** | Keine Slash-Parser-Grammatik im Chat (`/`-Commands sind `gap`, werden nicht behauptet). Das Äquivalent ist verdrahtet: Chat-Buttons Freigeben / Ablehnen / Weiter gegen Operate-APIs; Formation Bestätigen/Ablehnen gegen `POST /workspaces/formation`; Rust-CLI (`pair`, `projects`, `goals`, `settings`, `api`); Settings-Intent im Chat (`parse_settings_intent` → `apply_user_settings`). |
+| **Beleg** | `python/eidolon/web/chat-ui.js`, `python/eidolon/web/operate-render-ui.js`, `crates/eidolon-cli/src/main.rs`, `python/eidolon/core/settings_intent.py` |
+
+### 1.6 Status / Presence
+
+| | |
+|---|---|
+| **Status** | `required for parity` · `already in Eidolon` (Kernel + Chat-Phasen) |
+| **Soll** | Sichtbar, ob der Agent bereit ist, denkt, arbeitet, wartet, blockiert oder fertig ist — aus echtem Zustand, nicht aus Dekor. |
+| **Ist** | Signature-Object und Presence (`idle` / `thinking` / `acting` / `waiting` / `blocked` / `done`) aus Operate (`describeOperatePresence` → `setEidolonPresence`). Chat-Turn-Status `denkt` / `arbeitet` / `antwortet` über `GET /chat/turn-status`. `POST /chat` setzt `denkt` und `antwortet`. Healing-/LLM-Probleme erscheinen in Connection/Systemstatus, nicht als Fake-Erfolg. |
+| **Gap innerhalb der Phase** | `arbeitet` wird im normalen `/chat`-Pfad **nicht** gesetzt; nur der Self-Reflection-Chat setzt `PHASE_ARBEITET`. Gaze/Blick existiert nur in `sketches/`, nicht in der Produkt-UI. |
+| **Beleg** | `python/eidolon/chat_turn_status.py`, `python/eidolon/chat_message_routes.py`, `python/eidolon/operate_api_self_reflection_chat.py`, `python/eidolon/web/app-shell.js`, `python/eidolon/web/components/shell/shell-layout.css` |
+
+### 1.7 Always-on-Erreichbarkeit
+
+| | |
+|---|---|
+| **Status** | `required for parity` · lokal `already in Eidolon` · Messenger/Cloud `gap` |
+| **Soll** | Der Agent ist ansprechbar, ohne jedes Mal eine neue App-Session zu erfinden. OpenClaw/Hermes lösen das über ein Gateway plus Kanäle. |
+| **Ist** | Solange der Python-FastAPI-Prozess läuft, sind Chat, Operate, Pairing und CLI gegen denselben Server erreichbar. `eidolon-core` hat `instantiation_policy=always_on`. Mesh-Pairing koppelt Geräte an diese Runtime. |
+| **Gap** | Kein gehosteter 24/7-Bot, kein Push in Messenger, kein Hintergrund-Daemon unabhängig vom lokalen Server. `/ws` trägt keinen Produktzustand. |
+| **Beleg** | `ARCHITECTURE.md` (einzige live Runtime), `python/eidolon/bots/role_catalog.py`, `python/eidolon/mesh_pairing_routes.py` |
+
+### 1.8 Kurzmatrix
+
+| Fähigkeit | Pflicht | Stand | Eine Zeile Ist |
+|---|---|---|---|
+| Chat-Kanal (Web/Mobile lokal) | `required for parity` | `already in Eidolon` | `/#chat`, `POST /chat`, Sessions, Pairing in dieselbe Shell |
+| Multi-Channel Messenger | `required for parity` | `gap` | keine Channel-Adapter |
+| Tools/Skills im Agent-Turn | `required for parity` | `gap` | Katalog + Toggle ja; Chat führt sie nicht aus |
+| Session-/Arbeitsgedächtnis | `required for parity` | `already in Eidolon` | Chat-Sessions + Operate-SQLite + Topic-Signale |
+| Semantisches Langzeitgedächtnis | `required for parity` | `gap` | kein Cross-Session-Recall, Generator entkoppelt |
+| Steuerfläche (kein Slash nötig) | `required for parity` | `already in Eidolon` | Freigabe/Weiter/Formation/CLI/Settings-Intent |
+| Slash-Grammatik | optional, wenn Äquivalent ehrlich | `gap` | nicht vorhanden, nicht behaupten |
+| Status/Presence | `required for parity` | `already in Eidolon` | Signature + Turn-Status; Gaze `gap` |
+| Always-on lokal | `required for parity` | `already in Eidolon` | FastAPI-Prozess + Pairing |
+| Always-on Messenger/Cloud | `required for parity` | `gap` | kein Gateway-Kanal |
+
+---
+
+## 2. Nächste Stufe (Eidolon-Differenz)
+
+Was über einen Messenger-Agenten hinausgeht. Das ist der eigentliche Produktkern. Jede Zeile ist konkret und mit Ist-Abstand.
+
+### 2.1 Operate-Kernel als Wahrheit
+
+**Soll:** Session, Ziel, Lauf, Subagent, Freigabe, Blocker, Evidence und nächster Schritt sind **ein** persistiertes Modell. UI darf verdichten, nicht eine zweite Wahrheit erfinden.
+
+**Ist (`already in Eidolon` als Kernel, nicht als vollständige Einheitsfläche):**
+
+- Records und SQLite-Store existieren: `WorkSessionRecord`, `ObjectiveRecord`, `AgentRunRecord`, `SubAgentRunRecord`, `ApprovalGateRecord`, `BlockingIssueRecord`, `EvidenceItemRecord`, `TransitionEventRecord`, `NextActionRecord`.
+- Produktphasen sind als Vertrag gemappt (`product_phases.py`).
+- Chat, Arbeit und Projektfläche **lesen** denselben Operate-/`work_kernel`-Snapshot.
+
+**Offen (`gap` zur vollen Differenz):**
+
+- Board-Element-Blocker und `BlockingIssueRecord` sind noch zwei persistierte Modelle (`ROADMAP.md`).
+- Chat-Landing holt denselben Snapshot noch über zwei HTTP-Calls (`/api/v1/operate/overview` + `/chat/context`).
+- Chat-UI hält zusätzlich `localStorage` (`eidolon-chat-messages`) — Cache, nicht Kernel.
+
+**Beleg:** `python/eidolon/operate/contract_*.py`, `python/eidolon/workspaces/work_truth.py`, `ROADMAP.md`.
+
+### 2.2 Chat → Projekt → Board → Freigabe
+
+**Soll:** Aus einem Vorhaben wird kein stilles Projekt. Der Weg ist sichtbar: Gespräch → Kandidat → bestätigtes Projekt → Board-Karten → Freigabe nur wo konsequential.
+
+**Ist (`already in Eidolon` als Vertrag):**
+
+- `POST /workspaces/formation`: `chat_topic` → `project_candidate` sichtbar; `project_candidate` → `active_project` nur mit `confirmed=true`.
+- Arbeitsorientierte Nachrichten erzeugen den Kandidaten deterministisch (ohne LLM).
+- Bestätigung legt das Projekt an und seedet textgebundene Board-Karten (idempotent).
+- Buchung / externe Schreibaktion öffnet eine echte `ApprovalGateRecord`. Weiter ist Fortsetzen, nicht heimliche Freigabe.
+
+**Beleg:** `docs/project-formation-rules.md`, `python/eidolon/workspaces/project_formation.py`, `tests/test_chat_stewardship_contracts.py` (Tür bleibt schlank; Handlungen bleiben echt).
+
+### 2.3 Sichtbare Arbeit
+
+**Soll:** Nutzer sieht jederzeit Kontext, Ziel, Zustand, Zuständigkeit, offenen Blocker, offene Freigabe, nächsten Schritt. Autonomie ohne diese Sichtbarkeit ist verboten.
+
+**Ist (`already in Eidolon` auf Arbeit/Operate; Chat verdichtet):**
+
+- Operate-UI zeigt Lauf, Freigaben, Blocker, Evidence, Next Action.
+- Chat zeigt Formation und Operate-Handlungen, wenn sie real anliegen — nicht als Idle-Dashboard.
+- Idle-Chat ist Titel + Composer, optional eine Projektzeile (`Titel · öffnen`).
+
+**Beleg:** `python/eidolon/web/operate-render-ui.js`, `python/eidolon/web/chat-ui.js`, `docs/eidolon-ui-workspace-architecture.md`, `tests/test_chat_stewardship_contracts.py`.
+
+### 2.4 Rollen-Bots unter einem Hauptsystem
+
+**Soll:** Spezialisten entstehen als organisatorische Rollen **unter** Eidolon. Keine Persona-Zoo, keine entkoppelten Bots. Dauerhafte Rollen nur mit Erklärung und Freigabe.
+
+**Ist:**
+
+- `already in Eidolon`: Rollenregister, `eidolon-core` aktiv und löschgeschützt, Vorlagen `defined` (Projekt/Task/Meta), Freigabepflicht für Aktivierung, `/identity` und `/bots/roles`.
+- `already in Eidolon` als Kernel-Vokabular: `SubAgentRun` mit `planner` / `research` / `builder` / `verifier` / … — Records, keine zweiten Chat-Gegenüber.
+- `gap`: Es gibt **kein** zweites Gesprächsgegenüber im Chat. Die UI spricht mit „Eidolon“. Live gespawnte Projekt-Bots als eigene Sessions existieren nicht.
+
+**Beleg:** `python/eidolon/bots/role_catalog.py`, `python/eidolon/bots/role_registry_ops.py`, `docs/bot-organization-model.md`.
+
+### 2.5 Anti-Placebo
+
+**Soll:** Keine Scheinerfolge, keine Demo-Daten als Wahrheit, keine toten Buttons, keine erfundenen Läufe. Unfähigkeit wird als Unfähigkeit gezeigt.
+
+**Ist (`already in Eidolon` als Disziplin, nicht als magische Vollständigkeit):**
+
+- Chat ohne Modellantwort zeigt Fehler, nicht „Antwort erhalten“ (`EIDO-007`).
+- Capabilities kommen aus Checks, nicht aus Wunschlisten.
+- Settings/Secrets erscheinen nicht in Antworten; leere Fallback-Ketten werden abgelehnt.
+- Motion bestätigt nur reale Mutationen; Presence atmet aus Kernel/Session.
+- Bekannte Uneinheitlichkeiten bleiben in Roadmap/Findings sichtbar statt „fertig“ zu lügen.
+
+**Beleg:** `docs/findings/EIDO-007-chat-fake-success-fallback.md`, `python/eidolon/web/chat-ui.js`, `python/eidolon/core/capability_catalog.py`, `AGENT.md`.
+
+### 2.6 Mehrere Clients, derselbe Zustand
+
+**Soll:** Web, Mobile, CLI sehen dieselbe Session, dasselbe Projekt, dieselbe Freigabe.
+
+**Ist:**
+
+- `already in Eidolon` als Server-Wahrheit: alle Clients sprechen FastAPI; Operate/Projekte/Pairing liegen im externen State-Root.
+- `gap` zur vollen Differenz: Chat-Transcript zusätzlich in `localStorage`; zwei HTTP-Calls für denselben Overview; Board-Blocker vs. Operate-Blocker.
+
+**Beleg:** `README.md`, `ROADMAP.md` (offene P0-Uneinheitlichkeiten), `python/eidolon/web/chat-ui.js` (`persistChatMessages`).
+
+### 2.7 Instinktive UI + animierte Präsenz
+
+**Soll:** Die Oberfläche erklärt sich selbst. Präsenz (Gaze/Status) ist an echte Phasen gebunden. Skizzen sind keine Produktwahrheit.
+
+**Ist:**
+
+- `already in Eidolon`: dunkle Schale, Chat-Tür statt Dashboard, Signature atmet entlang Operate-Presence, Chat-Status `denkt…` / `antwortet` am Turn, Action-Motion nur nach Mutation, `prefers-reduced-motion` + Settings `ui.animations`.
+- `gap`: Gaze/Blickkontakt nur in `sketches/2026-08-30_*embodiment*`. `arbeitet` nicht im normalen Chat-Turn. Signature im Idle-Chat bewusst **kein** Hero mehr (`test_idle_chat_door_is_title_composer_and_one_project_line`).
+
+---
+
+## 3. Instinkt-UX-Vertrag
+
+Verbindlich für jede neue Oberfläche. Widerspricht eine Fläche diesem Vertrag, gilt die Fläche als Drift — auch wenn sie „mehr Features“ zeigt.
+
+### 3.1 Fünf Eigenschaften
+
+1. **Selbsterklärend** — Ohne Tutorial ist klar: worüber sprechen wir, was läuft, was braucht mich, was als Nächstes. Keine Semantik nur in Hover oder nur in Farbe.
+2. **Unkompliziert** — Eine primäre Handlung pro Moment. Keine zweite Startwand, keine Utility-Flut auf der Tür.
+3. **Übersichtlich** — Wenige sichtbare Dinge, Rest auffindbar. Idle bleibt leer und ehrlich.
+4. **Animiert** — Bewegung bestätigt echte Phasen oder echte Mutationen. Kein Dekor-Loop, der Arbeit vortäuscht.
+5. **Optisch ansprechend** — Dunkle Schale, Wärme aus Typo/Abstand/Akzent. Kein erzwungenes Light-Theme, kein Maskottchen, das den Kernel ersetzt.
+
+### 3.2 Chat ist die Tür, nicht das Dashboard
+
+- Default ist `/#chat`.
+- Idle: Sessiontitel + Composer. Höchstens eine echte Projektzeile (`Titel · öffnen`).
+- Keine Landing-Wand aus „Gerade aktiv“, Diagnosen, Hero-Signature oder Operate-Überblick.
+- Freigaben, Blocker und nächster Schritt leben in **Arbeit**; im Chat nur als echte Handlung, wenn sie anliegen.
+- Operate bleibt `#operate`, nie Default.
+
+Beleg des heutigen Schnitts: `docs/eidolon-ui-workspace-architecture.md`, `tests/test_chat_stewardship_contracts.py`.
+
+### 3.3 Kurze Mitspieler-Stimme
+
+Bei Arbeit:
+
+- höchstens 3–5 kurze Zeilen
+- höchstens eine nächste Aktion **oder** eine Klärungsfrage
+- kein Schema aus Intention / Richtungen / Empfehlung
+- eine konkrete Board-Anbietung statt Essay („lege ich als Karte an“)
+- keinen Projektzustand erfinden
+
+Bei Smalltalk: normaler Gesprächspartner, nicht automatisch in Projektarbeit schieben.
+
+Beleg: `python/eidolon/chat_runtime_prompting.py`, `python/eidolon/chat_quality_finalize.py`, `tests/test_chat_stewardship_contracts.py`.
+
+### 3.4 Animierter Avatar nur verdrahtet
+
+Erlaubte Chat-Phasen: `denkt` · `arbeitet` · `antwortet`.
+
+Regeln:
+
+- UI darf eine Phase nur zeigen, wenn Server oder lokaler Sendepfad sie **gesetzt** hat.
+- `GET /chat/turn-status` ist die Serverquelle; der Client pollt nur während eines echten Sends.
+- `arbeitet` darf nicht dekorativ zwischen `denkt` und `antwortet` geblinkt werden, solange `/chat` diese Phase nicht setzt.
+- Signature-Presence folgt Operate, nicht einem Zufallsgenerator.
+- Gaze/Blick darf erst Produkt werden, wenn er an dieselben Phasen/Operate-States hängt. Skizzen bleiben Skizzen.
+
+---
+
+## 4. Ehrlichkeit — was „keine Fehler“ heißt
+
+„Keine Fehler“ / „zero bugs forever“ ist **kein** gültiges Soll. Software bleibt fehlerfähig. Das gültige Soll ist:
+
+1. **Kein Fake-Erfolg.** Eine Aktion, die nicht gelaufen ist, darf nicht als gelaufen erscheinen. Leere Modellantworten, fehlende Backends, fehlende Skills und fehlende Kanäle werden als Fehler, `unavailable` oder `gap` gezeigt.
+2. **Tests vor Merge.** Produktverträge (`pytest`, UI-Contracts, Endpoint-Checks) laufen, bevor eine Fläche „fertig“ heißt. `AGENT.md` bleibt das Verifikationsprotokoll.
+3. **Bekannte Fehler sichtbar.** Offene Uneinheitlichkeiten stehen in `ROADMAP.md`, Findings und in diesem Dokument als `gap`. Sie werden nicht durch Umbenennen geschlossen.
+4. **Kontinuierliche Verifikation.** Jeder neue Pfad muss denselben Kernel sprechen oder ehrlich sagen, dass er es noch nicht tut.
+5. **Placebo ist der eigentliche Produktfehler.** Ein hübscher Dummy ist schlimmer als ein sichtbares Loch.
+
+Prüfsatz:
+
+> Wenn wir es nicht im live Code zeigen können, ist es `gap`.
+> Wenn wir es zeigen, aber der Nutzer einen Erfolg sieht, den der Kernel nicht hat, ist es Placebo — und damit ein Spec-Bruch.
+
+---
+
+## 5. Was dieser Vertrag bewusst nicht tut
+
+- Keine Feature-für-Feature-Kopie von OpenClaw, Hermes oder Grok Bot.
+- Keine Übernahme von `SPECS/` oder Rust-Crates als live Produkt.
+- Keine Gaze-/Embodiment-Skizze als Ist.
+- Kein Anspruch auf Multi-Channel, MCP, Skill-Import oder Video, solange der Code das nicht tut.
+- Kein „wir sind schon die nächste Stufe in allen Flächen“ — Kernel und Formation sind real; Consumer-Reichweite und Tool-Loop sind `gap`.
+
+## Verbindlicher Prüfsatz
+
+Wenn eine spätere Entscheidung diesen Vertrag bricht, gilt in dieser Reihenfolge:
+
+1. **Kein Placebo** vor Demo-Eindruck
+2. **Operate-Wahrheit** vor zusätzlicher Fläche
+3. **Chat-Tür** vor Dashboard
+4. **Parität ehrlich halten**, bevor neue Kanäle beworben werden
+5. **Bekannte Lücken sichtbar lassen**, statt sie zuzukleistern

@@ -41,7 +41,7 @@ Rust-Crates bleiben im Repo (CLI, experimentelle Runtime, Mesh-Bibliotheken), si
 - `python -m pytest -q` besteht für die neuen Formation-/Work-Truth-/Planning-Verträge; in dieser Umgebung zusätzlich 4 vorbestehende Env-Fehler (kein Live-Ollama, kein `aioquic`, keine Codex-CLI)
 
 ## Aktive Wahrheitsquellen
-- Produkt-Soll: `docs/eidolon-specification.md`
+- Produkt-Soll: `docs/eidolon-specification.md` (inkl. `docs/eidolon-evolution-stage.md`)
 - Soll/Ist-Mapping: `docs/eidolon-spec-to-system-mapping.md`
 - Repo-Grenzen: `docs/repo-boundaries.md`
 - Repo-Navigation: `docs/repo-map.md`
