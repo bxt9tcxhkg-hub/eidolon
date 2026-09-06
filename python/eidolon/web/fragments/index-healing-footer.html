@@ -1,6 +1,7 @@
             <div id="panel-healing" class="tab-panel">
                 <div class="card">
                     <div class="card-header"><h3>Healing-Status</h3><div style="display:flex;gap:8px;"><button class="btn btn-sm" data-ui-action="loadHealing">Aktualisieren</button><button class="btn btn-sm" data-ui-action="runHealingCheck">Check ausführen</button></div></div>
+                    <div class="empty" style="margin:0 16px 12px;">Health-Checks und gemeldeter Status — Wiederherstellung nur wo verdrahtet.</div>
                     <div id="healing-status"><div class="empty">Lade...</div></div>
                 </div>
             </div>
@@ -34,7 +35,7 @@
                 </div>
                 <div class="card">
                     <div class="card-header"><h3>🧠 KI-Verbindung</h3><button class="btn btn-sm" data-ui-action="resetSettingsArea" data-ui-args='["llm"]'>Zurücksetzen</button></div>
-                    <div class="empty" style="margin-bottom:10px;">OpenAI-kompatible Anbieter (Groq, OpenRouter, Mistral, lokale Gateways) werden über Basis-URL, API-Schlüssel und Modell angebunden. ChatGPT-Login (OAuth) erscheint nur für den Codex-Pfad — nie als Fake für reine Key-Anbieter. Die Ersatzkette versucht den gewählten Anbieter zuerst, danach die hinterlegten Fallbacks.</div>
+                    <div class="empty" style="margin-bottom:10px;">Erreichbar über Mehr → KI-Verbindung. OpenAI-kompatible Anbieter (Groq, OpenRouter, Mistral, lokale Gateways) werden über Basis-URL, API-Schlüssel und Modell angebunden. ChatGPT-Login (OAuth) erscheint nur für den Codex-Pfad — nie als Fake für reine Key-Anbieter. Die Ersatzkette versucht den gewählten Anbieter zuerst, danach die hinterlegten Fallbacks. Diagnosen bleiben hier, nicht in der Chat-Tür.</div>
                     <div id="settings-llm"><div class="empty">Lade...</div></div>
                     <div id="llm-connection-status" class="empty" style="margin-top:10px;"></div>
                 </div>
@@ -55,25 +56,12 @@
     </div>
 
     <div class="mobile-bar">
-        <div class="mitem active" data-tab="chat" data-tab-target="chat"><span class="icon">•</span><span>Chat</span></div>
-        <div class="mitem" data-tab="workspaces" data-tab-target="workspaces"><span class="icon">•</span><span>Projekte</span></div>
-        <div class="mitem" data-tab="operate" data-tab-target="operate"><span class="icon">•</span><span>Arbeit</span></div>
-        <div class="mitem" data-tab="more" data-ui-action="toggleMobileMore"><span class="icon">⋯</span><span>Mehr</span></div>
+        <!--EIDOLON_NAV_MOBILE_BAR_BEGIN-->
+        <!--EIDOLON_NAV_MOBILE_BAR_END-->
     </div>
     <div class="mobile-more-sheet" id="mobile-more-sheet">
-        <div class="mobile-more-grid">
-            <div class="mobile-more-item" data-tab-target="settings">⚙️ Einstellungen</div>
-            <div class="mobile-more-item" data-tab-target="mesh">📡 Geräte</div>
-            <div class="mobile-more-item" data-tab-target="identity">🪞 Identität</div>
-            <div class="mobile-more-item" data-tab-target="backups">💾 Sicherungen</div>
-            <div class="mobile-more-item" data-tab-target="dashboard">📊 Systemstatus</div>
-            <div class="mobile-more-item" data-tab-target="healing">🩹 Stabilität</div>
-            <div class="mobile-more-item" data-tab-target="skills">⚡ Fähigkeiten</div>
-            <div class="mobile-more-item" data-tab-target="code">🔧 Code-Reparatur</div>
-            <div class="mobile-more-item" data-tab-target="goals">🎯 Ziele</div>
-            <div class="mobile-more-item" data-tab-target="pods">Helfer</div>
-            <div class="mobile-more-item" data-tab-target="execution">🧭 Laufzeit</div>
-        </div>
+        <!--EIDOLON_NAV_MOBILE_MORE_BEGIN-->
+        <!--EIDOLON_NAV_MOBILE_MORE_END-->
     </div>
 
     <div class="ws-status" id="ws-status"><span class="dot"></span> Verbinde...</div>

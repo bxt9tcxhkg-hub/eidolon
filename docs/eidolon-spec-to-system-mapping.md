@@ -440,7 +440,7 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 
 ### Remaining mismatch
 - the root component stylesheet is now segmented, but the goals component slice remains comparatively large
-- primary nav is Chat / Projektfläche / Arbeit; utilities are grouped under Betrieb and Technik
+- primary nav is Chat / Projekte / Arbeit; system panels live under Mehr (Betrieb / Technik) with honest German labels; catalog-only skills stay labeled not executable
 - generic slots are kernel-fed and denser, still not a full adaptive composition engine
 
 ### Verdict

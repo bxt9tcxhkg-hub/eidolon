@@ -19,6 +19,7 @@ Diese Dokumente definieren Soll, Istbild und Prioritäten:
 - `python/agent_server.py` — FastAPI-Entrypoint
 - `python/eidolon/` — Produktlogik, Routen, Operate, Workspaces, Rollen, Core
 - `python/eidolon/web/` — aktive Weboberfläche
+- `python/eidolon/web/nav_contract.py` — Alltagsweg vs. Mehr-Labels (Nav-Vertrag)
 
 ### Rust-Pfade (quarantiniert, nicht live)
 - `crates/` — CLI (Client gegen FastAPI), experimentelle Runtime, Mesh-/Memory-/Eval-/Skills-/Core-Bibliotheken

@@ -21,7 +21,7 @@
 - `workspace_payloads.py`, `bridge_workspace.py`, `service_support.py`, `runtime_support.py`, `runtime_service_factory.py`, `auth_logic.py`, `module_runtime_actions.py`, `mesh_pairing_routes.py`, `mesh/inbox.py`, `store_schema.py`, `settings_validation.py`, `semantic_clustering.py`, `topic_attention_analysis.py` und `memory/graph.py` erneut entlang echter Verantwortungsgrenzen mit kompatiblen Fassaden zerlegt
 - Chat-POST `/chat` und Chat-GET `/chat/context` erzeugen ihren Runtime-Kontext jetzt über denselben `chat_route_support.session_payload`-Pfad auf Basis des `work_context_kernel`
 - Goals-, Chat- und Shell-CSS werden über importierte Slice-Dateien statt über große Einzelfiles ausgeliefert
-- Chat ist jetzt auch in der Web-UI die echte Startoberfläche; die Shell priorisiert Unterhaltung, aktive Arbeit und Projekte vor Utility-Flächen
+- Chat ist jetzt auch in der Web-UI die echte Startoberfläche; Alltagsweg ist Chat / Projekte / Arbeit, Technikflächen hängen hinter Mehr (Betrieb / Technik)
 - Operate-Panel ist wieder verdrahtet und über `#operate` erreichbar, ohne Default zu sein
 - Projektfläche öffnet in der Planungsansicht (Zusammengehörig / Geplant / In Arbeit / Fertig / Archiv) mit Umbenennen, Status, Gruppe, Reihenfolge, Ablegen und Streichen gegen echte Projekt-APIs
 - Projektstatus planned/in_progress/done/archived ist über `PUT /projects/{id}` editierbar
@@ -45,7 +45,8 @@
 - `python -m pytest -q` → Formation-/Board-Karten-/Freigabe- und Altverträge; vorbestehende Env-Fehler (kein Live-Ollama, kein `aioquic`, Codex-CLI/`oauth_supported` false) bleiben außerhalb dieses Schnitts
 - Bestätigtes Vorhaben füllt das Board mit unterscheidbaren, textgebundenen Karten (Fakten/Bedingungen in Notizen); erneutes Seed verdoppelt nicht
 - LLM-Anbieter liegen in einer Registry: Ollama, OpenAI-kompatibel (`base_url` + Key + Modell, optionale Presets wie Groq) und Codex-OAuth; OAuth wird nur für den Codex-Pfad gezeigt; `complete()` folgt der Ersatzkette (gewählt zuerst, dann `fallback_chain`); Schlüssel erscheinen nicht in Settings-/Connection-/Chat-Antworten
-- Ersatzkette ist in den Settings sortierbar und persistent; leer/ungültig wird ehrlich abgelehnt. Chat und Operate wenden Settings nur auf ausdrücklichen Wunsch an (`POST /settings/apply`, `POST /api/v1/operate/settings/apply`); Schema lehnt ungültige Werte ab, Secrets bleiben draußen. Erkannte `/health`-, LLM- und SelfHealing-Probleme erscheinen im Connection-Status, Systemstatus und Stabilität, nicht als Chat-Tür-Diagnose. Kein neues Self-Repair-OS in diesem Schnitt.
+- Ersatzkette ist in den Settings sortierbar und persistent; leer/ungültig wird ehrlich abgelehnt. Chat und Operate wenden Settings nur auf ausdrücklichen Wunsch an (`POST /settings/apply`, `POST /api/v1/operate/settings/apply`); Schema lehnt ungültige Werte ab, Secrets bleiben draußen. Erkannte `/health`-, LLM- und SelfHealing-Probleme erscheinen im Connection-Status, Systemstatus und Healing, nicht als Chat-Tür-Diagnose. Kein neues Self-Repair-OS in diesem Schnitt.
+- Nav-Vertrag (`python/eidolon/web/nav_contract.py`) hält Primärweg und Mehr-Labels an einem Ort; Fähigkeiten-Katalog und Helfer-Protokoll bleiben ehrlich gekennzeichnet (nicht ausführbar / keine eigenen Prozesse)
 
 ## Offene Prioritäten
 

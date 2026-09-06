@@ -100,6 +100,10 @@ Nicht frei mutierbar:
 - globale Orientierung
 - Systemstatus / Einstellungen
 
+### Alltag vor Technik
+Die Standardtür ist **Chat + Karten + eine Aktion** (Nav: Chat / Projekte / Arbeit).
+Health, Capability-Prüfungen, Healing, Fähigkeiten-Katalog, Mesh, Code-Reparatur, Ausführung, Helfer-Protokoll und KI-Diagnosen bleiben erreichbar und editierbar hinter **Mehr** bzw. Einstellungen — nicht als Default, nicht als stille Totzonen, nicht als Placebo. Katalog-only-Einträge behalten die ehrliche K3-Kennzeichnung.
+
 ### Adaptive Host-Fläche
 Darf sich problemabhängig zusammensetzen, solange sie die semantische Grammatik respektiert.
 
