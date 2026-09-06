@@ -10,7 +10,7 @@ Eidolon ist ein **arbeitsführendes agentisches Hauptsystem**, das Gespräch, Pr
 ## Primäre Produktlogik
 - **Chat ist der Einstieg** (`/#chat`)
 - **Operate ist der sichtbare Arbeitskern** hinter dem Chat, nicht die Starttür
-- **Projekte/Workspaces** sind die strukturierte Arbeitsfläche (Planung: Zusammengehörig / Geplant / In Arbeit / Fertig / Archiv)
+- **Projekte/Workspaces** sind die strukturierte Arbeitsfläche (Planung: Zusammengehörig / Geplant / In Arbeit / Fertig / Archiv). Auf dem Telefon ist das eine senkrechte Kartenwand; am Desktop bleiben Statusspalten.
 - **Karten/Widgets** sind nur ein generisches Gerüst (Slots + Typen). Keine fest verdrahteten Domänen-Pakete
 - **Bots** sind organisatorische Rollen, keine Personas
 - **Autonomie** ist erlaubt, aber sichtbar und begrenzt

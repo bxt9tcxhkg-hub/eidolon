@@ -125,6 +125,10 @@
                 min-width: 0;
                 max-width: 100%;
             }
+            #ws-project-detail {
+                flex-direction: column;
+                gap: 0;
+            }
             .ws-project-chrome #ws-detail-title {
                 font-size: 0.98rem;
             }
@@ -141,21 +145,80 @@
                 flex: 1 1 120px;
                 width: auto;
             }
-            .planning-column {
-                flex: 0 0 min(240px, 78vw);
-                width: min(240px, 78vw);
-                min-width: min(240px, 78vw);
-                max-width: min(240px, 78vw);
-                min-height: 260px;
-                scroll-snap-align: start;
+            /* 390px phones use the same vertical Kartenwand as the 768px project surface */
+            #ws-planning-scaffold,
+            #ws-planning-scaffold-board,
+            .workspaces-is-idle #ws-planning-scaffold {
+                display: none;
             }
-            .planning-column-title,
-            .planning-column-header h3 {
-                font-size: 0.82rem;
+            .ws-open-element-form {
+                display: none;
             }
-            .planning-board {
-                min-height: min(52dvh, 420px);
-                scroll-snap-type: x proximity;
+            .ws-board-view-mode {
+                display: none;
+            }
+            .planning-idea-line {
+                position: sticky;
+                top: 0;
+                z-index: 2;
+                margin: 0 0 10px;
+                padding: 0 0 8px;
+                background: var(--surface);
+            }
+            .planning-idea-line input {
+                min-height: 42px;
+                font-size: 1rem;
+            }
+            .planning-board,
+            .planning-board.planning-wall,
+            .ws-board-card #ws-elements-view {
+                display: flex;
+                flex-direction: column;
+                flex-wrap: nowrap;
+                align-items: stretch;
+                gap: 10px;
+                overflow-x: hidden;
+                overflow-y: visible;
+                min-height: 0;
+                width: 100%;
+                scroll-snap-type: none;
+            }
+            .planning-board:not(.planning-wall) .planning-column,
+            .planning-board:not(.planning-wall) .planning-column-body {
+                display: contents;
+            }
+            .planning-board:not(.planning-wall) .planning-column-header,
+            .planning-board:not(.planning-wall) .planning-column-count,
+            .planning-board:not(.planning-wall) .planning-column-empty {
+                display: none;
+            }
+            .planning-wall-list {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+            .plan-card,
+            .plan-card-wall {
+                width: 100%;
+                max-width: 100%;
+                margin-bottom: 0;
+                cursor: pointer;
+            }
+            .plan-card .status-chip.plan-card-status-chip {
+                display: inline-flex;
+                text-transform: none;
+            }
+            .ws-brainstorm-card {
+                order: 8;
+                margin-top: 8px;
+                padding: 10px 12px;
+            }
+            .ws-brainstorm-card:not([open]) {
+                opacity: 0.78;
+            }
+            .ws-brainstorm-card #brainstorm-suggestions {
+                display: none;
             }
             .plan-card-menu-btn {
                 opacity: 1;

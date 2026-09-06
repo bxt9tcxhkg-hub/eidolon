@@ -103,6 +103,8 @@ Nicht frei mutierbar:
 ### Adaptive Host-Fläche
 Darf sich problemabhängig zusammensetzen, solange sie die semantische Grammatik respektiert.
 
+Web und schmale Viewports dürfen unterschiedliche **Dichte** haben, nicht unterschiedliche **Bedeutung**. Auf der Projektfläche gilt: Desktop darf horizontale Statusspalten behalten; bis 768px (inkl. 390px-Telefone) ist die Primäransicht eine senkrechte Kartenwand mit Titel, Statuschip und echten Element-Mutationen. Kein zweites Jargonsystem und keine Placebo-Spalten, die nur Zähler zeigen.
+
 ## Ergebnisregel
 Eine gute Eidolon-Oberfläche ist nicht daran zu erkennen, dass sie neu oder spektakulär aussieht, sondern daran, dass sie:
 - zum Problem passt

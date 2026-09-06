@@ -141,9 +141,14 @@
                                     </optgroup>
                                 </select>
                                 <input type="text" id="ws-element-filter" class="ws-board-filter" placeholder="Elemente filtern...">
-                                <button type="button" class="btn btn-sm" data-ui-action="openElementForm">+ Element</button>
+                                <button type="button" class="btn btn-sm ws-open-element-form" data-ui-action="openElementForm">+ Element</button>
                             </div>
                         </div>
+                        <form class="planning-idea-line" id="ws-idea-line" action="#" onsubmit="return false;">
+                            <label class="planning-idea-line-label" for="ws-idea-title">Neue Karte</label>
+                            <input type="text" id="ws-idea-title" name="title" placeholder="Idee als Karte anlegen…" autocomplete="off" data-enter-action="submitIdeaLine">
+                            <button type="button" class="btn btn-sm btn-primary" data-ui-action="submitIdeaLine">Anlegen</button>
+                        </form>
                         <div id="ws-elements-view"><div class="empty">Keine Elemente</div></div>
                     </div>
 
@@ -220,18 +225,21 @@
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="card-header"><h3>Bausteine ergänzen</h3></div>
-                        <div class="form-group">
-                            <label>Beschreibung für Vorschläge</label>
-                            <textarea id="brainstorm-text" rows="3" placeholder="Beschreibe das Vorhaben. Vorschläge kommen aus dem bestehenden Projekt-Kernel, nicht aus einem Domänen-Paket."></textarea>
+                    <details class="card ws-brainstorm-card" id="ws-brainstorm-card">
+                        <summary class="ws-brainstorm-summary">Vorschläge vom Kernel</summary>
+                        <div class="ws-brainstorm-body">
+                            <p class="empty ws-brainstorm-hint">Vorschläge erscheinen als Entwurfskarten auf der Wand. Übernehmen legt ein echtes Element an.</p>
+                            <div class="form-group">
+                                <label for="brainstorm-text">Woran fehlt es?</label>
+                                <textarea id="brainstorm-text" rows="2" placeholder="Kurz das Vorhaben beschreiben. Der Kernel erfindet keine Domänen-Karten."></textarea>
+                            </div>
+                            <div class="ws-brainstorm-actions">
+                                <button class="btn btn-sm btn-primary" data-ui-action="generateBrainstorm">Vorschläge holen</button>
+                                <button class="btn btn-sm" data-ui-action="clearBrainstorm">Leeren</button>
+                            </div>
+                            <div id="brainstorm-suggestions"><div class="empty">Noch keine Vorschläge.</div></div>
                         </div>
-                        <div style="display:flex;gap:6px;margin-bottom:10px;">
-                            <button class="btn btn-sm btn-primary" data-ui-action="generateBrainstorm">Vorschläge holen</button>
-                            <button class="btn btn-sm" data-ui-action="clearBrainstorm">Leeren</button>
-                        </div>
-                        <div id="brainstorm-suggestions"><div class="empty">Noch keine Vorschläge. Der Kernel erfindet keine Domänen-Karten.</div></div>
-                    </div>
+                    </details>
 
                     <div class="card" id="ws-canvas-card" style="display:none;padding:0;overflow:hidden;position:relative;">
                         <div id="canvas-container" style="width:100%;height:500px;position:relative;overflow:hidden;background:#0d1117;cursor:grab;">

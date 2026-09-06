@@ -35,6 +35,7 @@
 - Python FastAPI ist dokumentiert und durch Port-Wächter als einzige live Runtime gegenüber Rust abgegrenzt
 - Ein kleines zustandsfähiges Eidolon-Signature-Object transportiert reale Arbeitszustände statt bloßes Dekor
 - Idle-Projektfläche ist handlungsfähig: große Primäraktion „Neues Projekt“ plus leeres Board, ohne Operate-Überblickswand
+- Schmale Projektfläche (≤768px, inkl. 390px) ist eine senkrechte Kartenwand mit Statuschip und Ideen-Zeile gegen `POST /projects/{id}/elements`; Desktop behält horizontale Spalten; „Bausteine ergänzen“ ist zu Kernel-Vorschlägen als Entwurfskarten zurückgestuft
 - Idle-Arbeit zeigt drei klare Wege (Chat, Übernahme aus Projektfläche, Hinweis auf Freigaben) statt einer leeren Sektionswand
 - Kurze Action-Motion bestätigt nur reale Mutationen und respektiert `prefers-reduced-motion` sowie Settings `animations`
 - Idle-UI bleibt schlank (Chat: Titel + Composer, keine Landing-Wand); Dark-Theme ist wärmer, Arbeitsspur atmet in Arbeit/Projektfläche aus Kernel-/Sessiondaten ohne Fake-Läufe
