@@ -71,6 +71,24 @@
     border-color: rgba(34, 197, 94, 0.28);
 }
 
+[data-eidolon-presence][data-presence-phase="schreibt"],
+[data-eidolon-presence].is-schreibt {
+    border-color: rgba(217, 161, 92, 0.5);
+    box-shadow: 0 0 12px rgba(217, 161, 92, 0.24);
+}
+
+[data-eidolon-presence][data-presence-phase="denkt"],
+[data-eidolon-presence].is-denkt {
+    border-color: rgba(255, 220, 150, 0.9);
+    box-shadow: 0 0 16px rgba(255, 196, 92, 0.46);
+}
+
+[data-eidolon-presence][data-presence-phase="antwortet"],
+[data-eidolon-presence].is-antwortet {
+    border-color: rgba(245, 236, 214, 0.78);
+    box-shadow: 0 0 14px rgba(255, 248, 230, 0.3);
+}
+
 @media (prefers-reduced-motion: reduce) {
     [data-eidolon-presence] .eidolon-presence-live {
         display: none !important;
