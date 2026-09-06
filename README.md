@@ -29,7 +29,7 @@ Rust-Crates bleiben im Repo (CLI, experimentelle Runtime, Mesh-Bibliotheken), si
 - Chat-Session-System mit Runtime-Context vorhanden
 - Operate-Kernel mit Run-/Objective-/Approval-/Blocker-/Evidence-Modell vorhanden
 - Workspace-Bridge in Operate vorhanden
-- Web-UI startet in Chat; Projektfläche und Arbeit (Operate) sind erreichbar, ohne die Starttür zu sein
+- Web-UI startet in Chat; Alltagsweg ist Chat / Projekte / Arbeit. Technikflächen (Health, Healing, Katalog, Mesh, Ausführung, Helfer-Protokoll, KI-Diagnosen) liegen hinter Mehr / Einstellungen
 - Idle-Chat ist eine Tür (Titel + Composer, optional eine Projektzeile); Dark-Theme ist wärmer, Arbeitsspur zeigt Bereit/Wartet/Nächstes in Arbeit/Projektfläche aus echten Kernel- und Sessiondaten
 - Freigaben, Blocker und nächster Schritt bleiben in Arbeit und lösen dieselben Operate-APIs aus; Chat listet sie nicht als Landing-Dashboard
 - Projektplanung erlaubt Rename, Status, Gruppe, Reihenfolge, Ablegen und Streichen gegen persistierte Projekt-APIs

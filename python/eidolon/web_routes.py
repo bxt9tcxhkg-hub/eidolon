@@ -61,9 +61,12 @@ def get_web_root(project_root: Path) -> Path:
 
 
 def read_root_html(project_root: Path) -> str:
+    from eidolon.web.nav_contract import inject_nav
+
     web_root = get_web_root(project_root)
     fragments_root = web_root / 'fragments'
-    return ''.join((fragments_root / name).read_text(encoding='utf-8') for name in ROOT_PAGE_FRAGMENTS)
+    html = ''.join((fragments_root / name).read_text(encoding='utf-8') for name in ROOT_PAGE_FRAGMENTS)
+    return inject_nav(html)
 
 
 def register_web_routes(app: FastAPI, project_root: Path) -> None:

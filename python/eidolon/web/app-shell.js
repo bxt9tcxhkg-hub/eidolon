@@ -1,16 +1,16 @@
 const PAGES = {
     chat: { title: 'Eidolon', subtitle: 'Starte ein Gespräch oder setze reale Arbeit fort.' },
     operate: { title: 'Arbeit', subtitle: 'Freigaben und nächster Schritt, sobald etwas läuft' },
-    pods: { title: 'Helfer', subtitle: 'Aktive Hilfsläufe und ihr realer Zustand', group: 'advanced' },
-    dashboard: { title: 'Systemstatus', subtitle: 'Backend, Laufzeit, Speicher und verfügbare Fähigkeiten', group: 'advanced' },
-    workspaces: { title: 'Projektfläche', subtitle: 'Board zum Planen — oder ein neues Projekt anlegen' },
-    execution: { title: 'Laufzeit', subtitle: 'Geräte, Laufzeitfähigkeiten und aktuelle Ausführungssignale', group: 'advanced' },
-    mesh: { title: 'Geräte', subtitle: 'Handy, Browser und weitere Geräte mit Eidolon koppeln', group: 'advanced' },
-    goals: { title: 'Ziele', subtitle: 'Welche Ziele Eidolon verfolgt', group: 'advanced' },
+    pods: { title: 'Helfer-Protokoll', subtitle: 'Protokollierte Hilfsläufe — keine eigenen Prozesse', group: 'advanced' },
+    dashboard: { title: 'Systemstatus', subtitle: 'Health, Capability-Prüfungen, Laufzeit und Speicher', group: 'advanced' },
+    workspaces: { title: 'Projekte', subtitle: 'Karten zum Planen — oder ein neues Projekt anlegen' },
+    execution: { title: 'Ausführung', subtitle: 'Geräte, Capability-Prüfungen und aktuelle Ausführungssignale', group: 'advanced' },
+    mesh: { title: 'Geräte', subtitle: 'Mesh: Handy, Browser und weitere Geräte mit Eidolon koppeln', group: 'advanced' },
+    goals: { title: 'Autonomie-Ziele', subtitle: 'Systemziele, die Eidolon selbst verfolgt — keine Alltags-Todos', group: 'advanced' },
     identity: { title: 'Identität', subtitle: 'Rollenmodell und Produkt-Selbstbeschreibung', group: 'config' },
     code: { title: 'Code-Reparatur', subtitle: 'Gezielte Analyse und Reparatur von lokalen Eidolon-Dateien', group: 'advanced' },
-    healing: { title: 'Stabilität', subtitle: 'Reale Health-Checks und Wiederherstellungsstatus', group: 'advanced' },
-    skills: { title: 'Fähigkeiten', subtitle: 'Katalog hinterlegter Fähigkeiten — nicht als Runtime verdrahtet', group: 'advanced' },
+    healing: { title: 'Healing', subtitle: 'Health-Checks und gemeldeter Status — Wiederherstellung nur wo verdrahtet', group: 'advanced' },
+    skills: { title: 'Fähigkeiten-Katalog', subtitle: 'Katalog hinterlegter Fähigkeiten — nicht als Runtime verdrahtet', group: 'advanced' },
     backups: { title: 'Sicherungen', subtitle: 'Echte Wiederherstellungspunkte und Speicherzustand', group: 'advanced' },
     settings: { title: 'Einstellungen', subtitle: 'Konfiguration mit speicherbaren Werten und Herkunftsanzeige' }
 };
@@ -73,7 +73,8 @@ function toggleMobileMore() {
     syncNavHighlight(currentTab);
 }
 
-function showTab(tabId) {
+function showTab(tabId, options) {
+    const settingsArea = options && options.settingsArea;
     if (tabId !== 'more') closeMobileMore();
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + tabId)?.classList.add('active');
@@ -102,7 +103,10 @@ function showTab(tabId) {
         identity: () => loadIdentity(),
         code: () => loadCodeRepair(),
     };
-    loaders[tabId]?.();
+    const loaded = loaders[tabId]?.();
+    if (tabId === 'settings' && settingsArea) {
+        Promise.resolve(loaded).then(() => focusSettingsArea(settingsArea));
+    }
 }
 
 function focusSettingsArea(area) {
@@ -405,7 +409,8 @@ document.addEventListener('click', function (event) {
     const nav = event.target.closest('[data-tab-target]');
     if (nav) {
         event.preventDefault();
-        showTab(nav.dataset.tabTarget);
+        const area = nav.dataset.settingsArea;
+        showTab(nav.dataset.tabTarget, area ? { settingsArea: area } : undefined);
         return;
     }
     const actionEl = event.target.closest('[data-ui-action]');

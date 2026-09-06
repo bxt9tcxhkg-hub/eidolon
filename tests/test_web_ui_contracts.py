@@ -622,9 +622,9 @@ def test_chat_ui_persists_messages_across_reload_in_local_storage():
     assert '.theme-toggle { display: none; }' in APP_WEB_CSS
     assert '.nav-item .icon::before' in APP_WEB_CSS
     assert 'data-tab="chat" data-tab-target="chat"' in html
-    assert 'data-tab="workspaces" data-tab-target="workspaces"><span class="icon"></span> Projektfläche' in html
-    assert 'data-tab="dashboard" data-tab-target="dashboard"><span class="icon"></span> Systemstatus' in html
-    assert 'data-tab="mesh" data-tab-target="mesh"><span class="icon"></span> Geräte' in html
+    assert 'data-tab="workspaces" data-tab-target="workspaces" data-nav-layer="primary"><span class="icon"></span> Projekte' in html
+    assert 'data-tab="dashboard" data-tab-target="dashboard" data-nav-layer="more"><span class="icon"></span> Systemstatus' in html
+    assert 'data-tab="mesh" data-tab-target="mesh" data-nav-layer="more"><span class="icon"></span> Geräte (Mesh)' in html
     assert 'id="chat-project-door"' in html
     assert 'id="chat-operate-actions"' in html
     assert 'id="chat-active-summary"' not in html
@@ -968,7 +968,7 @@ def test_chat_is_initial_active_surface_and_header():
     assert "window.addEventListener('hashchange'" in APP_SHELL_JS.read_text(encoding='utf-8')
     assert "const initialTab = (window.location.hash || '#chat').replace('#', '');" in APP_SHELL_JS.read_text(encoding='utf-8')
     assert "operate: { title: 'Arbeit'" in APP_SHELL_JS.read_text(encoding='utf-8')
-    assert 'data-tab="operate" data-tab-target="operate">' in html
+    assert 'data-tab="operate" data-tab-target="operate" data-nav-layer="primary">' in html
     assert 'id="chat-project-door"' in html
 
 
@@ -1005,10 +1005,10 @@ def test_project_planning_surface_is_generic_and_editable():
     assert 'data-ui-action="saveProjectTitle"' in html
     assert 'data-ui-action="archiveCurrentProject"' in html
     assert 'id="task-parent-id"' in html
-    assert 'Mehr Flächen' in html
+    assert '<summary>Mehr</summary>' in html
     assert 'id="chat-operate-actions"' in html
     assert 'id="chat-formation"' in html
-    assert 'Mehr Flächen' in html
+    assert 'Mehr Flächen' not in html
     assert 'nav-group-title">Betrieb</div>' in html
     assert 'nav-group-title">Technik</div>' in html
     assert 'Slots, keine Domänen-Pakete' in html
@@ -1115,7 +1115,7 @@ def test_chat_is_operate_execute_door():
     assert "'/api/v1/runs/' + runId + '/advance'" in operate_js
     assert 'refreshOperateSurfaces' in operate_js
     assert 'loadChatLandingSummary' in operate_js
-    assert 'Mehr Flächen' in html
+    assert '<summary>Mehr</summary>' in html
     assert 'nav-group-title">System</div>' not in html
 
 

@@ -53,7 +53,7 @@ Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gem
 - CSS ist nach Shell-, Chat- und Goals-Slices in Importdateien aufgeteilt
 - Dark-Theme bleibt Standard, mit wärmeren Neutralen, Display-Typo und reicherem Akzent; Idle-Signature atmet
 - Arbeitsspur (`data-work-trace`) zeigt Bereit / Wartet / Als Nächstes aus Kernel- und Sessiondaten, ohne Placebo-Aktivität
-- Default-Einstieg ist Chat (`/#chat`); Operate ist über `#operate` / Nav „Arbeit“ erreichbar
+- Default-Einstieg ist Chat (`/#chat`); Alltagsweg ist Chat / Projekte / Arbeit. Operate bleibt `#operate` / Nav „Arbeit“. Systemflächen hängen hinter Mehr (Betrieb / Technik), nicht in der Primärnav
 - Chat-Tür ist Titel + Composer, optional eine Projektzeile; Freigaben/Blocker/Next Action bleiben in Arbeit und erscheinen im Chat nur bei echter laufender Handlung
 - Chat, Arbeit und Projektfläche lesen denselben `work_kernel`-/Operate-Snapshot; Projektmutationen geben denselben Snapshot zurück
 - Projektbildung ist über `POST /workspaces/formation` explizit; `active_project` braucht sichtbare Bestätigung
