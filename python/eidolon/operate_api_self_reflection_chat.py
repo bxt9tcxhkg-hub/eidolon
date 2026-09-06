@@ -57,10 +57,14 @@ def register_self_reflection_chat_route(
             response_text = response if isinstance(response, str) else response.get('text', str(response))
             set_chat_turn_phase(session_id, PHASE_ANTWORTET, 'self_reflection_reply')
 
-            return api_v1_ok({
+            payload = api_v1_ok({
                 'response': response_text,
                 'reflection_data': reflector.generate_report_text(report),
             })
+            payload['response'] = response_text
+            if session_id:
+                payload['session_id'] = session_id
+            return payload
 
         except Exception as e:
             import traceback

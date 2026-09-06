@@ -8,16 +8,32 @@ async function loadHealth() {
         if (wsStatus) applyLocalRuntimeStatus(wsStatus, d);
         const comps = d.components || {};
         const componentRows = [];
+        const problemsEl = document.getElementById('health-problems');
+        if (problemsEl) {
+            const problems = Array.isArray(d.problems) ? d.problems.filter(Boolean) : [];
+            problemsEl.innerHTML = problems.length
+                ? problems.map((item) => '<div class="comp-row"><span class="comp-dot warn"></span><span class="comp-detail">' + escapeHtml(String(item)) + '</span></div>').join('')
+                : '';
+        }
         let html = '<div class="comp-row"><span class="comp-dot ok"></span><span class="comp-name">Laufzeit</span><span class="comp-detail">' + (d.uptime_human || '-') + '</span></div>';
-        html += '<div class="comp-row"><span class="comp-dot ok"></span><span class="comp-name">Status</span><span class="comp-detail">' + (d.status || '-') + '</span></div>';
-        if (comps.skills) html += '<div class="comp-row"><span class="comp-dot ok"></span><span class="comp-name">Skills</span><span class="comp-detail">' + comps.skills.count + '/' + comps.skills.enabled + '</span></div>';
-        if (comps.capabilities) html += '<div class="comp-row"><span class="comp-dot ok"></span><span class="comp-name">Capabilities</span><span class="comp-detail">' + comps.capabilities.available + '/' + comps.capabilities.total + '</span></div>';
+        html += '<div class="comp-row"><span class="comp-dot ' + (d.status === 'ok' ? 'ok' : 'warn') + '"></span><span class="comp-name">Status</span><span class="comp-detail">' + (d.status || '-') + '</span></div>';
+        if (comps.skills) html += '<div class="comp-row"><span class="comp-dot ' + (comps.skills.available ? 'ok' : 'warn') + '"></span><span class="comp-name">Skills</span><span class="comp-detail">' + escapeHtml(comps.skills.detail || ((comps.skills.count ?? 0) + '/' + (comps.skills.enabled ?? 0) + ' Katalog')) + '</span></div>';
+        if (comps.capabilities) {
+            const capAvail = comps.capabilities.available ?? 0;
+            const capTotal = comps.capabilities.total ?? 0;
+            html += '<div class="comp-row"><span class="comp-dot ' + (capAvail > 0 && capAvail === capTotal ? 'ok' : 'warn') + '"></span><span class="comp-name">Capabilities</span><span class="comp-detail">' + capAvail + '/' + capTotal + '</span></div>';
+        }
         if (comps.certificates) html += '<div class="comp-row"><span class="comp-dot ' + (comps.certificates.complete ? 'ok' : 'warn') + '"></span><span class="comp-name">Zertifikate</span><span class="comp-detail">' + (comps.certificates.complete ? comps.certificates.days_left + ' Tage' : 'Unvollständig') + '</span></div>';
-        if (comps.mesh_metrics) html += '<div class="comp-row"><span class="comp-dot ' + (comps.mesh_metrics.peer_count > 0 ? 'ok' : '') + '"></span><span class="comp-name">Mesh-Peers</span><span class="comp-detail">' + comps.mesh_metrics.peer_count + ' verbunden</span></div>';
-        if (comps.knowledge_graph) componentRows.push('<div class="comp-row"><span class="comp-dot ' + (comps.knowledge_graph.available ? 'ok' : 'warn') + '"></span><span class="comp-name">Knowledge Graph</span><span class="comp-detail">' + (comps.knowledge_graph.available ? ((comps.knowledge_graph.stats?.entities ?? 0) + ' Entitäten') : 'Nicht verfügbar') + '</span></div>');
+        if (comps.mesh_metrics) {
+            const meshDetail = comps.mesh_metrics.available
+                ? ((comps.mesh_metrics.peer_count ?? 0) + ' verbunden' + (comps.mesh_metrics.metrics_complete ? '' : ' · Latenz nicht gemessen'))
+                : (comps.mesh_metrics.detail || 'Nicht angebunden');
+            html += '<div class="comp-row"><span class="comp-dot ' + (comps.mesh_metrics.available && (comps.mesh_metrics.peer_count ?? 0) > 0 ? 'ok' : 'warn') + '"></span><span class="comp-name">Mesh-Peers</span><span class="comp-detail">' + escapeHtml(String(meshDetail)) + '</span></div>';
+        }
+        if (comps.knowledge_graph) componentRows.push('<div class="comp-row"><span class="comp-dot ' + (comps.knowledge_graph.available ? 'ok' : 'warn') + '"></span><span class="comp-name">Knowledge Graph</span><span class="comp-detail">' + escapeHtml(comps.knowledge_graph.available ? ((comps.knowledge_graph.stats?.entities ?? 0) + ' Entitäten') : (comps.knowledge_graph.detail || 'Nicht angebunden')) + '</span></div>');
         if (comps.quic_port) componentRows.push('<div class="comp-row"><span class="comp-dot ' + (comps.quic_port.listening ? 'ok' : 'warn') + '"></span><span class="comp-name">QUIC-Transport</span><span class="comp-detail">' + escapeHtml(comps.quic_port.status || (comps.quic_port.listening ? 'listening' : 'not_wired')) + '</span></div>');
         if (comps.self_healing) componentRows.push('<div class="comp-row"><span class="comp-dot ' + (comps.self_healing.available ? 'ok' : 'warn') + '"></span><span class="comp-name">Self-Healing</span><span class="comp-detail">' + escapeHtml(comps.self_healing.status || (comps.self_healing.available ? 'available' : 'unavailable')) + '</span></div>');
-        if (comps.evidence) componentRows.push('<div class="comp-row"><span class="comp-dot ' + (comps.evidence.available ? 'ok' : 'warn') + '"></span><span class="comp-name">Evidence Store</span><span class="comp-detail">' + ((comps.evidence.verified ?? 0) + ' verifiziert / ' + (comps.evidence.blocked ?? 0) + ' blockiert') + '</span></div>');
+        if (comps.evidence) componentRows.push('<div class="comp-row"><span class="comp-dot ' + (comps.evidence.available ? 'ok' : 'warn') + '"></span><span class="comp-name">Evidence Store</span><span class="comp-detail">' + escapeHtml(comps.evidence.available ? ((comps.evidence.verified ?? 0) + ' verifiziert / ' + (comps.evidence.blocked ?? 0) + ' blockiert') : (comps.evidence.detail || 'Nicht angebunden')) + '</span></div>');
         if (comps.goals) componentRows.push('<div class="comp-row"><span class="comp-dot ' + ((comps.goals.active ?? 0) > 0 ? 'ok' : 'warn') + '"></span><span class="comp-name">Ausführungsziele</span><span class="comp-detail">' + ((comps.goals.active ?? 0) + ' aktiv / ' + (comps.goals.done ?? 0) + ' erledigt') + '</span></div>');
         if (comps.backups) componentRows.push('<div class="comp-row"><span class="comp-dot ok"></span><span class="comp-name">Sicherungen</span><span class="comp-detail">' + ((comps.backups.count ?? 0) + ' vorhanden') + '</span></div>');
         const hc = document.getElementById('health-summary');
@@ -64,9 +80,9 @@ function describeLocalRuntimeStatus(health, errorMessage) {
         ? problems.join('; ')
         : 'Bekannte lokale Grenzen (z. B. fehlendes Backup oder unvollständige Zertifikate).';
     return {
-        label: 'Lokal · Grenzen',
+        label: 'Host · Grenzen',
         tone: 'limited',
-        title: 'Lokal eingeschränkt: ' + reason + ' Die Arbeitsfläche selbst läuft weiter — das ist kein Ausfall.',
+        title: 'Host eingeschränkt: ' + reason + ' Die Arbeitsfläche selbst läuft weiter — das ist kein Ausfall.',
     };
 }
 

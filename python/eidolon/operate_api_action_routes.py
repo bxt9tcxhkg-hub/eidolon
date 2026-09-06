@@ -83,7 +83,14 @@ def register_operate_action_routes(app: FastAPI, *, runtime, get_operate_service
             api_v1_error('invalid_approval', str(exc), status_code=400)
         if approval.run_id != run_id:
             api_v1_error('run_mismatch', 'Approval gehört zu einem anderen Run', status_code=400)
-        return api_v1_ok({'approval': approval.to_dict(), 'run': service.get_run(run_id).to_dict()})
+        return api_v1_ok({
+            'approval': approval.to_dict(),
+            'run': service.get_run(run_id).to_dict(),
+            'execution': {
+                'wired': False,
+                'detail': 'Freigabe ist gespeichert. Es gibt keinen Executor für Buchung, Mail oder externe Schreibaktionen.',
+            },
+        })
 
     @app.post('/api/v1/runs/{run_id}/interrupt')
     async def api_v1_interrupt_run(run_id: str, request: dict):

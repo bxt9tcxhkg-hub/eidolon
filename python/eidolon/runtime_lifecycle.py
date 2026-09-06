@@ -6,6 +6,7 @@ from typing import Any
 
 from fastapi import FastAPI
 from eidolon.core.capabilities import get_capability_registry
+from eidolon.core.capability_checks import set_quic_listener_running
 from eidolon.core.config import QUIC_PORT
 from eidolon.mesh.transport.quic_server import EidolonQuicServer
 
@@ -45,8 +46,10 @@ async def start_runtime(runtime_app) -> None:
     try:
         runtime_app.quic_server_state['server'] = EidolonQuicServer(host='0.0.0.0', port=QUIC_PORT)
         await runtime_app.quic_server_state['server'].start()
+        set_quic_listener_running(True)
         print(f'QUIC-Server gestartet auf Port {QUIC_PORT}')
     except Exception as exc:
+        set_quic_listener_running(False)
         print(f'QUIC-Server konnte nicht gestartet werden: {exc}')
 
 
@@ -54,6 +57,7 @@ async def stop_runtime(runtime_app) -> None:
     if runtime_app.quic_server_state['server']:
         await runtime_app.quic_server_state['server'].stop()
         runtime_app.quic_server_state['server'] = None
+    set_quic_listener_running(False)
     await runtime_app._ns('healing_service', runtime_app.services.healing_service).stop()
 
 

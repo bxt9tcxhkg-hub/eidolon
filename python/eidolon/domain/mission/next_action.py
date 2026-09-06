@@ -17,6 +17,7 @@ def derive_next_action(run, approvals, blockers) -> NextActionRecord:
             action_label='Entscheidung geben',
             action_enabled=True,
             action_reason_disabled=None,
+            execution_wired=False,
         )
 
     if open_blockers:
@@ -29,6 +30,7 @@ def derive_next_action(run, approvals, blockers) -> NextActionRecord:
             action_label='Blocker auflösen',
             action_enabled=bool(getattr(blocker, 'requires_user_action', False)),
             action_reason_disabled=None if getattr(blocker, 'requires_user_action', False) else 'Blocker braucht keine direkte Nutzeraktion',
+            execution_wired=False,
         )
 
     if run is None or getattr(run, 'state', None) in {'completed', 'failed', 'cancelled'}:
@@ -40,17 +42,19 @@ def derive_next_action(run, approvals, blockers) -> NextActionRecord:
             action_label=None,
             action_enabled=False,
             action_reason_disabled=None,
+            execution_wired=False,
         )
 
     phase = getattr(run, 'current_phase', None) or 'understand'
     transition = getattr(run, 'next_transition', None)
-    summary = getattr(run, 'state_reason', None) or 'Nächsten sinnvollen Arbeitsschritt fortsetzen.'
+    summary = getattr(run, 'state_reason', None) or 'Nächsten Zustandsübergang fortschreiben.'
     return NextActionRecord(
         kind='next_step',
-        title=f'Weiter von Phase {phase}',
-        summary=summary,
+        title=f'Phase fortschreiben: {phase}',
+        summary=(summary + ' Keine Ausführung — nur Zustandsmaschine.').strip(),
         evidence_refs=[],
-        action_label='Weiter',
+        action_label='Phase fortschreiben',
         action_enabled=True,
         action_reason_disabled=None if transition else 'Kein weiterer Zustandsübergang definiert',
+        execution_wired=False,
     )

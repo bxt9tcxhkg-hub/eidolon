@@ -280,37 +280,15 @@ async function updateLLMActions(provider) {
             return;
         }
         if (openai.configured) {
-            container.innerHTML = '<div class="muted" style="margin-bottom:8px;">OpenAI ist über ChatGPT-Login verbunden.</div><button class="btn btn-sm" onclick="checkOpenAIAuth(this)">Status prüfen</button> <button class="btn btn-sm" onclick="testOpenAIChat(this)">Test-Chat</button>';
+            container.innerHTML = '<div class="muted" style="margin-bottom:8px;">OpenAI ist über ChatGPT-Login (Codex-CLI) verbunden.</div><button class="btn btn-sm" onclick="checkOpenAIAuth(this)">Status prüfen</button> <button class="btn btn-sm" onclick="testOpenAIChat(this)">Test-Chat</button>';
         } else {
-            container.innerHTML = '<div class="muted" style="margin-bottom:8px;">Starte einen echten Gerätecode-Login. Das funktioniert auch auf dem Handy: Link öffnen, Code eingeben, danach Status prüfen.</div><button class="btn btn-sm btn-primary" onclick="triggerOpenAILogin(this)">OpenAI Login starten</button><div id="openai-login-session" class="muted" style="margin-top:10px;"></div>';
+            container.innerHTML = '<div class="muted" style="margin-bottom:8px;">ChatGPT-Login läuft nur über die Codex-CLI. Es gibt keinen Gerätecode-Login in dieser Oberfläche.</div>' +
+                '<div class="muted" style="margin-bottom:8px;">Im Terminal: <code>codex login</code> — danach Status prüfen.</div>' +
+                '<button class="btn btn-sm" onclick="checkOpenAIAuth(this)">Status prüfen</button>';
         }
         return;
     }
     container.innerHTML = '<div class="muted">Ollama braucht keine Schlüssel. OAuth wird hier nicht angeboten.</div>';
-}
-async function triggerOpenAILogin(btn) {
-    btn && (btn.disabled = true);
-    try {
-        const result = await api('POST', '/integrations/openai/login', {});
-        if (result.session_id) {
-            window.eidolonOpenAILoginSessionId = result.session_id;
-            const panel = document.getElementById('openai-login-session');
-            if (panel) {
-                panel.innerHTML = '<div><strong>1.</strong> Öffne: <a href="' + result.verification_url + '" target="_blank" rel="noopener noreferrer">' + result.verification_url + '</a></div>' +
-                    '<div style="margin-top:6px;"><strong>2.</strong> Code: <code>' + result.user_code + '</code></div>' +
-                    '<div style="margin-top:6px;"><strong>3.</strong> Danach unten auf <em>Status prüfen</em> klicken.</div>' +
-                    '<div style="margin-top:10px;"><button class="btn btn-sm" onclick="checkOpenAIAuth(this)">Status prüfen</button></div>';
-            }
-            showNotice('OpenAI-Gerätecode erstellt. Öffne den Link und gib den Code ein.', 'warning');
-        } else if (result.ok) {
-            showNotice(result.detail || 'Login erfolgreich', 'success');
-        } else {
-            showNotice(result.error || 'Login fehlgeschlagen', 'error');
-        }
-        await loadLLMConnection();
-        await updateLLMActions('openai_oauth');
-    } catch (e) { showNotice(e.message, 'error'); }
-    finally { btn && (btn.disabled = false); }
 }
 async function saveOpenAIKey(btn) {
     const input = document.getElementById('openai-api-key');
@@ -331,21 +309,13 @@ async function saveOpenAIKey(btn) {
 async function checkOpenAIAuth(btn) {
     btn && (btn.disabled = true);
     try {
-        let result;
-        if (window.eidolonOpenAILoginSessionId) {
-            result = await api('GET', '/integrations/openai/login/' + window.eidolonOpenAILoginSessionId);
-            if (result.logged_in) {
-                window.eidolonOpenAILoginSessionId = null;
-            }
+        const result = await api('GET', '/llm/connection');
+        const openai = result.openai || {};
+        const connected = openai.configured === true || openai.logged_in === true;
+        if (connected) {
+            showNotice(openai.detail || 'OpenAI ist über Codex verbunden.', 'success');
         } else {
-            result = await api('POST', '/integrations/openai/auth', {});
-        }
-        if (result.ok) {
-            showNotice(result.detail || 'OpenAI verbunden', 'success');
-        } else if (result.status === 'awaiting_browser') {
-            showNotice('Login läuft noch. Öffne den Link, gib den Code ein und prüfe danach erneut den Status.', 'warning');
-        } else {
-            showNotice(result.error || 'OpenAI nicht verbunden', 'warning');
+            showNotice(openai.detail || result.detail || 'OpenAI nicht verbunden. ChatGPT-Login nur über `codex login`.', 'warning');
         }
         await loadLLMConnection();
         await updateLLMActions('openai_oauth');
@@ -356,10 +326,11 @@ async function testOpenAIChat(btn) {
     btn && (btn.disabled = true);
     try {
         const result = await api('POST', '/chat', { message: 'Sag nur: EIDOLON_OK' });
-        if (result.ok) {
-            showNotice('Chat-Antwort: ' + (result.reply || result.response || '').slice(0, 50), 'success');
+        const reply = (result.reply || result.response || '').trim();
+        if (result.ok && reply) {
+            showNotice('Chat-Antwort: ' + reply.slice(0, 50), 'success');
         } else {
-            showNotice(result.error || 'Chat fehlgeschlagen', 'error');
+            showNotice(result.error || 'Chat fehlgeschlagen oder keine Modellantwort', 'error');
         }
     } catch (e) { showNotice(e.message, 'error'); }
     finally { btn && (btn.disabled = false); }

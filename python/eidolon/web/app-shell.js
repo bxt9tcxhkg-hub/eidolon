@@ -10,7 +10,7 @@ const PAGES = {
     identity: { title: 'Identität', subtitle: 'Rollenmodell und Produkt-Selbstbeschreibung', group: 'config' },
     code: { title: 'Code-Reparatur', subtitle: 'Gezielte Analyse und Reparatur von lokalen Eidolon-Dateien', group: 'advanced' },
     healing: { title: 'Stabilität', subtitle: 'Reale Health-Checks und Wiederherstellungsstatus', group: 'advanced' },
-    skills: { title: 'Fähigkeiten', subtitle: 'Aktivierte Werkzeuge und ausführbare Runtime-Fähigkeiten', group: 'advanced' },
+    skills: { title: 'Fähigkeiten', subtitle: 'Katalog hinterlegter Fähigkeiten — nicht als Runtime verdrahtet', group: 'advanced' },
     backups: { title: 'Sicherungen', subtitle: 'Echte Wiederherstellungspunkte und Speicherzustand', group: 'advanced' },
     settings: { title: 'Einstellungen', subtitle: 'Konfiguration mit speicherbaren Werten und Herkunftsanzeige' }
 };

@@ -24,6 +24,7 @@ def register_runtime_health_routes(
     get_http_port: Callable[[], int],
     get_quic_port: Callable[[], int],
     project_root: Path,
+    get_mesh_service: Callable[[], Any] | None = None,
 ) -> Any:
     def server_start() -> float: return get_server_start()
 
@@ -33,7 +34,7 @@ def register_runtime_health_routes(
         caps = []
         for cap in get_capability_registry().list():
             caps.append({**cap, 'available': quic_status['available'], 'detail': quic_status['detail']} if cap.get('id') == 'mesh.quic' else cap)
-        return health_payload(server_start=server_start(), goal_stats=goal_stats, backup_stats=backup_stats, healing_state=healing_state, quic_status=quic_status, caps=caps, certs=certs, builtin_skills=get_builtin_skills(), human_duration=human_duration, http_port=get_http_port(), quic_port=get_quic_port())
+        return health_payload(server_start=server_start(), goal_stats=goal_stats, backup_stats=backup_stats, healing_state=healing_state, quic_status=quic_status, caps=caps, certs=certs, builtin_skills=get_builtin_skills(), human_duration=human_duration, http_port=get_http_port(), quic_port=get_quic_port(), get_mesh_service=get_mesh_service)
 
     @app.get('/capabilities')
     async def capabilities():

@@ -11,6 +11,7 @@
     async function advanceOperateRun(runId) {
         await api('POST', '/api/v1/runs/' + runId + '/advance', { reason: 'Advance triggered from chat or operate UI' });
         await refreshOperateSurfaces();
+        if (typeof showNotice === 'function') showNotice('Phase fortgeschrieben. Es wurde keine Aktion ausgeführt.', 'info', 5000);
         if (typeof confirmAction === 'function') confirmAction(document.getElementById('operate-next-action') || document.getElementById('panel-operate'), 'continued');
     }
 
@@ -24,8 +25,16 @@
     }
 
     async function resolveOperateApproval(runId, approvalId, decision) {
-        await api('POST', '/api/v1/runs/' + runId + '/approval/' + approvalId, { decision, resolved_by: 'user' });
+        const result = await api('POST', '/api/v1/runs/' + runId + '/approval/' + approvalId, { decision, resolved_by: 'user' });
         await refreshOperateSurfaces();
+        const execution = result && result.data && result.data.execution;
+        if (decision === 'approved') {
+            if (typeof showNotice === 'function') {
+                showNotice((execution && execution.detail) || 'Freigabe notiert. Ausführung (Buchung, Mail, externe Aktion) ist nicht angebunden.', 'info', 6000);
+            }
+        } else if (typeof showNotice === 'function') {
+            showNotice('Ablehnung notiert. Es wurde keine Gegenaktion ausgeführt.', 'info', 5000);
+        }
         if (typeof confirmAction === 'function') confirmAction(document.getElementById('operate-approvals') || document.getElementById('panel-operate'), decision === 'rejected' ? 'rejected' : 'approved');
     }
 
