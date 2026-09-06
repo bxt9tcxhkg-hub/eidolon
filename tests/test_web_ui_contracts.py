@@ -336,6 +336,10 @@ def test_openai_connection_supports_oauth_via_codex_login():
     assert 'OpenAI-kompatibel (API-Key)' in js
     assert 'Ollama lokal' in js
     assert 'OAuth gibt es für diesen Anbieter nicht' in js
+    assert 'ChatGPT-Login läuft nur über die Codex-CLI' in js
+    assert 'Es gibt keinen Gerätecode-Login in dieser Oberfläche' in js
+    assert 'function triggerOpenAILogin' not in js
+    assert "api('GET', '/integrations/openai/login/'" not in js
     assert 'function moveFallbackProvider' in js
     assert 'Ersatzkette ist leer' in js
     assert 'Anbieter anhängen' in js
@@ -383,44 +387,36 @@ def test_integrations_status_and_auth_routes_are_truthful_compatibility_paths():
     auth = client.post('/integrations/openai/auth')
     assert auth.status_code == 200
     auth_payload = auth.json()
-    assert auth_payload['ok'] is True
-    assert auth_payload['supported'] is True
+    assert auth_payload['ok'] is bool(llm['openai'].get('configured'))
+    assert auth_payload['supported'] is bool(llm['openai'].get('oauth_supported'))
     assert auth_payload['auth_method'] == 'chatgpt_login'
+    if not auth_payload['ok']:
+        assert auth_payload.get('configured') is False
 
 
-def test_openai_login_endpoint_can_return_real_device_flow_contract():
-    client = TestClient(agent_server.app)
-    original_available = llm_backend_mod._codex_available
-    original_status = llm_backend_mod._codex_login_status
-    original_spawn = agent_server._spawn_openai_device_login
-    try:
-        llm_backend_mod._codex_available = lambda: True
-        llm_backend_mod._codex_login_status = lambda: {'logged_in': False, 'mode': 'none'}
-        agent_server._spawn_openai_device_login = lambda: {
-            'ok': True,
-            'supported': True,
-            'provider': 'openai',
-            'auth_method': 'chatgpt_login',
-            'session_id': 'sess123',
-            'status': 'awaiting_browser',
-            'verification_url': 'https://auth.openai.com/codex/device',
-            'user_code': 'ABCD-EFGH',
-            'detail': 'Öffne den Link und gib den Code ein.',
-            'logged_in': False,
-            'current_provider': 'ollama',
-            'command': 'codex login --device-auth',
-        }
-        response = client.post('/integrations/openai/login')
-        assert response.status_code == 200
-        payload = response.json()
+def test_openai_login_endpoint_does_not_invent_device_codes():
+    from eidolon.runtime_service_auth import spawn_openai_device_login
+
+    payload = spawn_openai_device_login()
+    assert not payload.get('session_id')
+    assert not payload.get('user_code')
+    assert not payload.get('verification_url')
+    if payload.get('logged_in') or payload.get('configured'):
         assert payload['ok'] is True
-        assert payload['status'] == 'awaiting_browser'
-        assert payload['verification_url'] == 'https://auth.openai.com/codex/device'
-        assert payload['user_code'] == 'ABCD-EFGH'
-    finally:
-        llm_backend_mod._codex_available = original_available
-        llm_backend_mod._codex_login_status = original_status
-        agent_server._spawn_openai_device_login = original_spawn
+    else:
+        assert payload['ok'] is False
+        assert payload.get('status') == 'manual_login_required' or payload.get('error')
+
+    client = TestClient(agent_server.app)
+    response = client.post('/integrations/openai/login')
+    assert response.status_code == 200
+    body = response.json()
+    assert not body.get('session_id')
+    assert not body.get('user_code')
+    if body.get('logged_in') or body.get('configured'):
+        assert body['ok'] is True
+    else:
+        assert body['ok'] is False
 
 
 def test_llm_runtime_status_is_initialized_from_settings_store():
@@ -474,6 +470,8 @@ def test_skills_endpoints_mutate_real_runtime_state():
     disabled = client.post('/skills/chat/disable').json()
     assert disabled['ok'] is True
     assert disabled['enabled'] is False
+    assert disabled.get('persisted') is False
+    assert disabled.get('runtime_wired') is False
     enabled_list = client.get('/skills/enabled').json()['skills']
     assert 'chat' not in {skill['name'] for skill in enabled_list}
     enabled = client.post('/skills/chat/enable').json()
@@ -589,8 +587,8 @@ def test_accept_pairing_ui_does_not_show_success_on_error_payload():
 def test_skills_ui_populates_both_summary_and_list_instead_of_staying_loading():
     js = APP_WEB_JS
     assert "const listEl = document.getElementById('skills-list');" in js
-    assert 'if (listEl) listEl.innerHTML = rows;' in js
-    assert 'if (listEl) listEl.innerHTML = err;' in js
+    assert 'if (listEl) listEl.innerHTML = notice + rows;' in js
+    assert 'if (listEl) listEl.innerHTML = notice + \'<div class="empty">Keine Skills</div>\';' in js or 'if (listEl) listEl.innerHTML = err;' in js
 
 
 def test_code_and_backup_buttons_are_bound_to_real_inline_flows_not_prompts():
@@ -934,6 +932,8 @@ def test_chat_ui_does_not_fall_back_to_fake_success_copy():
     js = APP_WEB_JS
     assert "'Antwort erhalten'" not in html
     assert "Fehler: Keine Modellantwort erhalten" in js
+    assert 'function chatModelText(r)' in js
+    assert 'r.data && r.data.response' in js
     assert 'Bereit, wenn du es bist.' in js
     assert 'renderChat(); loadOperateView(); loadPodsView(); loadWorkspaces();' in js
 

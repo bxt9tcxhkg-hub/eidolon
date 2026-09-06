@@ -119,7 +119,7 @@
         if (!el) return;
         if (!nextAction || nextAction.kind === 'none') { el.innerHTML = '<div class="empty">Noch keine nächste Aktion im Operate-Kernel.</div>'; return; }
         const pending = (Array.isArray(approvals) ? approvals : []).filter((item) => item && item.id && (item.status === 'pending' || item.is_pending || !item.status));
-        const advanceButton = runId && nextAction.kind === 'next_step' && nextAction.action_enabled && !pending.length ? '<div style="margin-top:12px;"><button class="btn btn-primary" onclick="advanceOperateRun(' + JSON.stringify(runId) + ')">' + escapeHtml(nextAction.action_label || 'Weiter') + '</button></div>' : '';
+        const advanceButton = runId && nextAction.kind === 'next_step' && nextAction.action_enabled && !pending.length ? '<div style="margin-top:12px;"><button class="btn btn-primary" onclick="advanceOperateRun(' + JSON.stringify(runId) + ')">' + escapeHtml(nextAction.action_label || 'Phase fortschreiben') + '</button></div>' : '';
         let approvalButtons = '';
         if (runId && (nextAction.kind === 'approval_request' || pending.length)) {
             const gate = pending[0];
@@ -127,7 +127,7 @@
                 ? '<div style="display:flex;gap:8px;margin-top:12px;"><button class="btn btn-sm btn-primary" onclick="resolveOperateApproval(' + JSON.stringify(runId) + ', ' + JSON.stringify(gate.id) + ', ' + JSON.stringify('approved') + ')">Freigeben</button><button class="btn btn-sm" onclick="resolveOperateApproval(' + JSON.stringify(runId) + ', ' + JSON.stringify(gate.id) + ', ' + JSON.stringify('rejected') + ')">Ablehnen</button></div>'
                 : '<div style="margin-top:12px;"><button class="btn btn-sm" onclick="requestOperateApproval(' + JSON.stringify(runId) + ')">Freigabe erneut anfordern</button></div>';
         }
-        el.innerHTML = [row('Typ', nextAction.kind || '—'), row('Titel', nextAction.title || '—'), row('Zusammenfassung', nextAction.summary || '—'), row('Aktion', pending.length ? 'Freigeben / Ablehnen' : (nextAction.action_label || '—')), row('Ausführbar', nextAction.action_enabled ? 'ja' : 'nein'), advanceButton, approvalButtons].join('');
+        el.innerHTML = [row('Typ', nextAction.kind || '—'), row('Titel', nextAction.title || '—'), row('Zusammenfassung', nextAction.summary || '—'), row('Aktion', pending.length ? 'Freigeben / Ablehnen' : (nextAction.action_label || '—')), row('Ausführbar', nextAction.action_enabled ? 'ja' : 'nein'), row('Ausführung', nextAction.execution_wired ? 'angebunden' : 'nicht angebunden'), advanceButton, approvalButtons].join('');
     }
 
     function renderApprovals(runId, items) {

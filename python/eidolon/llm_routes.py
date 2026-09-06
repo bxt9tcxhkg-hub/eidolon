@@ -60,7 +60,15 @@ def register_llm_routes(
     @app.post('/integrations/openai/auth')
     async def integrations_openai_auth():
         openai = dict(llm_backend().status().get('openai') or {})
-        return {'ok': True, 'supported': True, 'provider': 'openai', 'auth_method': 'chatgpt_login', **openai}
+        configured = bool(openai.get('configured') or openai.get('logged_in'))
+        return {
+            'ok': configured,
+            'supported': bool(openai.get('oauth_supported')),
+            'provider': 'openai',
+            'auth_method': openai.get('auth_method') or 'chatgpt_login',
+            'logged_in': configured,
+            **openai,
+        }
 
     @app.post('/integrations/openai/login')
     async def integrations_openai_login():

@@ -106,7 +106,7 @@ def test_status_badge_stays_honest_and_warmer():
     css = CANVAS_CSS.read_text(encoding='utf-8')
     js = (ROOT / 'python' / 'eidolon' / 'web' / 'dashboard-ui.js').read_text(encoding='utf-8')
     assert "label: 'Lokal'" in js
-    assert "label: 'Lokal · Grenzen'" in js
+    assert "label: 'Host · Grenzen'" in js
     assert 'kein voller Mesh-/QUIC-Status' in js
     assert '.ws-status.limited .dot' in css
     assert 'border-radius: 999px' in css

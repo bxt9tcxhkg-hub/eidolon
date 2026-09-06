@@ -16,7 +16,7 @@ class Capability:
     inputs: dict[str, str] = field(default_factory=dict)
     outputs: dict[str, str] = field(default_factory=dict)
     permissions: list[str] = field(default_factory=list)
-    _check_fn: CheckFn = lambda: True
+    _check_fn: CheckFn = lambda: False
     detail: str = ''
 
     def check_available(self) -> bool:
@@ -36,7 +36,7 @@ class Capability:
             'outputs': self.outputs,
             'permissions': self.permissions,
             'available': available,
-            'detail': self.detail if self.detail else ('available' if available else 'unavailable'),
+            'detail': self.detail if self.detail else ('verfügbar' if available else 'nicht verfügbar — kein Probe-Check bestanden'),
         }
 
 

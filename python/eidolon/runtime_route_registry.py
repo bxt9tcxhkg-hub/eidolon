@@ -40,6 +40,7 @@ def register_routes(runtime_app):
         get_http_port=lambda: HTTP_PORT,
         get_quic_port=lambda: QUIC_PORT,
         project_root=runtime_app.project_root,
+        get_mesh_service=lambda: runtime_app._ns('mesh_service', runtime_app.services.mesh_service),
     )
     register_identity_mesh_routes(runtime_app.app, get_llm_backend=lambda: runtime_app._ns('llm_backend', runtime_app.services.llm_backend), get_bot_role_registry=lambda: runtime_app._ns('bot_role_registry', runtime_app.services.bot_role_registry), get_mesh_service=lambda: runtime_app._ns('mesh_service', runtime_app.services.mesh_service), get_http_port=lambda: HTTP_PORT)
     register_chat_and_code_routes(

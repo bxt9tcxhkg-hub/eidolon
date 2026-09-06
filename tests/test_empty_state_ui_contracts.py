@@ -130,9 +130,9 @@ def test_local_runtime_status_is_quiet_and_honest():
     assert 'function applyLocalRuntimeStatus' in js
     assert 'Lokal verbunden' in js
     assert 'Backend nicht erreichbar' in js
-    assert 'Lokal eingeschränkt:' in js
+    assert 'Host eingeschränkt:' in js
     assert "label: 'Lokal'" in js
-    assert "label: 'Lokal · Grenzen'" in js
+    assert "label: 'Host · Grenzen'" in js
     assert "tone: 'quiet'" in js
     assert "el.title = info.title" in js
     assert "wsStatus.innerHTML = '<span class=\"dot\"></span> ' + escapeHtml(d.status === 'ok' ? 'Lokal verbunden' : 'Lokal eingeschränkt')" not in js

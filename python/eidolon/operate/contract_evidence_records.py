@@ -46,4 +46,5 @@ class NextActionRecord:
     action_label: str | None
     action_enabled: bool
     action_reason_disabled: str | None
+    execution_wired: bool = False
     def to_dict(self) -> dict[str, Any]: return asdict(self)

@@ -1,13 +1,22 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import shutil
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
 
 from eidolon.core.config import PROJECT_ROOT, state_path
+
+_quic_listener_running = False
+
+
+def set_quic_listener_running(running: bool) -> None:
+    global _quic_listener_running
+    _quic_listener_running = bool(running)
 
 
 def module_available(name: str) -> bool:
@@ -27,8 +36,29 @@ def mesh_certificates_present() -> bool:
 
 
 def mesh_quic_available() -> bool:
+    return _quic_listener_running
+
+
+def filesystem_readable() -> bool:
     try:
-        from eidolon.mesh.transport.quic_server import EidolonQuicServer  # noqa: F401
+        return Path(PROJECT_ROOT).exists() and os.access(PROJECT_ROOT, os.R_OK)
+    except Exception:
+        return False
+
+
+def filesystem_writable() -> bool:
+    try:
+        target = state_path('.', project_root=PROJECT_ROOT)
+        target.mkdir(parents=True, exist_ok=True)
+        return os.access(target, os.W_OK)
+    except Exception:
+        return False
+
+
+def evidence_store_available() -> bool:
+    try:
+        from eidolon.core.evidence import get_evidence_store
+        get_evidence_store().get_blocked()
         return True
     except Exception:
         return False
@@ -65,4 +95,14 @@ def image_generation_available() -> bool:
 
 
 def ollama_available() -> bool:
-    return bool(os.environ.get('OLLAMA_HOST', 'http://localhost:11434'))
+    host = os.environ.get('OLLAMA_HOST') or os.environ.get('OLLAMA_URL') or 'http://127.0.0.1:11434'
+    try:
+        req = urllib.request.Request(str(host).rstrip('/') + '/api/tags', headers={'Accept': 'application/json'})
+        with urllib.request.urlopen(req, timeout=1.5) as resp:
+            status = getattr(resp, 'status', 200)
+            if not (200 <= int(status) < 300):
+                return False
+            json.loads(resp.read().decode('utf-8'))
+            return True
+    except Exception:
+        return False

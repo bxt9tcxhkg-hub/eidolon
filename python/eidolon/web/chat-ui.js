@@ -120,6 +120,7 @@ function renderChatOperateDoor(targetEl, data) {
         parts.push('<div class="chat-operate-item">'
             + '<div class="summary-headline">' + escapeHtml(item.title || 'Freigabe') + '</div>'
             + '<div class="summary-copy">' + escapeHtml(item.summary || 'Diese Aktion wartet auf deine Entscheidung.') + '</div>'
+            + '<div class="summary-copy">Freigabe speichert die Entscheidung. Buchung, Mail oder externe Aktion folgen nicht — kein Executor.</div>'
             + (runId ? '<div class="chat-operate-buttons">'
                 + operateActionButton('Freigeben', 'resolveOperateApproval', [runId, item.id, 'approved'], true)
                 + operateActionButton('Ablehnen', 'resolveOperateApproval', [runId, item.id, 'rejected'], false)
@@ -135,12 +136,21 @@ function renderChatOperateDoor(targetEl, data) {
                 + '</div>' : '')
             + '</div>');
     });
+    if (runId && nextAction.kind === 'approval_request' && !approvals.length) {
+        parts.push('<div class="chat-operate-item">'
+            + '<div class="summary-headline">' + escapeHtml(nextAction.title || 'Freigabe') + '</div>'
+            + '<div class="summary-copy">' + escapeHtml(nextAction.summary || 'Freigabe erneut anfordern — Ausführung ist nicht angebunden.') + '</div>'
+            + '<div class="chat-operate-buttons">'
+            + operateActionButton('Freigabe erneut anfordern', 'requestOperateApproval', [runId], false)
+            + '</div>'
+            + '</div>');
+    }
     if (runId && nextAction.kind === 'next_step' && nextAction.action_enabled && !approvals.length && !blockers.length) {
         parts.push('<div class="chat-operate-item">'
             + '<div class="summary-headline">' + escapeHtml(nextAction.title || 'Nächster Schritt') + '</div>'
-            + '<div class="summary-copy">' + escapeHtml(nextAction.summary || 'Die Arbeit kann fortgesetzt werden.') + '</div>'
+            + '<div class="summary-copy">' + escapeHtml(nextAction.summary || 'Schreibt nur die Phase weiter — keine Ausführung.') + '</div>'
             + '<div class="chat-operate-buttons">'
-            + operateActionButton(nextAction.action_label || 'Weiter', 'advanceOperateRun', [runId], true)
+            + operateActionButton(nextAction.action_label || 'Phase fortschreiben', 'advanceOperateRun', [runId], true)
             + '</div>'
             + '</div>');
     }
@@ -573,6 +583,25 @@ function startChatStatusPoll(sessionId) {
     }, 400);
 }
 
+function chatModelText(r) {
+    if (!r || typeof r !== 'object') return '';
+    const candidates = [r.response, r.data && r.data.response, r.reply, r.data && r.data.reply];
+    for (const value of candidates) {
+        if (typeof value === 'string' && value.trim()) return value;
+    }
+    return '';
+}
+
+function chatErrorText(r) {
+    const err = r && r.error;
+    if (typeof err === 'string' && err.trim()) return err;
+    if (err && typeof err === 'object') {
+        const message = err.message || err.detail || err.code;
+        if (typeof message === 'string' && message.trim()) return message;
+    }
+    return 'Keine Modellantwort erhalten';
+}
+
 async function sendChat() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
@@ -603,10 +632,11 @@ async function sendChat() {
             await loadChatRuntimeContext(currentChatSessionId);
         }
         setChatAgentStatus('antwortet', 'response');
+        const reply = chatModelText(r);
         if (r?.ok === false) {
-            chatMessages.push({ role: 'assistant', content: 'Fehler: ' + (r.error || 'Keine Modellantwort erhalten') });
-        } else if (typeof r?.response === 'string' && r.response.trim()) {
-            chatMessages.push({ role: 'assistant', content: r.response });
+            chatMessages.push({ role: 'assistant', content: 'Fehler: ' + chatErrorText(r) });
+        } else if (reply) {
+            chatMessages.push({ role: 'assistant', content: reply });
         } else {
             chatMessages.push({ role: 'assistant', content: 'Fehler: Keine Modellantwort erhalten' });
         }

@@ -7,6 +7,7 @@ from eidolon.core.backup_service import BackupService
 from eidolon.core.config import HTTP_PORT, PROJECT_ROOT, migrate_legacy_state
 from eidolon.operate.bridge import build_operate_snapshot
 from eidolon.runtime_bootstrap import build_runtime_app
+from eidolon.runtime_service_factory import spawn_openai_device_login as _real_spawn_openai_device_login
 from eidolon.runtime_support import (
     BUILTIN_SKILLS,
     apply_llm_code_mutation as _apply_llm_code_mutation,
@@ -48,7 +49,7 @@ voice_runtime_service = runtime.services.voice_runtime_service
 
 
 def _spawn_openai_device_login() -> dict[str, Any]:
-    return runtime.spawn_openai_device_login()
+    return _real_spawn_openai_device_login()
 
 
 def _chat_runtime_payload(message: str, source: str, session: dict[str, Any] | None) -> dict[str, Any]:

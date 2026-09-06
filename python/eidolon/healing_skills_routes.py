@@ -57,13 +57,41 @@ def register_healing_skills_routes(
         result = await healing_service().run_check_cycle()
         return {'ok': True, 'cycle': result, 'state': healing_service().get_state()}
 
+    def _catalog_skill(skill: dict) -> dict:
+        return {
+            **skill,
+            'executable': False,
+            'runtime_wired': False,
+            'persisted': False,
+        }
+
+    def _mutation_honesty() -> dict:
+        return {
+            'persisted': False,
+            'runtime_wired': False,
+            'detail': 'Nur im Speicher dieser Runtime. Nicht persistent. Skill-Runtime ist nicht verdrahtet.',
+        }
+
     @app.get('/skills')
     async def list_skills():
-        return {'ok': True, 'skills': builtin_skills()}
+        return {
+            'ok': True,
+            'catalog_only': True,
+            'runtime_wired': False,
+            'persistence': 'memory',
+            'detail': 'Katalog hinterlegter Fähigkeiten. Nicht als Runtime verdrahtet. Ein/Aus nur im Speicher dieser Sitzung.',
+            'skills': [_catalog_skill(skill) for skill in builtin_skills()],
+        }
 
     @app.get('/skills/enabled')
     async def list_enabled_skills():
-        return {'ok': True, 'skills': [skill for skill in builtin_skills() if skill.get('enabled')]}
+        return {
+            'ok': True,
+            'catalog_only': True,
+            'runtime_wired': False,
+            'persistence': 'memory',
+            'skills': [_catalog_skill(skill) for skill in builtin_skills() if skill.get('enabled')],
+        }
 
     @app.post('/skills/{name}/enable')
     async def enable_skill(name: str):
@@ -71,7 +99,7 @@ def register_healing_skills_routes(
         if not skill:
             return {'ok': False, 'error': 'Skill nicht gefunden'}
         skill['enabled'] = True
-        return {'ok': True, 'skill': skill, 'enabled': True}
+        return {'ok': True, 'skill': _catalog_skill(skill), 'enabled': True, **_mutation_honesty()}
 
     @app.post('/skills/{name}/disable')
     async def disable_skill(name: str):
@@ -79,7 +107,7 @@ def register_healing_skills_routes(
         if not skill:
             return {'ok': False, 'error': 'Skill nicht gefunden'}
         skill['enabled'] = False
-        return {'ok': True, 'skill': skill, 'enabled': False}
+        return {'ok': True, 'skill': _catalog_skill(skill), 'enabled': False, **_mutation_honesty()}
 
     @app.post('/skills/{name}/toggle')
     async def toggle_skill(name: str):
@@ -87,7 +115,7 @@ def register_healing_skills_routes(
         if not skill:
             return {'ok': False, 'error': 'Skill nicht gefunden'}
         skill['enabled'] = not bool(skill.get('enabled'))
-        return {'ok': True, 'skill': skill, 'enabled': skill['enabled']}
+        return {'ok': True, 'skill': _catalog_skill(skill), 'enabled': skill['enabled'], **_mutation_honesty()}
 
     @app.put('/skills/{name}/priority')
     async def set_skill_priority(name: str, request: dict):
