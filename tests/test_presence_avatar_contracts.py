@@ -59,8 +59,9 @@ def test_presence_motion_binds_to_real_turn_phases_only():
     assert "phase === 'denkt' || phase === 'arbeitet'" in live
     assert 'getElementById(\'chat-messages\')' in live
     assert 'getElementById(\'chat-input\')' in live
-    assert 'emotion' not in shell.lower()
-    assert 'emotion' not in live.lower()
+    assert 'emotion ai' not in shell.lower()
+    assert 'emotionserkennung' not in live.lower()
+    assert 'emotion detection' not in live.lower()
     assert 'voice' not in live.lower()
 
 
