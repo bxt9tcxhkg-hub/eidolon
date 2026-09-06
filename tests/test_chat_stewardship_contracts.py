@@ -107,7 +107,7 @@ def test_idle_chat_door_is_title_composer_and_one_project_line():
     assert 'id="chat-input"' in html
     assert 'id="chat-project-door"' in html
     assert 'function renderChatProjectDoor' in js
-    assert "title) + ' · öffnen'" in js
+    assert "escapeHtml(title) + ' · öffnen</button>'" in js
     assert 'id="chat-landing-panels"' not in html
     assert 'Gerade aktiv' not in html
     assert 'Braucht deine Entscheidung' not in html
