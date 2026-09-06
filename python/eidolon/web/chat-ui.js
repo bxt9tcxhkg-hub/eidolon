@@ -629,6 +629,7 @@ async function sendChat() {
     renderChat();
     input.value = '';
     startChatStatusPoll(currentChatSessionId);
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     try {
         const pairedDevice = getStoredMobileDevice();
         const isMetaQuestion = /selbstreflexion|analysiere dich|was würdest du verbessern|reflektiere|was ist deine schwäche|was ist deine stärke/i.test(text);
