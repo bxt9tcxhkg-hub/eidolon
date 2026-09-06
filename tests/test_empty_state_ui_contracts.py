@@ -50,7 +50,8 @@ def test_chat_empty_state_is_radically_slim():
     assert "panel.classList.toggle('chat-is-idle', idle)" in js
     assert '.chat-project-door' in css
     assert '.chat-is-idle #chat-formation' in css
-    assert '.chat-is-idle #chat-operate-actions' in css
+    assert '.chat-operate-actions[hidden]' in css
+    assert '.chat-is-idle #chat-operate-actions' not in css
     assert "el.innerHTML = '<div class=\"empty chat-idle-hint\">Bereit, wenn du es bist.</div>'" in js
     assert 'Schreibe oben dein Ziel, damit Eidolon einen realen Arbeitskontext aufbauen kann.' not in js
     assert '<div id="panel-operate" class="tab-panel active">' not in html

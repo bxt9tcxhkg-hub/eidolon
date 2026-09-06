@@ -144,7 +144,8 @@ def test_formation_and_approval_door_ui_contracts():
     assert 'Ja, übernehmen' in chat_js
     assert 'Nein, nur im Chat' in chat_js
     assert 'seed_board' in chat_js
-    assert "nextAction.kind === 'next_step' && nextAction.action_enabled && !approvals.length" in chat_js
+    assert "nextAction.kind === 'next_step' && !approvals.length && !blockers.length" in chat_js
+    assert "operateActionButton('Fortsetzen', 'advanceOperateRun'" in chat_js
     assert '>Freigeben</button>' in operate_js
     assert '>Ablehnen</button>' in operate_js
     assert "nextAction.kind === 'next_step' && nextAction.action_enabled && !pending.length" in operate_js

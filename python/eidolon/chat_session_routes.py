@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from eidolon.chat_route_support import session_payload
+from eidolon.chat_route_support import operate_overview_from_context, session_payload
 from eidolon.chat_turn_status import snapshot_chat_turn
 
 
@@ -17,7 +17,12 @@ def register_chat_session_routes(app: FastAPI, *, chat_session_store, latest_ses
         source = str((session or {}).get('source') or 'chat')
         message = latest_session_user_message(session)
         session, runtime_context = session_payload(chat_session_store, session_id, source, message, chat_runtime_payload)
-        return {'ok': True, 'session_id': (session or {}).get('session_id'), 'runtime_context': runtime_context}
+        return {
+            'ok': True,
+            'session_id': (session or {}).get('session_id'),
+            'runtime_context': runtime_context,
+            'operate_overview': operate_overview_from_context(runtime_context),
+        }
 
     @app.get('/chat/sessions')
     async def list_chat_sessions():

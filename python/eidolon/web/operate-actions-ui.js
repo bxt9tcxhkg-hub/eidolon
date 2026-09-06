@@ -1,9 +1,10 @@
 (function () {
     async function refreshOperateSurfaces() {
         if (typeof loadOperateView === 'function') await loadOperateView();
-        if (typeof loadChatLandingSummary === 'function') await loadChatLandingSummary();
-        if (typeof loadChatRuntimeContext === 'function' && typeof currentChatSessionId === 'string' && currentChatSessionId) {
-            await loadChatRuntimeContext(currentChatSessionId);
+        if (typeof loadChatRuntimeContext === 'function') {
+            await loadChatRuntimeContext(typeof currentChatSessionId === 'string' ? currentChatSessionId : '');
+        } else if (typeof loadChatLandingSummary === 'function') {
+            await loadChatLandingSummary();
         }
         if (typeof loadWorkspaces === 'function') await loadWorkspaces();
     }

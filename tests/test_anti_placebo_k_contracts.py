@@ -143,7 +143,8 @@ def test_k4_ui_and_api_do_not_imply_external_execution():
     actions = OPERATE_ACTIONS.read_text(encoding='utf-8')
     assert "nextAction.kind === 'approval_request' && !approvals.length" in chat
     assert 'Freigabe erneut anfordern' in chat
-    assert 'Phase fortschreiben' in chat
+    assert "operateActionButton('Fortsetzen', 'advanceOperateRun'" in chat
+    assert 'Schreibt nur die Phase weiter — keine Ausführung.' in chat
     assert 'Phase fortschreiben' in render
     assert "row('Ausführung'" in render
     assert 'Freigabe notiert' in actions
