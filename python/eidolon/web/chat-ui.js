@@ -622,13 +622,13 @@ async function sendChat() {
     loadChatLandingSummary().catch(() => {});
 }
 function presenceStillMarkHtml() {
-    return '<span class="eidolon-presence eidolon-presence-turn" aria-hidden="true">'
+    return '<div class="eidolon-presence eidolon-presence-turn" aria-hidden="true">'
         + '<span class="eidolon-presence-cloud" aria-hidden="true">'
         + '<picture class="eidolon-presence-picture">'
         + '<source type="image/webp" srcset="/assets/media/eidolon-presence.webp">'
         + '<img class="eidolon-presence-still" src="/assets/media/eidolon-presence.png" alt="" width="512" height="512" decoding="async">'
         + '</picture>'
-        + '</span></span>';
+        + '</span></div>';
 }
 
 function renderChatPresenceSlot(live) {

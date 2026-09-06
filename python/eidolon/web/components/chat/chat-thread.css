@@ -240,7 +240,10 @@
     align-items: start;
 }
 .chat-turn-presence {
+    display: block;
     width: 36px;
+    min-width: 36px;
+    min-height: 36px;
     padding-top: 1px;
 }
 .chat-turn-main {

@@ -164,6 +164,7 @@ def test_presence_sits_beside_assistant_turns_not_a_hero():
     assert 'width: 36px' in css
     assert 'width: 42px' in css
     assert 'width: 48px' not in css
+    assert 'display: block' in css
     assert '.eidolon-presence-turn' in css
     assert '.chat-turn.assistant' in thread_css
     assert 'data-presence-host="live"' in thread_css or 'chat-turn-presence' in thread_css
@@ -175,7 +176,11 @@ def test_presence_sits_beside_assistant_turns_not_a_hero():
     assert 'chat-home-hero' not in html
     assert 'function mountChatPresenceMark' in js
     assert "data-presence-host=\"live\"" in js
-    assert 'eidolon-presence-live' not in js.split('function presenceStillMarkHtml')[1].split('function renderChatPresenceSlot')[0]
+    still_html = js.split('function presenceStillMarkHtml')[1].split('function renderChatPresenceSlot')[0]
+    assert 'eidolon-presence-live' not in still_html
+    assert "class=\"eidolon-presence eidolon-presence-turn\"" in still_html
+    assert "return '<div class=\"eidolon-presence eidolon-presence-turn\"" in still_html
+    assert "return '<span" not in still_html
 
 
 def test_presence_assets_are_allowlisted_and_served_as_images():

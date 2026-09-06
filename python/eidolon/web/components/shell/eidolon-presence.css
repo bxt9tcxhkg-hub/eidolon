@@ -1,5 +1,6 @@
 .eidolon-presence,
 .eidolon-signature[data-eidolon-presence] {
+    display: block;
     position: relative;
     width: 42px;
     height: 42px;
