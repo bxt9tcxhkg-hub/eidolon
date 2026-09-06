@@ -86,4 +86,57 @@
             }
             .card-header { align-items: flex-start; }
             .card-header > div { max-width: 100%; flex-wrap: wrap; }
+            .main { min-width: 0; }
+            .main:has(#panel-workspaces.workspaces-has-open-project.active) .page-header {
+                margin-bottom: 10px;
+                padding-bottom: 8px;
+            }
+            .main:has(#panel-workspaces.workspaces-has-open-project.active) .page-header h2 {
+                font-size: 1.12rem;
+            }
+            .main:has(#panel-workspaces.workspaces-has-open-project.active) .page-header .subtitle {
+                display: none;
+            }
+            #panel-workspaces,
+            #ws-project-detail,
+            .ws-board-card {
+                min-width: 0;
+                max-width: 100%;
+            }
+            .ws-project-chrome #ws-detail-title {
+                font-size: 0.98rem;
+            }
+            .ws-board-card {
+                padding: 12px 10px 14px;
+            }
+            .ws-board-toolbar {
+                width: 100%;
+            }
+            .ws-board-toolbar-actions {
+                width: 100%;
+            }
+            .ws-board-filter {
+                flex: 1 1 120px;
+                width: auto;
+            }
+            .planning-column {
+                flex: 0 0 min(240px, 78vw);
+                width: min(240px, 78vw);
+                min-width: min(240px, 78vw);
+                max-width: min(240px, 78vw);
+                min-height: 260px;
+                scroll-snap-align: start;
+            }
+            .planning-column-title,
+            .planning-column-header h3 {
+                font-size: 0.82rem;
+            }
+            .planning-board {
+                min-height: min(52dvh, 420px);
+                scroll-snap-type: x proximity;
+            }
+            .plan-card-menu-btn {
+                opacity: 1;
+                color: var(--text-muted);
+            }
         }

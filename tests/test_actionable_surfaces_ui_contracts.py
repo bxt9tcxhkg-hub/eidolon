@@ -51,20 +51,37 @@ def test_projektflaeche_idle_is_new_project_plus_board():
 
 def test_projektflaeche_open_project_is_board_first():
     html = INDEX_HTML.read_text()
+    project_js = WORKSPACE_PROJECT_JS.read_text(encoding='utf-8')
+    css = COMPONENTS_CSS.read_text(encoding='utf-8')
+    assert 'id="ws-project-chrome"' in html
+    assert 'id="ws-project-meta"' in html
+    assert 'id="ws-project-meta" open' not in html
+    assert 'class="ws-project-meta-summary">Projekt</summary>' in html
     assert 'id="ws-project-title-edit"' in html
     assert 'id="ws-project-status-edit"' in html
     assert 'id="ws-project-secondary"' in html
     assert 'Im Chat öffnen' in html
     assert 'Arbeit zeigen' in html
     assert 'id="ws-elements-card"' in html
+    assert html.find('id="ws-project-meta"') < html.find('id="ws-project-title-edit"')
     assert html.find('id="ws-project-title-edit"') < html.find('id="ws-elements-card"')
-    assert html.find('id="ws-elements-card"') < html.find('id="ws-project-slots"')
     assert html.find('id="ws-project-secondary"') < html.find('id="ws-elements-card"')
+    assert html.find('id="ws-elements-card"') < html.find('id="ws-element-filter"')
+    assert html.find('id="ws-elements-card"') < html.find('data-ui-action="openElementForm"')
+    assert html.find('data-ui-action="showProjectList"') < html.find('id="ws-elements-card"')
     assert html.find('data-tab-target="chat">Im Chat öffnen') < html.find('id="ws-elements-view"')
+    assert html.find('id="ws-elements-card"') < html.find('id="brainstorm-text"')
     assert 'id="ws-project-stats-details"' in html
     assert 'id="ws-project-slots-details"' in html
-    assert html.find('id="ws-elements-card"') < html.find('id="ws-project-slots-details"')
-    assert 'projectsCard.hidden = hasOpenProject' in WORKSPACE_PROJECT_JS.read_text(encoding='utf-8')
+    assert html.find('id="ws-project-meta"') < html.find('id="ws-project-slots-details"')
+    assert html.find('id="ws-project-slots-details"') < html.find('id="ws-elements-card"')
+    assert 'projectsCard.hidden = hasOpenProject' in project_js
+    assert 'projectMeta.open = false' in project_js
+    assert 'function bindProjectMetaChrome' in project_js
+    assert '.ws-project-chrome' in css
+    assert '.ws-project-meta-body' in css
+    assert '.planning-column-title' in css
+    assert 'workspaces-has-open-project.active' in (ROOT / 'python' / 'eidolon' / 'web' / 'app-mobile.css').read_text(encoding='utf-8')
 
 
 def test_arbeit_idle_has_three_clear_paths():
@@ -160,6 +177,7 @@ def test_planning_board_is_horizontal_kanban_with_compact_cards():
     html = INDEX_HTML.read_text()
     assert 'class="planning-board"' in views_js
     assert 'planning-column-header' in views_js
+    assert 'planning-column-title' in views_js
     assert 'planning-column-body' in views_js
     assert 'class="plan-card-face"' in views_js
     assert 'class="plan-card-title"' in views_js
@@ -173,12 +191,21 @@ def test_planning_board_is_horizontal_kanban_with_compact_cards():
     assert 'plan-card-actions' in views_js
     assert views_js.find('class="plan-card-menu"') < views_js.find('plan-card-status')
     assert '.planning-board' in css
+    assert '.planning-column-title' in css
+    assert 'overflow-wrap: anywhere' in css
     assert 'flex-wrap: nowrap' in css
     assert 'overflow-x: auto' in css
     assert 'grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))' not in css
     assert '.plan-card-menu[hidden]' in css
+    assert '@media (hover: none)' in css
     assert 'planning-column-header' in html
+    assert 'planning-column-title' in html
     assert 'planning-column-body' in html
+    assert 'class="planning-column-title">Zusammengehörig</h3>' in html
+    assert 'class="planning-column-title">Geplant</h3>' in html
+    assert 'class="planning-column-title">In Arbeit</h3>' in html
+    assert '<div class="planning-column-header"><span class="planning-column-count">' not in html
+    assert '<div class="planning-column-header"><span class="planning-column-count">' not in views_js
     for column in ('idea', 'planned', 'in_progress', 'blocked', 'done', 'archived'):
         assert 'data-plan-column="' + column + '"' in html
 

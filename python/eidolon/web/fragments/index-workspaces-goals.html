@@ -56,22 +56,83 @@
                     <div id="ws-projects-list"><div class="empty">Lade…</div></div>
                     <div id="ws-planning-scaffold" class="planning-scaffold">
                         <div class="planning-board" id="ws-planning-scaffold-board">
-                            <div class="card planning-column" data-plan-column="idea"><div class="planning-column-header"><h3>Zusammengehörig</h3><span class="planning-column-count">0</span></div><div class="planning-column-body"><div class="empty planning-column-empty">Offen</div></div></div>
-                            <div class="card planning-column" data-plan-column="planned"><div class="planning-column-header"><h3>Geplant</h3><span class="planning-column-count">0</span></div><div class="planning-column-body"><div class="empty planning-column-empty">Offen</div></div></div>
-                            <div class="card planning-column" data-plan-column="in_progress"><div class="planning-column-header"><h3>In Arbeit</h3><span class="planning-column-count">0</span></div><div class="planning-column-body"><div class="empty planning-column-empty">Offen</div></div></div>
-                            <div class="card planning-column" data-plan-column="blocked"><div class="planning-column-header"><h3>Blockiert</h3><span class="planning-column-count">0</span></div><div class="planning-column-body"><div class="empty planning-column-empty">Offen</div></div></div>
-                            <div class="card planning-column" data-plan-column="done"><div class="planning-column-header"><h3>Fertig</h3><span class="planning-column-count">0</span></div><div class="planning-column-body"><div class="empty planning-column-empty">Offen</div></div></div>
-                            <div class="card planning-column" data-plan-column="archived"><div class="planning-column-header"><h3>Archiv</h3><span class="planning-column-count">0</span></div><div class="planning-column-body"><div class="empty planning-column-empty">Offen</div></div></div>
+                            <div class="card planning-column" data-plan-column="idea"><div class="planning-column-header"><h3 class="planning-column-title">Zusammengehörig</h3><span class="planning-column-count">0</span></div><div class="planning-column-body"><div class="empty planning-column-empty">Offen</div></div></div>
+                            <div class="card planning-column" data-plan-column="planned"><div class="planning-column-header"><h3 class="planning-column-title">Geplant</h3><span class="planning-column-count">0</span></div><div class="planning-column-body"><div class="empty planning-column-empty">Offen</div></div></div>
+                            <div class="card planning-column" data-plan-column="in_progress"><div class="planning-column-header"><h3 class="planning-column-title">In Arbeit</h3><span class="planning-column-count">0</span></div><div class="planning-column-body"><div class="empty planning-column-empty">Offen</div></div></div>
+                            <div class="card planning-column" data-plan-column="blocked"><div class="planning-column-header"><h3 class="planning-column-title">Blockiert</h3><span class="planning-column-count">0</span></div><div class="planning-column-body"><div class="empty planning-column-empty">Offen</div></div></div>
+                            <div class="card planning-column" data-plan-column="done"><div class="planning-column-header"><h3 class="planning-column-title">Fertig</h3><span class="planning-column-count">0</span></div><div class="planning-column-body"><div class="empty planning-column-empty">Offen</div></div></div>
+                            <div class="card planning-column" data-plan-column="archived"><div class="planning-column-header"><h3 class="planning-column-title">Archiv</h3><span class="planning-column-count">0</span></div><div class="planning-column-body"><div class="empty planning-column-empty">Offen</div></div></div>
                         </div>
                     </div>
                 </div>
 
                 <div id="ws-project-detail" style="display:none;">
-                    <div class="card">
-                        <div class="card-header">
+                    <div class="ws-project-chrome" id="ws-project-chrome">
+                        <div class="ws-project-chrome-bar">
+                            <button type="button" class="btn btn-sm" data-ui-action="showProjectList">Zurück</button>
                             <h3 id="ws-detail-title">Projekt</h3>
-                            <div style="display:flex;gap:6px;">
-                                <select id="ws-view-mode" style="padding:4px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.78rem;">
+                            <details class="ws-project-meta" id="ws-project-meta">
+                                <summary class="ws-project-meta-summary">Projekt</summary>
+                                <div class="ws-project-meta-body">
+                                    <div class="form-group">
+                                        <label>Projekt</label>
+                                        <div class="ws-project-meta-fields">
+                                            <input type="text" id="ws-project-title-edit" placeholder="Projekt umbenennen…" data-enter-action="saveProjectTitle">
+                                            <select id="ws-project-status-edit">
+                                                <option value="planned">Geplant</option>
+                                                <option value="in_progress">In Arbeit</option>
+                                                <option value="done">Fertig</option>
+                                                <option value="archived">Archiviert</option>
+                                            </select>
+                                            <button type="button" class="btn btn-sm" data-ui-action="saveProjectTitle">Speichern</button>
+                                            <button type="button" class="btn btn-sm" data-ui-action="archiveCurrentProject">Archivieren</button>
+                                        </div>
+                                    </div>
+                                    <div class="project-secondary-actions" id="ws-project-secondary">
+                                        <button type="button" class="btn btn-sm" data-tab-target="chat">Im Chat öffnen</button>
+                                        <button type="button" class="btn btn-sm" data-tab-target="operate">Arbeit zeigen</button>
+                                    </div>
+                                    <details class="project-stats-details" id="ws-project-stats-details">
+                                        <summary>Zahlen</summary>
+                                        <div id="ws-project-stats"></div>
+                                    </details>
+                                    <details class="project-slots-details" id="ws-project-slots-details">
+                                        <summary class="project-slots-summary">Gerüst und Slots</summary>
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h3>Generisches Arbeitsgerüst</h3>
+                                                <span class="tag info">Slots, keine Domänen-Pakete</span>
+                                            </div>
+                                            <div class="empty" style="text-align:left;padding:0 0 12px 0;">Karten und Slots sind ein generisches Gerüst. Der Kernel/Workspace füllt sie. Es gibt keine fest verdrahteten Training-, Instagram- oder Reise-Flächen.</div>
+                                            <div id="ws-project-slots" class="project-slot-grid">
+                                                <section class="project-slot" data-slot="context">
+                                                    <div class="project-slot-label">Kontext</div>
+                                                    <div id="ws-slot-context" class="project-slot-body"><div class="empty">Kein geladener Projektkontext.</div></div>
+                                                </section>
+                                                <section class="project-slot" data-slot="next">
+                                                    <div class="project-slot-label">Nächster Schritt</div>
+                                                    <div id="ws-slot-next" class="project-slot-body"><div class="empty">Kein nächster Schritt aus dem Kernel.</div></div>
+                                                </section>
+                                                <section class="project-slot" data-slot="inbox">
+                                                    <div class="project-slot-label">Unsortiert</div>
+                                                    <div id="ws-slot-inbox" class="project-slot-body"><div class="empty">Keine offenen Eingänge.</div></div>
+                                                </section>
+                                            </div>
+                                        </div>
+                                    </details>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
+                    <div class="card ws-board-card" id="ws-elements-card">
+                        <div class="card-header ws-board-toolbar">
+                            <div class="ws-board-toolbar-title">
+                                <h3 id="ws-elements-title">Planung</h3>
+                                <span id="ws-elements-count" class="tag info"></span>
+                            </div>
+                            <div class="ws-board-toolbar-actions">
+                                <select id="ws-view-mode" class="ws-board-view-mode">
                                     <option value="board" selected>Planung</option>
                                     <optgroup label="Weitere Ansichten">
                                         <option value="canvas">Canvas</option>
@@ -79,67 +140,12 @@
                                         <option value="list">Liste</option>
                                     </optgroup>
                                 </select>
-                                <input type="text" id="ws-element-filter" placeholder="Elemente filtern..." style="padding:4px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.78rem;width:120px;">
-                                <button class="btn btn-sm" data-ui-action="openElementForm">+ Element</button>
-                                <button class="btn btn-sm" data-ui-action="showProjectList">Zurück</button>
+                                <input type="text" id="ws-element-filter" class="ws-board-filter" placeholder="Elemente filtern...">
+                                <button type="button" class="btn btn-sm" data-ui-action="openElementForm">+ Element</button>
                             </div>
-                        </div>
-                        <div class="form-group" style="margin-top:8px;">
-                            <label>Projekt</label>
-                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                                <input type="text" id="ws-project-title-edit" placeholder="Projekt umbenennen…" data-enter-action="saveProjectTitle">
-                                <select id="ws-project-status-edit">
-                                    <option value="planned">Geplant</option>
-                                    <option value="in_progress">In Arbeit</option>
-                                    <option value="done">Fertig</option>
-                                    <option value="archived">Archiviert</option>
-                                </select>
-                                <button class="btn btn-sm" data-ui-action="saveProjectTitle">Speichern</button>
-                                <button class="btn btn-sm" data-ui-action="archiveCurrentProject">Archivieren</button>
-                            </div>
-                        </div>
-                        <div class="project-secondary-actions" id="ws-project-secondary">
-                            <button class="btn btn-sm" data-tab-target="chat">Im Chat öffnen</button>
-                            <button class="btn btn-sm" data-tab-target="operate">Arbeit zeigen</button>
-                        </div>
-                        <details class="project-stats-details" id="ws-project-stats-details">
-                            <summary>Zahlen</summary>
-                            <div id="ws-project-stats"></div>
-                        </details>
-                    </div>
-
-                    <div class="card ws-board-card" id="ws-elements-card">
-                        <div class="card-header">
-                            <h3 id="ws-elements-title">Planung</h3>
-                            <span id="ws-elements-count" class="tag info"></span>
                         </div>
                         <div id="ws-elements-view"><div class="empty">Keine Elemente</div></div>
                     </div>
-
-                    <details class="project-slots-details" id="ws-project-slots-details">
-                        <summary class="project-slots-summary">Gerüst und Slots</summary>
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Generisches Arbeitsgerüst</h3>
-                            <span class="tag info">Slots, keine Domänen-Pakete</span>
-                        </div>
-                        <div class="empty" style="text-align:left;padding:0 0 12px 0;">Karten und Slots sind ein generisches Gerüst. Der Kernel/Workspace füllt sie. Es gibt keine fest verdrahteten Training-, Instagram- oder Reise-Flächen.</div>
-                        <div id="ws-project-slots" class="project-slot-grid">
-                            <section class="project-slot" data-slot="context">
-                                <div class="project-slot-label">Kontext</div>
-                                <div id="ws-slot-context" class="project-slot-body"><div class="empty">Kein geladener Projektkontext.</div></div>
-                            </section>
-                            <section class="project-slot" data-slot="next">
-                                <div class="project-slot-label">Nächster Schritt</div>
-                                <div id="ws-slot-next" class="project-slot-body"><div class="empty">Kein nächster Schritt aus dem Kernel.</div></div>
-                            </section>
-                            <section class="project-slot" data-slot="inbox">
-                                <div class="project-slot-label">Unsortiert</div>
-                                <div id="ws-slot-inbox" class="project-slot-body"><div class="empty">Keine offenen Eingänge.</div></div>
-                            </section>
-                        </div>
-                    </div>
-                    </details>
 
                     <div class="card" id="ws-element-composer" style="display:none;">
                         <div class="card-header">

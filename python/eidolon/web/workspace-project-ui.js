@@ -207,6 +207,13 @@
             }
             const titleEl = document.getElementById('ws-detail-title');
             if (titleEl) titleEl.textContent = 'Lade Projekt…';
+            const projectMeta = document.getElementById('ws-project-meta');
+            if (projectMeta) projectMeta.open = false;
+            bindProjectMetaChrome();
+            const statsDetails = document.getElementById('ws-project-stats-details');
+            if (statsDetails) statsDetails.open = false;
+            const slotsDetails = document.getElementById('ws-project-slots-details');
+            if (slotsDetails) slotsDetails.open = false;
             const viewMode = document.getElementById('ws-view-mode');
             if (viewMode) viewMode.value = 'board';
             renderProjectStats({title: 'Lade…', elements: [], inbox: [], status: 'active', domain: '—'});
@@ -340,6 +347,17 @@
         const cardStatus = document.querySelector('[data-action="project-status"][data-id="' + projectId + '"]')?.value;
         const next = normalizeProjectStatus(cardStatus) === 'archived' ? 'planned' : 'archived';
         await saveProjectStatus(projectId, next);
+    }
+
+    function bindProjectMetaChrome() {
+        const meta = document.getElementById('ws-project-meta');
+        if (!meta || meta.dataset.bound) return;
+        meta.dataset.bound = '1';
+        document.addEventListener('click', (event) => {
+            if (!meta.open) return;
+            if (event.target.closest('#ws-project-meta')) return;
+            meta.open = false;
+        });
     }
 
     function showProjectList() {
