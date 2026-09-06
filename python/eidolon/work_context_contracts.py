@@ -83,6 +83,7 @@ def _blocker_action_view(item: Any) -> dict[str, Any]:
 def operate_context(operate_session: dict[str, Any], operate_objective: dict[str, Any], operate_run: dict[str, Any], operate_next_action: dict[str, Any], operate_blockers: list[dict], operate_approvals: list[dict], operate_subagents: list[dict]) -> dict[str, Any]:
     pending_approvals = [_approval_action_view(item) for item in operate_approvals if _is_pending_approval(item)]
     open_blockers = [_blocker_action_view(item) for item in operate_blockers if _is_open_blocker(item)]
+    next_action = operate_next_action or {}
     return {
         'session_id': operate_session.get('id'),
         'session_title': operate_session.get('title'),
@@ -91,13 +92,18 @@ def operate_context(operate_session: dict[str, Any], operate_objective: dict[str
         'objective_title': operate_objective.get('title'),
         'run_id': operate_run.get('id'),
         'run_state': operate_run.get('state'),
-        'next_action': operate_next_action,
+        'run_state_reason': operate_run.get('state_reason'),
+        'current_phase': operate_run.get('canonical_phase') or operate_run.get('current_phase'),
+        'next_action': next_action,
         'approval_count': len(operate_approvals),
         'blocker_count': len(operate_blockers),
         'pending_approvals': pending_approvals,
         'open_blockers': open_blockers,
         'pending_approval_count': len(pending_approvals),
         'open_blocker_count': len(open_blockers),
+        'pending_interrupt_count': int(operate_run.get('pending_interrupt_count') or 0),
+        'interrupt_classification': operate_run.get('interrupt_classification'),
+        'interruptible': operate_run.get('interruptible'),
         'subagent_count': len(operate_subagents),
     }
 

@@ -377,7 +377,7 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 - chat is the active initial panel
 - chat runtime compiles context and enforces a brief cowork reply (max ~3–5 lines, one next action or one question, board over catalog)
 - operate snapshot provides run/objective/blocker/approval/evidence state
-- `/chat/context` exposes pending approvals, open blockers, and next_action for Chat execute actions
+- `/chat/context` exposes pending approvals, open blockers, next_action reasons, interrupt fields, and `operate_overview` so Chat landing is one shared snapshot read
 - `POST /chat` can execute a small live skill set (`note`, `system_info`, `device_status`) and honestly refuses catalog-only skills
 - `POST /chat` with `stream: true` emits SSE; OpenAI-compatible/Groq yields real `delta` chunks, other paths return a single `done` without invented tokens
 

@@ -233,7 +233,7 @@ function describeOperatePresence(data) {
     if (blockers.length) {
         return { state: 'blocked', title: 'Blockiert', detail: focus + ' • ' + blockers.length + ' Blocker offen' };
     }
-    if (approvals.length || ['approval', 'await_approval', 'user_input', 'await_input'].includes(String(nextAction.kind || '').toLowerCase())) {
+    if (approvals.length || ['approval', 'await_approval', 'approval_request', 'user_input', 'await_input'].includes(String(nextAction.kind || '').toLowerCase())) {
         return { state: 'waiting', title: 'Wartet auf dich', detail: focus + ' • ' + Math.max(approvals.length, 1) + ' Entscheidung offen' };
     }
     if (['completed', 'done', 'verified'].includes(status) || phase === 'finalize') {

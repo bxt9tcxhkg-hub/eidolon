@@ -25,7 +25,7 @@
 - Operate-Panel ist wieder verdrahtet und über `#operate` erreichbar, ohne Default zu sein
 - Projektfläche öffnet in der Planungsansicht (Zusammengehörig / Geplant / In Arbeit / Fertig / Archiv) mit Umbenennen, Status, Gruppe, Reihenfolge, Ablegen und Streichen gegen echte Projekt-APIs
 - Projektstatus planned/in_progress/done/archived ist über `PUT /projects/{id}` editierbar
-- Chat-Tür bleibt schlank (Titel + Composer, optional eine Projektzeile); Freigaben, Blocker und nächster Schritt leben in Arbeit und bleiben im Chat nur als echte Handlung erreichbar
+- Chat-Tür bleibt schlank (Titel + Composer, optional eine Projektzeile); Freigaben, Blocker und nächster Schritt erscheinen im Chat nur, wenn der Kernel sie wirklich offen hat — Freigeben/Ablehnen/Fortsetzen treffen denselben Operate-Schreibpfad wie Arbeit
 - Chat, Arbeit und Projektfläche teilen denselben Operate-/Kernel-Snapshot für Freigaben, Blocker und Next Action; Projektmutationen schreiben nicht mehr in einen leeren parallelen `operate`-Pfad
 - Projektbildung ist ein expliziter Vertrag (`POST /workspaces/formation`): `chat_topic` → `project_candidate` sichtbar, `project_candidate` → `active_project` nur mit Nutzerbestätigung
 - Arbeitsorientierte Chat-Nachrichten erzeugen den Kandidaten deterministisch (ohne Ollama); Chat zeigt Bestätigen/Ablehnen
@@ -58,7 +58,7 @@
 - aktive Doku weiter synchron halten, wenn neue Runtime- oder UI-Schnitte dazukommen
 - verbleibende Mesh-/Core-Hotspots nur mit Live-Verifikation weiter reduzieren
 - **offen:** Workspace-Board-Blocker und Operate-`BlockingIssueRecord` werden in denselben Slots gezeigt, sind aber noch zwei persistierte Modelle; vollständige Write-Vereinigung der Element-Blocker in den Operate-Store ist nicht Teil dieses Schnitts
-- **offen:** Chat-Landing liest denselben Overview-Snapshot wie Arbeit, erzeugt ihn aber noch über `/api/v1/operate/overview` plus `/chat/context` statt eines einzigen HTTP-Calls
+- Chat-Landing liest Freigaben, Blocker, Next Action und Presence über einen `/chat/context`-Call (`operate_overview` ist die Projektion aus demselben Kernel-Snapshot). Arbeit bleibt auf `/api/v1/operate/overview` für die volle Laufansicht.
 
 ### P1 — Runtime und Oberfläche weiter verdichten
 - `python/eidolon/core/mesh_service.py`, `python/eidolon/core/auth_entities.py`, `python/eidolon/user/topic_attention.py` und andere verbleibende Domänen-Hotspots weiter entlang echter Zustandsgrenzen zerlegen
@@ -66,8 +66,9 @@
 - historische Nebenachsen nur noch als sauber markierte Referenz erhalten
 
 ### P1 — Agentisches Produktmodell vertiefen
-- Chat-Operate-Tür um Interrupts und feinere Next-Action-Gründe weiter verdichten
-- direkte Bearbeitung der Arbeitswahrheit weiter an denselben Operate-/Workspace-Schreibpfad binden
+- Chat zeigt Kernel-Next-Action-Gründe (`action_reason_disabled`, `state_reason`) und Interrupt-Klassifikation, wenn der Run sie hat; kein erfundener Grund
+- Chat-Freigabe/Blocker/Fortsetzen bleiben an `POST /api/v1/runs/.../approval|blockers|advance` gebunden — kein paralleler leerer Operate-Pfad
+- **offen:** direkte Board-/Element-Bearbeitung aus dem Chat (Karten anlegen/verschieben) weiter an denselben Workspace-Schreibpfad binden, ohne zweite Wahrheit
 - **Folge-PR, nicht dieser Schnitt:** tiefere Self-Repair-Autonomie (Code-Reparatur-Loops, Recovery über den vorhandenen `SelfHealingService` hinaus). Secrets und destruktive Live-Eingriffe bleiben hinter der Freigabe-Tür.
 
 ## Verifizierungsbasis

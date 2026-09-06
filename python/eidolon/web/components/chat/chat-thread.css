@@ -172,8 +172,7 @@
 .chat-operate-actions[hidden] {
     display: none;
 }
-.chat-is-idle #chat-formation,
-.chat-is-idle #chat-operate-actions {
+.chat-is-idle #chat-formation {
     display: none;
 }
 .chat-is-idle .chat-messages {

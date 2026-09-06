@@ -150,7 +150,7 @@ Was über einen Messenger-Agenten hinausgeht. Das ist der eigentliche Produktker
 **Offen (`gap` zur vollen Differenz):**
 
 - Board-Element-Blocker und `BlockingIssueRecord` sind noch zwei persistierte Modelle (`ROADMAP.md`).
-- Chat-Landing holt denselben Snapshot noch über zwei HTTP-Calls (`/api/v1/operate/overview` + `/chat/context`).
+- Chat-Landing holt den Operate-Tür-Snapshot über `GET /chat/context` (`operate_overview` + `runtime_context.operate_context`). Arbeit bleibt auf `/api/v1/operate/overview`.
 - Chat-UI hält zusätzlich `localStorage` (`eidolon-chat-messages`) — Cache, nicht Kernel.
 
 **Beleg:** `python/eidolon/operate/contract_*.py`, `python/eidolon/workspaces/work_truth.py`, `ROADMAP.md`.
@@ -175,7 +175,7 @@ Was über einen Messenger-Agenten hinausgeht. Das ist der eigentliche Produktker
 **Ist (`already in Eidolon` auf Arbeit/Operate; Chat verdichtet):**
 
 - Operate-UI zeigt Lauf, Freigaben, Blocker, Evidence, Next Action.
-- Chat zeigt Formation und Operate-Handlungen, wenn sie real anliegen — nicht als Idle-Dashboard.
+- Chat zeigt Formation und Operate-Handlungen, wenn sie real anliegen — auch auf der Idle-Tür, sobald eine Freigabe, ein Blocker oder ein fortschreibbarer nächster Schritt im Kernel offen ist. Kein Idle-Freigabe-Wand ohne Anlass.
 - Idle-Chat ist Titel + Composer, optional eine Projektzeile (`Titel · öffnen`).
 
 **Beleg:** `python/eidolon/web/operate-render-ui.js`, `python/eidolon/web/chat-ui.js`, `docs/eidolon-ui-workspace-architecture.md`, `tests/test_chat_stewardship_contracts.py`.
@@ -213,7 +213,7 @@ Was über einen Messenger-Agenten hinausgeht. Das ist der eigentliche Produktker
 **Ist:**
 
 - `already in Eidolon` als Server-Wahrheit: alle Clients sprechen FastAPI; Operate/Projekte/Pairing liegen im externen State-Root.
-- `gap` zur vollen Differenz: Chat-Transcript zusätzlich in `localStorage`; zwei HTTP-Calls für denselben Overview; Board-Blocker vs. Operate-Blocker.
+- `gap` zur vollen Differenz: Chat-Transcript zusätzlich in `localStorage`; Board-Blocker vs. Operate-Blocker.
 
 **Beleg:** `README.md`, `ROADMAP.md` (offene P0-Uneinheitlichkeiten), `python/eidolon/web/chat-ui.js` (`persistChatMessages`).
 
