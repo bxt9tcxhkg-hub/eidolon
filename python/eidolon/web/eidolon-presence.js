@@ -66,10 +66,10 @@ const PRESENCE_FRAG = [
     '  vec2 mote = vec2(0.56, 0.58) + uGaze * 0.11;',
     '  vec2 md = (uv - mote) * vec2(1.0, 1.06);',
     '  float d2 = dot(md, md);',
-    '  float core = exp(-d2 * 76.0);',
-    '  float halo = exp(-d2 * 16.0);',
-    '  vec3 gold = vec3(1.0, 0.87, 0.56);',
-    '  ink.rgb += gold * (core * 0.72 + halo * 0.22) * uMote * uPulse;',
+    '  float core = exp(-d2 * 38.0);',
+    '  float halo = exp(-d2 * 8.5);',
+    '  vec3 gold = vec3(1.0, 0.88, 0.62);',
+    '  ink.rgb += gold * (core * 0.78 + halo * 0.32) * uMote * uPulse;',
     '  gl_FragColor = ink;',
     '}',
 ].join('\n');
@@ -301,11 +301,11 @@ function createPresenceCanvas2D(canvas, image) {
             }
             const mx = (0.56 + gaze.x * 0.11) * width;
             const my = (1 - (0.58 + gaze.y * 0.11)) * height;
-            const radius = Math.max(width, height) * 0.42;
+            const radius = Math.max(width, height) * 0.52;
             const glow = ctx.createRadialGradient(mx, my, 0, mx, my, radius);
             const pulse = knobs.mote * knobs.pulse;
-            glow.addColorStop(0, 'rgba(255, 236, 184,' + (0.42 * pulse).toFixed(3) + ')');
-            glow.addColorStop(0.22, 'rgba(217, 161, 92,' + (0.18 * pulse).toFixed(3) + ')');
+            glow.addColorStop(0, 'rgba(255, 240, 196,' + (0.52 * pulse).toFixed(3) + ')');
+            glow.addColorStop(0.28, 'rgba(217, 161, 92,' + (0.22 * pulse).toFixed(3) + ')');
             glow.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.globalCompositeOperation = 'screen';
             ctx.fillStyle = glow;
