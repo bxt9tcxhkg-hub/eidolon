@@ -1,7 +1,7 @@
-const PRESENCE_ASSET_VERSION = '20260906-visible';
+const PRESENCE_ASSET_VERSION = '20260906-composer';
 const PRESENCE_STILL_PNG = '/assets/media/eidolon-presence.png';
 
-// Idle must swirl at 42–48px within 1–2s. Previous warp:0.055 read as still.
+// Idle must swirl at composer/sidebar mark size within 1–2s. Previous warp:0.055 read as still.
 const PRESENCE_PHASES = {
     idle: { warp: 0.48, pulse: 0.92, mote: 0.98, gaze: 0.55 },
     denkt: { warp: 0.82, pulse: 1.18, mote: 1.08, gaze: 0.85 },
@@ -546,10 +546,25 @@ function bindPresenceChrome() {
         .observe(document.documentElement, { attributes: true, attributeFilter: ['data-animations'] });
 }
 
-function startEidolonPresence() {
+function pruneDetachedPresenceMarks() {
+    for (let i = presenceMarks.length - 1; i >= 0; i -= 1) {
+        const mark = presenceMarks[i];
+        if (!mark.root || !document.documentElement.contains(mark.root)) {
+            if (mark.io) mark.io.disconnect();
+            presenceMarks.splice(i, 1);
+        }
+    }
+}
+
+function refreshEidolonPresenceMarks() {
+    pruneDetachedPresenceMarks();
     document.querySelectorAll('[data-eidolon-presence]').forEach(bindPresenceMark);
     bindPresenceChrome();
     syncEidolonPresenceMotion();
+}
+
+function startEidolonPresence() {
+    refreshEidolonPresenceMarks();
 }
 
 function syncEidolonPresenceMotion() {
@@ -561,6 +576,7 @@ function syncEidolonPresenceMotion() {
 }
 
 window.startEidolonPresence = startEidolonPresence;
+window.refreshEidolonPresenceMarks = refreshEidolonPresenceMarks;
 window.syncEidolonPresenceMotion = syncEidolonPresenceMotion;
 window.PRESENCE_ASSET_VERSION = PRESENCE_ASSET_VERSION;
 

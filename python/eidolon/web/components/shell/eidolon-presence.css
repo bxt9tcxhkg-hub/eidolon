@@ -1,5 +1,6 @@
 .eidolon-presence,
 .eidolon-signature[data-eidolon-presence] {
+    display: block;
     position: relative;
     width: 42px;
     height: 42px;
@@ -14,10 +15,13 @@
     box-shadow: 0 8px 22px rgba(8, 4, 2, 0.38);
 }
 
-.eidolon-presence {
-    width: 48px;
-    height: 48px;
-    flex-basis: 48px;
+.eidolon-presence,
+#chat-eidolon-presence.eidolon-presence {
+    width: 42px;
+    height: 42px;
+    max-width: 48px;
+    max-height: 48px;
+    flex-basis: 42px;
 }
 
 .eidolon-presence-cloud,

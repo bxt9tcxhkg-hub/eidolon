@@ -126,13 +126,14 @@
     border-bottom: none;
 }
 .chat-messages {
-    flex: 1;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 4px 0 8px;
     background: transparent;
     border-radius: 0;
     margin-bottom: 8px;
-    min-height: 280px;
     border: none;
 }
 .chat-project-door {
@@ -175,13 +176,9 @@
 .chat-is-idle #chat-operate-actions {
     display: none;
 }
-.chat-is-idle .chat-shell,
-.chat-is-idle .chat-thread-panel {
-    min-height: 0;
-}
 .chat-is-idle .chat-messages {
     min-height: 0;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     padding: 4px 0 8px;
     margin-bottom: 4px;
     border: none;
@@ -272,13 +269,20 @@
     border-bottom: none;
     color: var(--text-muted);
 }
+.chat-composer-chrome {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 10px;
+    min-height: 42px;
+}
 .chat-agent-status {
     display: flex;
     align-items: center;
     gap: 10px;
     min-height: 0;
-    margin: 0 0 10px;
-    padding: 6px 0;
+    margin: 0;
+    padding: 0;
     color: var(--text);
     font-size: 0.9rem;
     font-weight: 600;
@@ -287,7 +291,7 @@
     display: none;
 }
 .chat-agent-status.is-visible {
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: none;
 }
 .chat-agent-status-label:empty {
     display: none;
@@ -296,11 +300,12 @@
     color: var(--text);
 }
 @media (prefers-reduced-motion: reduce) {
-    .chat-panel-heading .eidolon-presence-live {
+    .chat-composer-chrome .eidolon-presence-live {
         display: none !important;
     }
 }
 .chat-input-shell {
+    flex: 0 0 auto;
     padding: 14px 4px 0;
     border-top: 1px solid var(--border-subtle);
 }

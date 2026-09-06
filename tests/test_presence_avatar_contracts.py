@@ -35,11 +35,21 @@ def test_chat_presence_slot_uses_approved_still_and_german_aria():
     assert 'id="eidolon-signature"' in html
     assert 'eidolon-signature hero' not in html
     assert 'chat-panel-heading' in html
+    assert 'chat-composer-chrome' in html
+    assert 'id="chat-eidolon-presence-park"' not in html
     assert html.count('id="chat-eidolon-presence"') == 1
     assert html.count('data-eidolon-presence') == 2
     assert html.count('data-presence-engine="still"') == 2
-    assert html.index('id="chat-eidolon-presence"') < html.index('id="chat-session-title"')
+    heading = html.split('class="chat-panel-heading"', 1)[1].split('</div>', 1)[0]
+    assert 'chat-eidolon-presence' not in heading
+    assert 'id="chat-session-title"' in heading
+    assert html.index('id="chat-messages"') < html.index('id="chat-eidolon-presence"')
+    assert html.index('class="chat-composer-chrome"') < html.index('id="chat-eidolon-presence"')
     assert html.index('id="chat-eidolon-presence"') < html.index('id="chat-agent-status"')
+    assert html.index('id="chat-agent-status"') < html.index('id="chat-input"')
+    chrome = html.split('class="chat-composer-chrome"', 1)[1].split('class="chat-input"', 1)[0]
+    assert 'id="chat-eidolon-presence"' in chrome
+    assert 'id="chat-agent-status"' in chrome
 
 
 def test_presence_motion_binds_to_real_turn_phases_only():
@@ -53,6 +63,10 @@ def test_presence_motion_binds_to_real_turn_phases_only():
     assert "Eidolon arbeitet" in shell
     assert "Eidolon antwortet" in shell
     assert 'setEidolonTurnPhase(phase)' in js
+    assert 'data-presence-host' not in js
+    assert 'function mountChatPresenceMark' not in js
+    assert 'function parkChatPresenceMark' not in js
+    assert 'function presenceStillMarkHtml' not in js
     assert "setChatAgentStatus('denkt', 'local')" in js
     assert "setChatAgentStatus('antwortet', 'response')" in js
     assert "setChatAgentStatus('arbeitet'" not in js
@@ -84,6 +98,8 @@ def test_presence_uses_internal_warp_not_bitmap_pan_zoom():
     assert 'createPresenceCanvas2D' in live
     assert 'class="eidolon-presence-live"' in html
     assert 'function startEidolonPresence' in live
+    assert 'function refreshEidolonPresenceMarks' in live
+    assert 'function pruneDetachedPresenceMarks' in live
     assert 'function syncEidolonPresenceMotion' in live
     assert 'data-presence-engine' in live
     assert "setAttribute('data-presence-engine'" in live
@@ -134,19 +150,36 @@ def test_presence_reduced_motion_and_animation_setting_freeze_to_still():
     assert "setPresenceEngineAttr(mark.root, 'still')" in live
 
 
-def test_presence_stays_a_mark_near_title_not_a_hero():
+def test_presence_sits_above_composer_not_on_transcript_rows():
     css = PRESENCE_CSS.read_text(encoding='utf-8')
+    thread = ROOT / 'python' / 'eidolon' / 'web' / 'components' / 'chat' / 'chat-thread.css'
+    thread_css = thread.read_text(encoding='utf-8')
+    rail = SESSION_RAIL_CSS.read_text(encoding='utf-8')
     mobile = MOBILE_CSS.read_text(encoding='utf-8')
-    heading = SESSION_RAIL_CSS.read_text(encoding='utf-8')
+    js = CHAT_UI_JS.read_text(encoding='utf-8')
     html = _html()
     assert 'max-width: 56px' in css
     assert 'max-height: 56px' in css
-    assert 'width: 48px' in css
+    assert 'max-width: 48px' in css
     assert 'width: 42px' in css
-    assert 'max-width: 42px' in mobile
-    assert '.chat-panel-heading' in heading
+    assert 'display: block' in css
+    assert '.eidolon-presence-turn' not in css
+    assert '.chat-composer-chrome' in thread_css
+    assert '.chat-turn-presence' not in thread_css
+    assert 'data-presence-host' not in thread_css
+    assert 'grid-template-columns: auto minmax(0, 1fr)' not in thread_css
+    assert 'max-height: min(78vh, 800px)' in rail
+    assert 'overflow-y: auto' in thread_css
+    assert 'min-height: 0' in thread_css.split('.chat-messages')[1].split('.chat-project-door')[0]
+    assert 'flex: 0 0 auto' in thread_css.split('.chat-input-shell')[1]
+    assert 'width: 36px' in mobile
+    assert 'max-width: 36px' in mobile
+    assert '.chat-panel-heading' in rail
     assert 'eidolon-signature hero' not in html
     assert 'chat-home-hero' not in html
+    assert 'function mountChatPresenceMark' not in js
+    assert 'data-presence-host' not in js
+    assert 'eidolon-presence' not in js.split('function renderChatTurn')[1].split('function renderChatStatusTurn')[0]
 
 
 def test_presence_assets_are_allowlisted_and_served_as_images():
@@ -169,9 +202,9 @@ def test_presence_assets_are_allowlisted_and_served_as_images():
     assert 'no-cache' in js.headers.get('cache-control', '').lower()
     assert 'no-store' in js.headers.get('cache-control', '').lower()
     html = _html()
-    assert '/assets/eidolon-presence.js?v=20260906-visible' in html
-    assert "PRESENCE_ASSET_VERSION = '20260906-visible'" in PRESENCE_JS.read_text(encoding='utf-8')
-    versioned = client.get('/assets/eidolon-presence.js?v=20260906-visible')
+    assert '/assets/eidolon-presence.js?v=20260906-composer' in html
+    assert "PRESENCE_ASSET_VERSION = '20260906-composer'" in PRESENCE_JS.read_text(encoding='utf-8')
+    versioned = client.get('/assets/eidolon-presence.js?v=20260906-composer')
     assert versioned.status_code == 200
     assert 'no-cache' in versioned.headers.get('cache-control', '').lower()
     assert b'PRESENCE_STILL_PNG' in versioned.content

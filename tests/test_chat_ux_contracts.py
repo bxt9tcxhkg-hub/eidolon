@@ -43,6 +43,12 @@ def test_chat_transcript_is_flat_rows_not_bubbles():
     assert "class=\"chat-turn msg '" in js
     assert 'id="chat-agent-status"' in html
     assert 'id="chat-eidolon-presence"' in html
+    assert 'chat-composer-chrome' in html
+    assert 'id="chat-eidolon-presence-park"' not in html
+    assert 'data-presence-host' not in js
+    assert 'function mountChatPresenceMark' not in js
+    assert 'overflow-y: auto' in css
+    assert 'max-height: min(78vh, 800px)' in (ROOT / 'python' / 'eidolon' / 'web' / 'components' / 'chat' / 'chat-session-rail.css').read_text(encoding='utf-8')
     assert 'denkt…' in js
     assert 'arbeitet…' in js
     assert 'antwortet' in js
