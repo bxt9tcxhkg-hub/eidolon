@@ -17,6 +17,13 @@ _NON_WORK_PUSH_MARKERS = (
     'projektarbeit',
     'weiterarbeiten',
 )
+_WORK_ESSAY_SCHEMA_MARKERS = (
+    'sinnvolle richtungen jetzt',
+    'ich empfehle:',
+    'konkreter nächster schritt:',
+    'konkreter naechster schritt:',
+    'wahrscheinliche intention',
+)
 
 
 def _classification(runtime_context: dict) -> str:
@@ -42,6 +49,15 @@ def _non_work_reply_drift(reply: str, runtime_context: dict) -> bool:
     return any(marker in lowered for marker in _NON_WORK_PUSH_MARKERS)
 
 
+def _work_essay_schema(reply: str, runtime_context: dict) -> bool:
+    if _enforce_non_work_contract(runtime_context):
+        return False
+    if not (_enforce_work_contract(runtime_context) or ((runtime_context.get('user_intent') or {}).get('is_work_oriented'))):
+        return False
+    lowered = normalize_text(reply).casefold()
+    return sum(1 for marker in _WORK_ESSAY_SCHEMA_MARKERS if marker in lowered) >= 2
+
+
 def finalize_chat_reply(reply: str, runtime_context: dict) -> tuple[str, dict]:
     reply = normalize_text(reply)
     quality = {
@@ -49,6 +65,7 @@ def finalize_chat_reply(reply: str, runtime_context: dict) -> tuple[str, dict]:
         'identity_repaired': False,
         'generic_assistant_pattern': False,
         'non_work_drift': False,
+        'essay_schema': False,
         'intent_classification': (runtime_context.get('user_intent') or {}).get('classification'),
         'context_state': (runtime_context.get('workflow_state') or {}).get('current_context_state'),
         'contract_satisfied': True,
@@ -66,5 +83,13 @@ def finalize_chat_reply(reply: str, runtime_context: dict) -> tuple[str, dict]:
         quality['non_work_drift'] = True
         reply = build_grounded_fallback_reply(runtime_context)
         quality['used_fallback'] = True
-    quality['contract_satisfied'] = not quality['generic_assistant_pattern'] and not quality['non_work_drift']
+    if _work_essay_schema(reply, runtime_context):
+        quality['essay_schema'] = True
+        reply = build_grounded_fallback_reply(runtime_context)
+        quality['used_fallback'] = True
+    quality['contract_satisfied'] = (
+        not quality['generic_assistant_pattern']
+        and not quality['non_work_drift']
+        and not quality['essay_schema']
+    )
     return reply, quality

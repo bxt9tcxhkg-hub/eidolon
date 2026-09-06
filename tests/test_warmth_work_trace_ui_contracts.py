@@ -48,10 +48,10 @@ def test_slim_idle_chat_is_warmed_not_refilled():
     assert 'chat-is-idle' in html
     assert 'id="chat-idle-prompt"' in html
     assert 'Woran sollen wir arbeiten?' in html
-    assert 'id="chat-work-trace"' in html
-    assert '.chat-is-idle .chat-home-hero' in css
-    assert '.chat-is-idle #chat-landing-panels' in css
-    assert '.chat-is-idle #chat-work-trace' in css
+    assert 'id="chat-project-door"' in html
+    assert 'id="chat-work-trace"' not in html
+    assert '.chat-project-door' in css
+    assert '.chat-is-idle #chat-formation' in css
     assert 'font-family: var(--font-display)' in css
     assert 'start-suggestion' not in html
     assert 'chip-start' not in html
@@ -67,8 +67,9 @@ def test_work_trace_uses_real_kernel_and_session_signals():
     operate = OPERATE_VIEW_JS.read_text(encoding='utf-8')
     workspace = WORKSPACE_PROJECT_JS.read_text(encoding='utf-8')
     css = BASE_CSS.read_text(encoding='utf-8')
-    for marker in ('id="chat-work-trace"', 'id="operate-work-trace"', 'id="ws-work-trace"', 'data-work-trace'):
+    for marker in ('id="operate-work-trace"', 'id="ws-work-trace"', 'data-work-trace'):
         assert marker in html
+    assert 'id="chat-work-trace"' not in html
     assert 'function describeWorkTrace' in shell
     assert 'function pickRecentLocalWork' in shell
     assert 'function refreshWorkTraces' in shell

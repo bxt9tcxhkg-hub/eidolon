@@ -15,33 +15,52 @@ function syncChatIdleLayout(runtimeContext) {
     }
 }
 
-function renderChatRuntimeProblems(runtimeContext) {
-    const el = document.getElementById('chat-runtime-problems');
+function chatAuxHasWork(el) {
+    return Boolean(el && el.querySelector('.chat-operate-item'));
+}
+
+function hideEmptyChatAux(el) {
     if (!el) return;
-    const problems = (runtimeContext && runtimeContext.runtime_problems) || [];
-    if (!problems.length) {
-        el.textContent = '';
-        el.style.display = 'none';
+    el.hidden = !chatAuxHasWork(el);
+}
+
+function activeProjectDoorTitle(runtimeContext, overview) {
+    const project = (runtimeContext && runtimeContext.project_context) || {};
+    const operate = (runtimeContext && runtimeContext.operate_context) || {};
+    const objective = (overview && overview.objective) || {};
+    const raw = project.active_project_title || operate.objective_title || objective.title || '';
+    const title = String(raw || '').trim();
+    if (!title || /operate workspace bridge/i.test(title) || title === 'Kein Fokus') return '';
+    const state = ((runtimeContext && runtimeContext.workflow_state) || {}).current_context_state;
+    const hasRun = Boolean(operate.run_id || (overview && overview.run && overview.run.id));
+    if (state !== 'active_project' && !project.active_project_id && !hasRun) return '';
+    return title;
+}
+
+function renderChatProjectDoor(runtimeContext, overview) {
+    const el = document.getElementById('chat-project-door');
+    if (!el) return;
+    const title = activeProjectDoorTitle(runtimeContext, overview);
+    if (!title) {
+        el.hidden = true;
+        el.innerHTML = '';
         return;
     }
-    el.style.display = '';
-    el.textContent = 'Erkannte Probleme: ' + problems.join(' · ');
+    el.hidden = false;
+    el.innerHTML = '<button type="button" class="chat-project-door-link" data-tab-target="workspaces">'
+        + escapeHtml(title) + ' · öffnen</button>';
 }
 
 function renderChatRuntimeContext(runtimeContext) {
     lastChatRuntimeContext = runtimeContext || null;
     syncChatIdleLayout(runtimeContext);
-    const stateEl = document.getElementById('chat-context-state');
-    const intentEl = document.getElementById('chat-intent-mode');
-    const nextEl = document.getElementById('chat-next-step');
-    if (!stateEl || !intentEl || !nextEl) return;
+    const idle = !chatHasUserMessage();
     if (!runtimeContext) {
-        stateEl.textContent = 'Noch kein belastbarer Arbeitskontext.';
-        intentEl.textContent = 'Warte auf Arbeitssignal';
-        nextEl.textContent = 'Sobald ein echter Kontext da ist, erscheint hier der nächste sinnvolle Schritt.';
         if (typeof setEidolonPresence === 'function') {
             setEidolonPresence('idle', 'Bereit für neue Arbeit', 'Starte ein Gespräch oder setze bestehende Arbeit fort.');
         }
+        renderChatFormation(null);
+        renderChatOperateActionsFromContext(null);
         if (typeof loadChatLandingSummary === 'function') loadChatLandingSummary();
         syncChatIdleLayout(null);
         return;
@@ -49,38 +68,31 @@ function renderChatRuntimeContext(runtimeContext) {
     const workflow = runtimeContext.workflow_state || {};
     const project = runtimeContext.project_context || {};
     const intent = runtimeContext.user_intent || {};
-    const focus = project.active_project_title || project.candidate_project_title || (project.topic_labels || [])[0] || 'Kein Fokus';
-    const readableFocus = focus && /operate workspace bridge/i.test(focus) ? 'Vorhandener Arbeitskontext' : focus;
-    const contextState = workflow.current_context_state || 'no_live_context';
+    const focus = project.active_project_title || project.candidate_project_title || (project.topic_labels || [])[0] || '';
+    const readableFocus = focus && /operate workspace bridge/i.test(focus) ? '' : focus;
     const phase = workflow.current_phase || 'await_input';
     const classification = intent.classification || 'unknown';
     const workOriented = Boolean(intent.is_work_oriented);
+    const social = !workOriented || classification === 'casual_chat' || classification === 'general_chat' || classification === 'general_chat_with_work_context';
 
-    renderChatFormation((runtimeContext && runtimeContext.formation) || null);
-    renderChatRuntimeProblems(runtimeContext);
-    if (!workOriented || classification === 'casual_chat' || classification === 'general_chat' || classification === 'general_chat_with_work_context') {
-        stateEl.textContent = (readableFocus && readableFocus !== 'Kein Fokus')
-            ? (readableFocus + ' • Arbeitskontext verfügbar, aber für dieses Gespräch nicht erzwungen')
-            : 'Normales Gespräch ohne erzwungenen Arbeitsmodus';
-        intentEl.textContent = classification === 'casual_chat' ? 'normales Gespräch' : 'allgemeiner Chat';
-        nextEl.textContent = 'Normale Unterhaltung aktiv — Arbeitskontext nur dann, wenn du ihn wirklich willst.';
-        if (typeof setEidolonPresence === 'function') {
-            setEidolonPresence('idle', 'Bereit für Gespräch', readableFocus && readableFocus !== 'Kein Fokus' ? (readableFocus + ' ist verfügbar, aber nicht erzwungen.') : 'Normale Unterhaltung ohne aktiven Arbeitslauf.');
-        }
-        if (typeof loadChatLandingSummary === 'function') loadChatLandingSummary();
-        syncChatIdleLayout(runtimeContext);
-        return;
+    if (!idle) {
+        renderChatFormation((runtimeContext && runtimeContext.formation) || null);
+    } else {
+        renderChatFormation(null);
     }
-
-    stateEl.textContent = readableFocus + ' • Kontext: ' + contextState + ' • Phase: ' + phase;
-    intentEl.textContent = classification + (intent.is_open_work_prompt ? ' • offene Arbeitsanfrage' : '');
-    nextEl.textContent = workflow.next_step || 'Noch kein belastbarer nächster Schritt vorhanden.';
-    if (typeof setEidolonPresence === 'function') {
-        const waiting = ['await_input', 'await_user', 'approval', 'await_approval'].includes(String(phase || '').toLowerCase());
-        setEidolonPresence(waiting ? 'waiting' : 'thinking', waiting ? 'Wartet auf dich' : 'Strukturiert Arbeit', workflow.next_step || (readableFocus + ' • ' + contextState));
+    if (social) {
+        if (typeof setEidolonPresence === 'function') {
+            setEidolonPresence('idle', 'Bereit für Gespräch', readableFocus ? (readableFocus + ' ist verfügbar, aber nicht erzwungen.') : 'Normale Unterhaltung ohne aktiven Arbeitslauf.');
+        }
+        if (!idle) renderChatOperateActionsFromContext(null);
+    } else {
+        if (typeof setEidolonPresence === 'function') {
+            const waiting = ['await_input', 'await_user', 'approval', 'await_approval'].includes(String(phase || '').toLowerCase());
+            setEidolonPresence(waiting ? 'waiting' : 'thinking', waiting ? 'Wartet auf dich' : 'Strukturiert Arbeit', workflow.next_step || readableFocus || '');
+        }
+        if (!idle) renderChatOperateActionsFromContext(runtimeContext);
     }
     if (typeof loadChatLandingSummary === 'function') loadChatLandingSummary();
-    renderChatOperateActionsFromContext(runtimeContext);
     syncChatIdleLayout(runtimeContext);
 }
 
@@ -133,9 +145,11 @@ function renderChatOperateDoor(targetEl, data) {
             + '</div>');
     }
     if (!parts.length) {
-        targetEl.innerHTML = '<div class="empty">Keine offenen Freigaben, Blocker oder fortsetzbaren Schritte.</div>';
+        targetEl.innerHTML = '';
+        targetEl.hidden = true;
         return;
     }
+    targetEl.hidden = false;
     targetEl.innerHTML = parts.join('');
 }
 
@@ -144,7 +158,8 @@ function renderChatOperateActionsFromContext(runtimeContext) {
     if (!el) return;
     const operate = (runtimeContext && runtimeContext.operate_context) || {};
     if (!operate.run_id && !pendingOperateApprovals(operate.pending_approvals).length && !openOperateBlockers(operate.open_blockers).length) {
-        el.innerHTML = '<div class="empty">Keine ausführbare Operate-Aktion im aktuellen Kontext.</div>';
+        el.innerHTML = '';
+        el.hidden = true;
         return;
     }
     renderChatOperateDoor(el, {
@@ -154,6 +169,7 @@ function renderChatOperateActionsFromContext(runtimeContext) {
         pending_approvals: operate.pending_approvals || [],
         open_blockers: operate.open_blockers || [],
     });
+    hideEmptyChatAux(el);
 }
 
 function renderChatFormation(formation) {
@@ -161,7 +177,8 @@ function renderChatFormation(formation) {
     if (!el) return;
     const data = formation || {};
     if (!data.visible || !data.workspace_id || !data.to_state) {
-        el.innerHTML = '<div class="empty">Keine sichtbare Projektbildung.</div>';
+        el.innerHTML = '';
+        el.hidden = true;
         return;
     }
     const label = data.label || 'Aktueller Kontext';
@@ -188,6 +205,7 @@ function renderChatFormation(formation) {
         + '<div class="summary-meta"><span class="summary-chip">' + escapeHtml(data.from_state || data.current_state || '') + '</span><span class="summary-chip">→ ' + escapeHtml(data.to_state) + '</span></div>'
         + (buttons.length ? '<div class="chat-operate-buttons">' + buttons.join('') + '</div>' : '')
         + '</div>';
+    el.hidden = false;
 }
 
 async function applyChatFormation(workspaceId, toState, confirmed, seedBoard) {
@@ -215,88 +233,33 @@ async function applyChatFormation(workspaceId, toState, confirmed, seedBoard) {
     if (typeof loadWorkspaces === 'function') await loadWorkspaces();
 }
 
-function renderChatLandingRecentSessions() {
-    const el = document.getElementById('chat-recent-summary');
-    if (!el) return;
-    if (!chatSessions.length) {
-        el.innerHTML = '<div class="empty">Noch keine Unterhaltungen gespeichert.</div>';
-        return;
-    }
-    el.innerHTML = '<div class="summary-list">' + chatSessions.slice(0, 3).map(session => {
-        const active = session.session_id === currentChatSessionId;
-        const title = escapeHtml(session.title || 'Neue Unterhaltung');
-        const preview = escapeHtml((session.last_message_preview || 'Noch keine Nachrichten').slice(0, 96));
-        const updated = escapeHtml(formatSessionTimestamp(session.updated_at || session.created_at));
-        return '<div class="summary-list-item">'
-            + '<div class="summary-headline">' + title + (active ? ' <span class="summary-chip">Aktuell</span>' : '') + '</div>'
-            + '<div class="summary-copy">' + preview + '</div>'
-            + '<div class="summary-meta"><span class="summary-chip">' + updated + '</span><span class="summary-chip">' + Number(session.message_count || 0) + ' Nachrichten</span></div>'
-            + '</div>';
-    }).join('') + '</div>';
-}
-
 async function loadChatLandingSummary() {
-    renderChatLandingRecentSessions();
-    const activeEl = document.getElementById('chat-active-summary');
-    const decisionEl = document.getElementById('chat-decision-summary');
-    if (!activeEl || !decisionEl) return;
     try {
         const overview = await api('GET', '/api/v1/operate/overview');
         const data = overview?.data || {};
         const kernel = data.work_kernel || lastChatRuntimeContext || {};
-        const operateCtx = kernel.operate_context || {};
-        const run = data.run || (operateCtx.run_id ? { id: operateCtx.run_id, state: operateCtx.run_state } : null);
-        const objective = data.objective || (operateCtx.objective_title ? { title: operateCtx.objective_title } : null);
-        const blockers = openOperateBlockers(operateCtx.open_blockers || data.blockers);
-        const approvals = pendingOperateApprovals(operateCtx.pending_approvals || data.approvals);
-        const nextAction = operateCtx.next_action || data.next_action || {};
-        const history = Array.isArray(data.history) ? data.history : [];
+        if (typeof refreshWorkTraces === 'function') refreshWorkTraces(data);
         const presence = typeof describeOperatePresence === 'function'
             ? describeOperatePresence(data)
             : { state: 'idle', title: 'Bereit für neue Arbeit', detail: 'Starte ein Gespräch oder setze bestehende Arbeit fort.' };
-        if (typeof refreshWorkTraces === 'function') refreshWorkTraces(data);
         if (typeof setEidolonPresence === 'function') {
             setEidolonPresence(presence.state, presence.title, presence.detail);
         }
-        if (!run || !objective) {
-            activeEl.innerHTML = '<div class="empty">Noch keine laufende Arbeit. Starte oben mit einer Nachricht oder öffne eine bestehende Unterhaltung.</div>';
+        renderChatProjectDoor(lastChatRuntimeContext || kernel, data);
+        if (!chatHasUserMessage()) {
+            renderChatFormation(null);
+            const actionsEl = document.getElementById('chat-operate-actions');
+            if (actionsEl) {
+                actionsEl.innerHTML = '';
+                actionsEl.hidden = true;
+            }
         } else {
-            const phase = escapeHtml(run.phase || run.current_phase || 'ohne Phase');
-            const status = escapeHtml(run.status || run.state || 'ohne Status');
-            const nextStepValue = (nextAction.summary || nextAction.label || '').trim()
-                || (String(nextAction.kind || '').toLowerCase() === 'none' ? '' : String(nextAction.kind || '').trim())
-                || (history.slice(-1)[0]?.summary || '')
-                || 'Kein offener nächster Schritt — die letzte Arbeit ist abgeschlossen.';
-            const nextStep = escapeHtml(nextStepValue);
-            const continueButton = (run.id && nextAction.kind === 'next_step' && nextAction.action_enabled && !approvals.length)
-                ? '<div class="chat-operate-buttons">' + operateActionButton(nextAction.action_label || 'Weiter', 'advanceOperateRun', [run.id], true) + '</div>'
-                : '';
-            activeEl.innerHTML = '<div class="summary-headline">' + escapeHtml(objective.title || 'Aktive Arbeit') + '</div>'
-                + '<div class="summary-copy">' + nextStep + '</div>'
-                + '<div class="summary-meta"><span class="summary-chip">Status: ' + status + '</span><span class="summary-chip">Phase: ' + phase + '</span></div>'
-                + continueButton;
-        }
-        renderChatOperateDoor(decisionEl, {
-            run,
-            next_action: nextAction,
-            pending_approvals: approvals,
-            open_blockers: blockers,
-        });
-        renderChatFormation(kernel.formation || data.formation);
-        if (!blockers.length && !approvals.length && !(run && run.id && nextAction.kind === 'next_step' && nextAction.action_enabled)) {
-            decisionEl.innerHTML = '<div class="empty">Keine offenen Freigaben oder Blocker. Du kannst direkt weiterarbeiten.</div>';
-        }
-        const actionsEl = document.getElementById('chat-operate-actions');
-        if (actionsEl) {
-            const hasActions = approvals.length || blockers.length || (run && run.id && nextAction.kind === 'next_step' && nextAction.action_enabled);
-            actionsEl.innerHTML = hasActions
-                ? '<div class="chat-panel-meta">Freigeben, Ablehnen und Weiter stehen oben in Gerade aktiv / Braucht deine Entscheidung.</div>'
-                : '<div class="empty">Keine ausführbare Operate-Aktion im aktuellen Kontext.</div>';
+            renderChatFormation(kernel.formation || data.formation);
+            renderChatOperateActionsFromContext(lastChatRuntimeContext || kernel);
         }
         syncChatIdleLayout(lastChatRuntimeContext);
-    } catch (e) {
-        activeEl.innerHTML = '<span class="tag err">' + escapeHtml(e.message || 'Aktive Arbeit konnte nicht geladen werden') + '</span>';
-        decisionEl.innerHTML = '<span class="tag err">' + escapeHtml(e.message || 'Freigaben konnten nicht geladen werden') + '</span>';
+    } catch (_) {
+        renderChatProjectDoor(lastChatRuntimeContext, null);
         syncChatIdleLayout(lastChatRuntimeContext);
     }
 }
@@ -446,7 +409,6 @@ function renderChatSessions(sessions) {
     const activeSession = (sessions || []).find(s => s.session_id === currentChatSessionId) || null;
     if (titleEl) titleEl.textContent = activeSession?.title || 'Neue Unterhaltung';
     if (summaryEl) summaryEl.textContent = filtered.length + ' von ' + ((sessions || []).length) + ' Sessions sichtbar';
-    renderChatLandingRecentSessions();
     if (typeof refreshWorkTraces === 'function') refreshWorkTraces();
 }
 async function loadChatSessions() {
@@ -478,8 +440,6 @@ async function selectChatSession(sessionId, options = {}) {
         message_count: result.session.message_count,
         last_message_preview: ((result.session.messages || []).slice(-1)[0] || {}).content || '',
     } : s);
-    const metaEl = document.getElementById('chat-session-meta');
-    if (metaEl) metaEl.textContent = formatSessionTimestamp(result.session.updated_at || result.session.created_at) + ' • ' + (result.session.message_count || 0) + ' Nachrichten';
     renderChat();
     loadChatLandingSummary().catch(() => {});
     if (!options.skipListReload) {
@@ -513,8 +473,6 @@ async function createChatSession() {
     ];
     renderChat();
     renderChatRuntimeContext(null);
-    const metaEl = document.getElementById('chat-session-meta');
-    if (metaEl) metaEl.textContent = 'Gerade erstellt • 0 Nachrichten';
     renderChatSessions(chatSessions);
     loadChatLandingSummary().catch(() => {});
     return result.session;

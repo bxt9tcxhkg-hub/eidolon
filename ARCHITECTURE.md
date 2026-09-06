@@ -10,10 +10,10 @@ Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gem
 ### 1. Product / Conversation Layer
 - `python/eidolon/chat_runtime.py`
 - `python/eidolon/chat_route_support.py`
-- Erzwingt arbeitsführenden Antwortvertrag
+- Erzwingt knappen Mitspieler-Vertrag für Arbeit (3–5 kurze Zeilen, höchstens eine Aktion oder eine Frage, kein Intention/Richtungen/Empfehlung-Schema)
 - `POST /chat` und `GET /chat/context` ziehen ihren Runtime-Kontext über denselben `session_payload`-Pfad
 - Baut Runtime-Kontext aus Chat, Workspace und Operate-Snapshot auf Basis des `work_context_kernel`
-- Fängt generische Assistentenantworten ab und fällt auf geerdete Richtung + Empfehlung + nächsten Schritt zurück
+- Fängt generische Assistentenantworten und Essay-Schema ab und fällt auf eine kurze, geerdete Board-Angebot-Antwort zurück
 
 ### 2. Operate Kernel
 - `python/eidolon/operate/contracts.py`
@@ -54,7 +54,7 @@ Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gem
 - Dark-Theme bleibt Standard, mit wärmeren Neutralen, Display-Typo und reicherem Akzent; Idle-Signature atmet
 - Arbeitsspur (`data-work-trace`) zeigt Bereit / Wartet / Als Nächstes aus Kernel- und Sessiondaten, ohne Placebo-Aktivität
 - Default-Einstieg ist Chat (`/#chat`); Operate ist über `#operate` / Nav „Arbeit“ erreichbar
-- Chat zeigt ausstehende Freigaben, Blocker und Next Action und löst dieselben Operate-APIs aus
+- Chat-Tür ist Titel + Composer, optional eine Projektzeile; Freigaben/Blocker/Next Action bleiben in Arbeit und erscheinen im Chat nur bei echter laufender Handlung
 - Chat, Arbeit und Projektfläche lesen denselben `work_kernel`-/Operate-Snapshot; Projektmutationen geben denselben Snapshot zurück
 - Projektbildung ist über `POST /workspaces/formation` explizit; `active_project` braucht sichtbare Bestätigung
 - Chat-Kandidaten entstehen deterministisch aus Vorhaben-Nachrichten; Bestätigung füllt textgebundene Board-Karten (Bedingungen in Notizen, idempotentes Seed) und kann eine echte Operate-Freigabe öffnen

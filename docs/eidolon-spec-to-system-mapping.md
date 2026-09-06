@@ -375,7 +375,7 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 
 ### Current evidence
 - chat is the active initial panel
-- chat runtime compiles context and enforces direction/recommendation/next step
+- chat runtime compiles context and enforces a brief cowork reply (max ~3–5 lines, one next action or one question, board over catalog)
 - operate snapshot provides run/objective/blocker/approval/evidence state
 - `/chat/context` exposes pending approvals, open blockers, and next_action for Chat execute actions
 
@@ -410,7 +410,7 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 - role registry enforces explicit approval for persistent approved roles
 
 ### Remaining mismatch
-- Chat and Arbeit now show Freigeben/Ablehnen when a pending gate exists; Weiter is only the continue-next action
+- Arbeit shows Freigeben/Ablehnen when a pending gate exists; Chat keeps the same APIs during an active turn, without an idle Freigabe-Dashboard
 - Interrupts are still a thinner path than approvals
 
 ### Verdict
@@ -426,15 +426,16 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 
 ## Area 6 — UI/workspace architecture
 ### Current evidence
-- chat runtime context is visible in UI
+- idle Chat is a door: session title + composer, plus one project line when an active project exists
+- certificate/healing diagnostics stay on Systemstatus/Stabilität/Mehr, not in the chat transcript
 - operate page (`#operate`) shows approvals, blockers, subagents, evidence, next action, history, work graph
-- operate is reachable from Chat and nav, but `/` and empty hash still open Chat
+- operate is reachable from nav, but `/` and empty hash still open Chat
 - project work surface defaults to a generic planning board with kernel-fed slots; no domain packs
 - idle Projektfläche leads with Neues Projekt + empty board and hides the Operate overview wall
 - idle Arbeit offers Chat start, optional project takeover, and a short hint instead of an empty section wall
 - action motion confirms real mutations only and honors reduced-motion plus `ui.animations`
-- dark shell uses warmer neutrals and a richer accent; idle Chat stays question + input
-- work-trace lines on Chat, Arbeit and Projektfläche read operate/session signals and otherwise show a calm ready state
+- dark shell uses warmer neutrals and a richer accent; idle Chat stays title + composer
+- work-trace lines on Arbeit and Projektfläche read operate/session signals and otherwise show a calm ready state
 
 ### Remaining mismatch
 - the root component stylesheet is now segmented, but the goals component slice remains comparatively large

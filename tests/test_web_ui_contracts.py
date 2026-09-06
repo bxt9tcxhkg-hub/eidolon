@@ -625,9 +625,11 @@ def test_chat_ui_persists_messages_across_reload_in_local_storage():
     assert 'data-tab="workspaces" data-tab-target="workspaces"><span class="icon"></span> Projektfläche' in html
     assert 'data-tab="dashboard" data-tab-target="dashboard"><span class="icon"></span> Systemstatus' in html
     assert 'data-tab="mesh" data-tab-target="mesh"><span class="icon"></span> Geräte' in html
-    assert 'id="chat-active-summary"' in html
-    assert 'id="chat-decision-summary"' in html
-    assert 'id="chat-recent-summary"' in html
+    assert 'id="chat-project-door"' in html
+    assert 'id="chat-operate-actions"' in html
+    assert 'id="chat-active-summary"' not in html
+    assert 'id="chat-decision-summary"' not in html
+    assert 'id="chat-recent-summary"' not in html
     assert 'id="eidolon-signature"' in html
     assert '<div class="theme-toggle"' not in html
     assert "document.addEventListener('click'" in js
@@ -937,11 +939,10 @@ def test_chat_ui_does_not_fall_back_to_fake_success_copy():
 def test_chat_ui_renders_live_runtime_context_contract():
     html = INDEX_HTML.read_text(encoding='utf-8')
     js = APP_WEB_JS
-    assert 'id="chat-context-state"' in html
-    assert 'id="chat-intent-mode"' in html
-    assert 'id="chat-next-step"' in html
-    assert 'id="chat-runtime-problems"' in html
-    assert 'function renderChatRuntimeProblems' in js
+    assert 'id="chat-project-door"' in html
+    assert 'function renderChatProjectDoor' in js
+    assert 'function renderChatRuntimeProblems' not in js
+    assert 'id="chat-runtime-problems"' not in html
     assert "async function loadChatRuntimeContext(sessionId)" in js
     assert "'/chat/context?session_id=' + encodeURIComponent(sessionId)" in js
     assert 'renderChatRuntimeContext(r.runtime_context);' in js
@@ -950,7 +951,7 @@ def test_chat_ui_renders_live_runtime_context_contract():
 def test_chat_is_initial_active_surface_and_header():
     html = INDEX_HTML.read_text(encoding='utf-8')
     assert '<h2 id="page-title">Eidolon</h2>' in html
-    assert 'Sprich den Kern an — oder setze reale Arbeit fort.' in html
+    assert 'Starte ein Gespräch oder setze reale Arbeit fort.' in html
     assert '<div id="panel-chat" class="tab-panel active chat-is-idle">' in html
     assert 'id="chat-idle-prompt"' in html
     assert 'id="operate-idle-empty"' in html
@@ -966,7 +967,7 @@ def test_chat_is_initial_active_surface_and_header():
     assert "const initialTab = (window.location.hash || '#chat').replace('#', '');" in APP_SHELL_JS.read_text(encoding='utf-8')
     assert "operate: { title: 'Arbeit'" in APP_SHELL_JS.read_text(encoding='utf-8')
     assert 'data-tab="operate" data-tab-target="operate">' in html
-    assert 'data-tab-target="operate">Arbeit öffnen' in html
+    assert 'id="chat-project-door"' in html
 
 
 def test_project_planning_surface_is_generic_and_editable():
@@ -1094,7 +1095,8 @@ def test_chat_is_operate_execute_door():
     js = APP_WEB_JS
     operate_js = (ROOT / 'python' / 'eidolon' / 'web' / 'operate-actions-ui.js').read_text(encoding='utf-8')
     assert 'id="chat-operate-actions"' in html
-    assert 'id="chat-decision-summary"' in html
+    assert 'id="chat-project-door"' in html
+    assert 'id="chat-decision-summary"' not in html
     assert 'function renderChatOperateDoor' in js
     assert 'function renderChatFormation' in js
     assert "applyChatFormation" in js

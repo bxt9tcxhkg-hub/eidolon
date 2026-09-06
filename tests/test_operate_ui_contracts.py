@@ -44,12 +44,12 @@ def test_operate_ui_panel_and_anchors_exist():
     assert 'data-tab="mesh"' in html
     assert 'id="operate-state-bar"' in html
     assert 'id="operate-next-action"' in html
-    assert 'id="chat-active-summary"' in html
-    assert 'id="chat-decision-summary"' in html
-    assert 'id="chat-recent-summary"' in html
-    assert 'id="chat-context-state"' in html
-    assert 'id="chat-intent-mode"' in html
-    assert 'id="chat-next-step"' in html
+    assert 'id="chat-project-door"' in html
+    assert 'id="chat-operate-actions"' in html
+    assert 'id="chat-formation"' in html
+    assert 'id="operate-approvals"' in html
+    assert 'id="chat-active-summary"' not in html
+    assert 'id="chat-decision-summary"' not in html
     assert 'id="pods-list"' in html
     assert 'id="pod-detail"' in html
     assert 'id="panel-execution"' in html
@@ -99,12 +99,12 @@ def test_operate_ui_asset_and_page_are_served():
     assert 'panel-workspaces' in root.text
     assert 'panel-dashboard' in root.text
     assert 'panel-mesh' in root.text
-    assert 'chat-active-summary' in root.text
-    assert 'chat-decision-summary' in root.text
-    assert 'chat-recent-summary' in root.text
-    assert 'chat-context-state' in root.text
-    assert 'chat-intent-mode' in root.text
-    assert 'chat-next-step' in root.text
+    assert 'chat-project-door' in root.text
+    assert 'chat-operate-actions' in root.text
+    assert 'chat-formation' in root.text
+    assert 'operate-approvals' in root.text
+    assert 'chat-active-summary' not in root.text
+    assert 'chat-decision-summary' not in root.text
     assert 'panel-pods' in root.text
     assert 'pods-list' in root.text
     assert 'pod-detail' in root.text

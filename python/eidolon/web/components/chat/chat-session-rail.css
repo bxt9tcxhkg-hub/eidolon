@@ -13,6 +13,10 @@
     padding: 0 0 12px 0;
     border-bottom: 1px solid var(--border-subtle);
 }
+#chat-session-title {
+    margin: 0;
+    font-size: 1.05rem;
+}
 .chat-panel-title {
     font-size: 0.82rem;
     font-weight: 700;

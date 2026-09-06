@@ -51,28 +51,33 @@ def build_non_work_fallback_reply(runtime_context: dict) -> str:
     return 'Wir können hier auch ganz normal sprechen. Wenn du plaudern, etwas diskutieren oder mich einfach kennenlernen willst, antworte ich darauf ohne es künstlich in Projektarbeit umzudeuten.'
 
 
+def _work_focus(runtime_context: dict) -> str:
+    project_context = runtime_context.get('project_context') or {}
+    focus = project_context.get('active_project_title') or project_context.get('candidate_project_title') or (project_context.get('topic_labels') or [None])[0]
+    return normalize_text(focus)
+
+
 def build_grounded_fallback_reply(runtime_context: dict) -> str:
     intent = runtime_context.get('user_intent') or {}
     if intent.get('classification') in {'casual_chat', 'general_chat', 'general_chat_with_work_context'}:
         return build_non_work_fallback_reply(runtime_context)
     workflow_state = runtime_context.get('workflow_state') or {}
-    project_context = runtime_context.get('project_context') or {}
     directions = candidate_directions(runtime_context)
     current_state = workflow_state.get('current_context_state') or 'no_live_context'
-    focus = project_context.get('active_project_title') or project_context.get('candidate_project_title') or (project_context.get('topic_labels') or [None])[0]
+    focus = _work_focus(runtime_context)
+    focus_bit = f' {focus}' if focus else ''
     if intent.get('classification') == 'repair_or_unblock' and directions:
-        lead = 'Ich lese das als Signal, zuerst den blockierenden Engpass anzugehen.'
+        lead = f'Zuerst den Engpass{focus_bit}.'
     elif current_state == 'active_project':
-        lead = f"Ich lese das als offene Einladung, die Arbeit im aktiven Projektkontext{f' {focus}' if focus else ''} sinnvoll fortzuführen."
+        lead = f'Wir sind im Projekt{focus_bit}.' if focus else 'Wir sind in einem aktiven Projekt.'
     elif current_state == 'project_candidate':
-        lead = f"Ich lese das als Aufforderung, den Projektkandidaten{f' {focus}' if focus else ''} in eine belastbare Richtung zu überführen."
+        lead = f'Kandidat{focus_bit} ist noch kein Vertrag.'
     elif current_state == 'chat_topic':
-        lead = f"Ich lese das als Aufforderung, aus dem Gesprächskontext{f' {focus}' if focus else ''} eine klare Arbeitsrichtung zu formen."
+        lead = f'Thema{focus_bit} ist da, aber noch kein Projekt.'
     else:
-        lead = 'Wir haben noch keinen belastbaren Projektkontext, also sollte ich nichts vortäuschen, aber die nächsten sinnvollen Einstiege klar machen.'
+        lead = 'Noch kein belastbarer Projektkontext — ich erfinde nichts.'
     if not directions:
-        return f"{lead}\n\nIch habe aktuell keinen belastbaren Projekt-, Pod- oder Evidenzzustand, aus dem ich echte Arbeitsrichtungen ableiten könnte.\nKonkreter nächster Schritt: Formuliere ein Ziel, einen Blocker oder ein gewünschtes Ergebnis, damit ich daraus einen realen Arbeitszug ableite."
-    recommendation = directions[0]
-    bullets = '\n'.join(f"- {item['title']} — {item['why']}" for item in directions)
-    next_step = workflow_state.get('next_step') or recommendation.get('next_step')
-    return f"{lead}\n\nSinnvolle Richtungen jetzt:\n{bullets}\n\nIch empfehle: {recommendation['title']}. {recommendation['why']}\nKonkreter nächster Schritt: {next_step}"
+        return f'{lead}\nSag ein Ziel oder einen Blocker, dann lege ich es als Karte an.'
+    item = directions[0]
+    title = normalize_text(item.get('title')) or 'nächster Zug'
+    return f'{lead}\nNächster Zug: {title}.\nLege ich als Karte an — oder willst du etwas anderes zuerst?'
