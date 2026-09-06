@@ -17,6 +17,7 @@ Diese Spezifikation definiert Eidolon als Produktgrundlage ohne Placebos, Fake-F
 5. [Bot-Organisationsmodell](./bot-organization-model.md)
 6. [Anforderungen an Bot-Rollen](./bot-role-requirements.md)
 7. [UI- und Workspace-Architektur](./eidolon-ui-workspace-architecture.md)
+8. [Evolution Stage — Parität, Differenz, Instinkt, Ehrlichkeit](./eidolon-evolution-stage.md)
 
 ## Verbindliche Gesamtprinzipien
 1. **Eidolon ist das zentrale Hauptsystem.**

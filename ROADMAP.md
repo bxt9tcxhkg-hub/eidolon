@@ -49,6 +49,7 @@
 ## Offene Prioritäten
 
 ### P0 — Einheitswahrheit durchziehen
+- **Produktvertrag geschlossen (Doku):** `docs/eidolon-evolution-stage.md` mappt Parität vs OpenClaw/Hermes/Grok Bot, benennt die Eidolon-Differenz und reframed „keine Fehler“ als kontinuierliche Verifikation + kein Placebo. Das schließt die Spec-Lücke, nicht die Implementierungs-`gap`s in dem Dokument.
 - große UI-/JS-Hotspots (`python/eidolon/web/index.html`, `python/eidolon/web/app-shell.js`) weiter in stabile Produktmodule schneiden
 - aktive Doku weiter synchron halten, wenn neue Runtime- oder UI-Schnitte dazukommen
 - verbleibende Mesh-/Core-Hotspots nur mit Live-Verifikation weiter reduzieren
