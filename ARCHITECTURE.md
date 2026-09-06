@@ -12,6 +12,7 @@ Eidolon ist derzeit ein **Python-FastAPI-System** (einzige live Runtime) mit gem
 - `python/eidolon/chat_route_support.py`
 - Erzwingt knappen Mitspieler-Vertrag für Arbeit (3–5 kurze Zeilen, höchstens eine Aktion oder eine Frage, kein Intention/Richtungen/Empfehlung-Schema)
 - `POST /chat` und `GET /chat/context` ziehen ihren Runtime-Kontext über denselben `session_payload`-Pfad
+- `POST /chat` kann nach Wahrheits- und Settings-Pfad eine kleine Skill-Runtime ausführen (`note`, `system_info`, `device_status`); unverdrahtete Katalog-Skills antworten ehrlich statt mit Echo-Erfolg
 - Baut Runtime-Kontext aus Chat, Workspace und Operate-Snapshot auf Basis des `work_context_kernel`
 - Fängt generische Assistentenantworten und Essay-Schema ab und fällt auf eine kurze, geerdete Board-Angebot-Antwort zurück
 

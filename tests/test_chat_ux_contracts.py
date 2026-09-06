@@ -67,7 +67,8 @@ def test_chat_status_is_honest_and_german():
     assert 'setEidolonTurnPhase(phase)' in js
     assert "PHASE_DENKT, 'build_runtime_context')" in routes or "PHASE_DENKT, 'llm_complete')" in routes
     assert "PHASE_ANTWORTET" in routes
-    assert "PHASE_ARBEITET" not in routes
+    assert "PHASE_ARBEITET" in routes
+    assert "skill_execute:" in routes
     assert "@app.get('/chat/turn-status')" in sessions
     assert 'aria-live="polite"' in html
     assert 'thinking…' not in js

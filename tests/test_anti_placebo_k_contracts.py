@@ -76,8 +76,10 @@ def test_k2_capability_default_is_not_available():
 
 def test_k2_skills_runtime_and_autonomy_loop_are_not_claimed():
     by_id = {item.id: item for item in build_default_capabilities()}
-    assert by_id['skills.runtime'].check_available() is False
-    assert 'nicht angebunden' in by_id['skills.runtime'].detail.lower() or 'nicht an' in by_id['skills.runtime'].detail.lower()
+    assert by_id['skills.runtime'].check_available() is True
+    detail = by_id['skills.runtime'].detail.lower()
+    assert 'note' in detail and 'system_info' in detail
+    assert 'openclaw' in detail or 'hermes' in detail
     assert by_id['autonomy.loop'].check_available() is False
     assert 'keine hintergrundschleife' in by_id['autonomy.loop'].detail.lower()
 
@@ -88,7 +90,7 @@ def test_k2_capabilities_endpoint_does_not_default_true():
     client = TestClient(agent_server.app)
     payload = client.get('/capabilities').json()
     by_id = {item['id']: item for item in payload['capabilities']}
-    assert by_id['skills.runtime']['available'] is False
+    assert by_id['skills.runtime']['available'] is True
     assert by_id['autonomy.loop']['available'] is False
     health = client.get('/health').json()
     assert by_id['mesh.quic']['available'] is bool(health['components']['quic_port']['listening'])
@@ -97,8 +99,9 @@ def test_k2_capabilities_endpoint_does_not_default_true():
 def test_k3_skills_page_is_labeled_catalog():
     shell = APP_SHELL.read_text(encoding='utf-8')
     ui = SKILLS_UI.read_text(encoding='utf-8')
-    assert 'nicht als Runtime verdrahtet' in shell
+    assert 'ausführbar nur im Chat, wo verdrahtet' in shell
     assert 'Katalog · nicht verdrahtet' in ui
+    assert 'ausführbar im Chat' in ui
     assert "s.enabled ? 'ok'" not in ui
 
 
@@ -106,10 +109,13 @@ def test_k3_skills_api_is_honest_about_memory_only():
     client = TestClient(agent_server.app)
     listed = client.get('/skills').json()
     assert listed['ok'] is True
-    assert listed['catalog_only'] is True
-    assert listed['runtime_wired'] is False
+    assert listed['catalog_only'] is False
+    assert listed['runtime_wired'] is True
     assert listed['persistence'] == 'memory'
-    assert all(skill.get('executable') is False for skill in listed['skills'])
+    by_name = {skill['name']: skill for skill in listed['skills']}
+    assert by_name['chat']['executable'] is False
+    assert by_name['note']['executable'] is True
+    assert not all(skill.get('executable') for skill in listed['skills'])
     disabled = client.post('/skills/chat/disable').json()
     assert disabled['ok'] is True
     assert disabled['persisted'] is False
@@ -196,8 +202,9 @@ def test_k5_health_does_not_mark_placeholders_available():
         assert isinstance((kg_live.get('stats') or {}).get('entities'), int)
     else:
         assert kg_live.get('stats') in (None, {})
-    assert comps['skills']['available'] is False
-    assert comps['skills'].get('catalog_only') is True
+    assert comps['skills']['available'] is True
+    assert comps['skills'].get('catalog_only') is False
+    assert comps['skills'].get('executable_count', 0) >= 3
     assert comps['mesh_metrics']['avg_latency'] is None
     assert comps['mesh_metrics']['metrics_complete'] is False
     if comps['evidence']['available']:
@@ -229,7 +236,7 @@ def test_health_payload_builder_stays_honest_without_mesh():
         quic_port=4433,
         get_mesh_service=None,
     )
-    assert payload['components']['skills']['available'] is False
+    assert payload['components']['skills']['available'] is True
     assert payload['components']['mesh_metrics']['available'] is False
     assert payload['components']['mesh_metrics']['peer_count'] is None
     assert payload['problems']

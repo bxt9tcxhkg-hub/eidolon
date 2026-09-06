@@ -64,7 +64,7 @@ python -m pytest -q
 ```
 
 Gezielte Verträge zusätzlich bei betroffenen Bereichen:
-- Chat: `tests/test_chat_runtime.py`
+- Chat: `tests/test_chat_runtime.py`, `tests/test_chat_skill_turn_contracts.py`
 - UI/API-Wahrheit: `tests/test_web_ui_contracts.py`
 - Idle-/Wärme-Verträge: `tests/test_empty_state_ui_contracts.py`, `tests/test_warmth_work_trace_ui_contracts.py`
 - Nav-Schichtung: `tests/test_nav_structure_contracts.py`
