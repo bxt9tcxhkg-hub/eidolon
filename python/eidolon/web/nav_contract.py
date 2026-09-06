@@ -130,7 +130,7 @@ MORE_GROUPS: tuple[dict, ...] = (
                 'nav_label': 'Fähigkeiten-Katalog',
                 'mobile_label': 'Fähigkeiten-Katalog',
                 'title': 'Fähigkeiten-Katalog',
-                'subtitle': 'Katalog hinterlegter Fähigkeiten — nicht als Runtime verdrahtet',
+                'subtitle': 'Katalog hinterlegter Fähigkeiten — ausführbar nur im Chat, wo verdrahtet',
                 'icon': '⚡',
                 'layer': 'more',
                 'group': 'advanced',

@@ -105,13 +105,22 @@ def mesh_metrics_payload(get_mesh_service: Callable[[], Any] | None, uptime_s: i
 
 
 def skills_health_payload(builtin_skills: list[dict]) -> dict[str, Any]:
+    from eidolon.skills.live_skills import LIVE_SKILL_IDS
+
+    listed_live = [skill['name'] for skill in builtin_skills if skill.get('name') in LIVE_SKILL_IDS]
+    live = listed_live or sorted(LIVE_SKILL_IDS)
     return {
-        'available': False,
-        'catalog_only': True,
+        'available': bool(live),
+        'catalog_only': not bool(live),
         'count': len(builtin_skills),
         'enabled': sum(1 for skill in builtin_skills if skill.get('enabled')),
+        'executable_count': len(live),
+        'live_skills': live,
         'skill_ids': [skill['name'] for skill in builtin_skills if skill.get('name')],
-        'detail': 'Katalog, nicht als ausführbare Runtime verdrahtet. Ein/Aus nur im Speicher.',
+        'detail': (
+            f'Chat kann {len(live)} Skills ausführen ({", ".join(live)}). '
+            'Übrige Einträge sind Katalog, nicht verdrahtet.'
+        ),
     }
 
 

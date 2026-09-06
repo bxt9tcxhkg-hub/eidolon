@@ -73,7 +73,8 @@ def test_presence_motion_binds_to_real_turn_phases_only():
     assert "setChatAgentStatus('denkt', 'local')" in js
     assert "setChatAgentStatus('antwortet', 'response')" in js
     assert "setChatAgentStatus('arbeitet'" not in js
-    assert "PHASE_ARBEITET" not in routes
+    assert "PHASE_ARBEITET" in routes
+    assert "skill_execute:" in routes
     assert 'dataset.turnPhase' in live
     assert 'data-presence-phase' in live
     assert "phase === 'antwortet'" in live

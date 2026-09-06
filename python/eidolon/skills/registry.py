@@ -79,13 +79,16 @@ class SkillRegistry:
     def execute(self, name: str, payload: dict[str, Any]) -> dict[str, Any]:
         skill = self.skills.get(name)
         if not skill:
-            return {'ok': False, 'reply': f'Skill nicht gefunden: {name}'}
+            return {'ok': False, 'wired': False, 'executed': False, 'reply': f'Skill nicht gefunden: {name}'}
         if not skill.enabled:
-            return {'ok': False, 'reply': f'Skill deaktiviert: {name}'}
+            return {'ok': False, 'wired': bool(skill.runtime_wired), 'executed': False, 'reply': f'Skill deaktiviert: {name}'}
         try:
-            return skill.fn(payload)
+            result = skill.fn(payload or {})
+            if isinstance(result, dict):
+                return result
+            return {'ok': False, 'wired': bool(skill.runtime_wired), 'executed': False, 'reply': 'Skill lieferte kein Objekt'}
         except Exception as exc:
-            return {'ok': False, 'reply': f'Fehler bei {name}: {exc}'}
+            return {'ok': False, 'wired': bool(skill.runtime_wired), 'executed': True, 'reply': f'Fehler bei {name}: {exc}'}
 
     def skill_registry_extract(self, text: str) -> str | None:
         return extract_skill_name(text)

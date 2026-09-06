@@ -7,6 +7,9 @@ from typing import Any, Callable
 from fastapi import FastAPI
 
 from eidolon.core.config import state_path
+from eidolon.runtime_builtin_skills import annotate_builtin_skill
+from eidolon.skills.chat_skill_turn import live_skill_names
+from eidolon.skills.live_skills import is_live_skill
 
 
 def register_healing_skills_routes(
@@ -57,40 +60,52 @@ def register_healing_skills_routes(
         result = await healing_service().run_check_cycle()
         return {'ok': True, 'cycle': result, 'state': healing_service().get_state()}
 
-    def _catalog_skill(skill: dict) -> dict:
-        return {
-            **skill,
-            'executable': False,
-            'runtime_wired': False,
-            'persisted': False,
-        }
+    def _present_skill(skill: dict) -> dict:
+        return annotate_builtin_skill(skill)
 
-    def _mutation_honesty() -> dict:
+    def _catalog_detail() -> str:
+        live = ', '.join(live_skill_names())
+        return (
+            f'Kleine Chat-Skill-Runtime: {live}. '
+            'Rest bleibt Katalog, nicht verdrahtet. Ein/Aus nur im Speicher dieser Sitzung.'
+        )
+
+    def _mutation_honesty(skill: dict) -> dict:
+        live = is_live_skill(str(skill.get('name') or ''))
         return {
             'persisted': False,
-            'runtime_wired': False,
-            'detail': 'Nur im Speicher dieser Runtime. Nicht persistent. Skill-Runtime ist nicht verdrahtet.',
+            'runtime_wired': live,
+            'detail': (
+                'Nur im Speicher dieser Runtime. Nicht persistent. '
+                + ('Ausführung nur im Chat, wenn der Skill eingeschaltet bleibt.' if live else 'Skill-Runtime ist für diesen Eintrag nicht verdrahtet.')
+            ),
         }
 
     @app.get('/skills')
     async def list_skills():
+        skills = [_present_skill(skill) for skill in builtin_skills()]
+        live = [skill['name'] for skill in skills if skill.get('executable')]
         return {
             'ok': True,
-            'catalog_only': True,
-            'runtime_wired': False,
+            'catalog_only': not bool(live),
+            'runtime_wired': bool(live),
+            'live_skills': live,
             'persistence': 'memory',
-            'detail': 'Katalog hinterlegter Fähigkeiten. Nicht als Runtime verdrahtet. Ein/Aus nur im Speicher dieser Sitzung.',
-            'skills': [_catalog_skill(skill) for skill in builtin_skills()],
+            'detail': _catalog_detail(),
+            'skills': skills,
         }
 
     @app.get('/skills/enabled')
     async def list_enabled_skills():
+        skills = [_present_skill(skill) for skill in builtin_skills() if skill.get('enabled')]
+        live = [skill['name'] for skill in skills if skill.get('executable')]
         return {
             'ok': True,
-            'catalog_only': True,
-            'runtime_wired': False,
+            'catalog_only': not bool(live),
+            'runtime_wired': bool(live),
+            'live_skills': live,
             'persistence': 'memory',
-            'skills': [_catalog_skill(skill) for skill in builtin_skills() if skill.get('enabled')],
+            'skills': skills,
         }
 
     @app.post('/skills/{name}/enable')
@@ -99,7 +114,8 @@ def register_healing_skills_routes(
         if not skill:
             return {'ok': False, 'error': 'Skill nicht gefunden'}
         skill['enabled'] = True
-        return {'ok': True, 'skill': _catalog_skill(skill), 'enabled': True, **_mutation_honesty()}
+        presented = _present_skill(skill)
+        return {'ok': True, 'skill': presented, 'enabled': True, **_mutation_honesty(skill)}
 
     @app.post('/skills/{name}/disable')
     async def disable_skill(name: str):
@@ -107,7 +123,8 @@ def register_healing_skills_routes(
         if not skill:
             return {'ok': False, 'error': 'Skill nicht gefunden'}
         skill['enabled'] = False
-        return {'ok': True, 'skill': _catalog_skill(skill), 'enabled': False, **_mutation_honesty()}
+        presented = _present_skill(skill)
+        return {'ok': True, 'skill': presented, 'enabled': False, **_mutation_honesty(skill)}
 
     @app.post('/skills/{name}/toggle')
     async def toggle_skill(name: str):
@@ -115,7 +132,8 @@ def register_healing_skills_routes(
         if not skill:
             return {'ok': False, 'error': 'Skill nicht gefunden'}
         skill['enabled'] = not bool(skill.get('enabled'))
-        return {'ok': True, 'skill': _catalog_skill(skill), 'enabled': skill['enabled'], **_mutation_honesty()}
+        presented = _present_skill(skill)
+        return {'ok': True, 'skill': presented, 'enabled': skill['enabled'], **_mutation_honesty(skill)}
 
     @app.put('/skills/{name}/priority')
     async def set_skill_priority(name: str, request: dict):
@@ -124,4 +142,4 @@ def register_healing_skills_routes(
             return {'ok': False, 'error': 'Skill nicht gefunden'}
         priority = int(request.get('priority', 0))
         skill['priority'] = priority
-        return {'ok': True, 'skill': skill, 'priority': priority}
+        return {'ok': True, 'skill': _present_skill(skill), 'priority': priority}

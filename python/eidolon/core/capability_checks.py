@@ -94,6 +94,18 @@ def image_generation_available() -> bool:
         return False
 
 
+def chat_skills_runtime_available() -> bool:
+    try:
+        from eidolon.skills.live_skills import LIVE_SKILL_MODULES, _load_skill_module
+        for stem in LIVE_SKILL_MODULES.values():
+            mod = _load_skill_module(stem)
+            if not callable(getattr(mod, 'run', None)):
+                return False
+        return True
+    except Exception:
+        return False
+
+
 def ollama_available() -> bool:
     host = os.environ.get('OLLAMA_HOST') or os.environ.get('OLLAMA_URL') or 'http://127.0.0.1:11434'
     try:

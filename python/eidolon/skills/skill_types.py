@@ -13,6 +13,17 @@ class Skill:
     enabled: bool = True
     priority: int = 0
     description: str = ''
+    executable: bool = False
+    runtime_wired: bool = False
 
     def to_dict(self) -> dict[str, Any]:
-        return {'name': self.name, 'handler': self.handler, 'params': self.params, 'enabled': self.enabled, 'priority': self.priority, 'description': self.description}
+        return {
+            'name': self.name,
+            'handler': self.handler,
+            'params': self.params,
+            'enabled': self.enabled,
+            'priority': self.priority,
+            'description': self.description,
+            'executable': bool(self.executable and self.runtime_wired),
+            'runtime_wired': bool(self.runtime_wired),
+        }

@@ -59,11 +59,11 @@ Was ein Messenger-Agent (OpenClaw, Hermes, Grok Bot) können muss und Eidolon **
 
 | | |
 |---|---|
-| **Status** | `required for parity` · `gap` |
+| **Status** | `required for parity` · `already in Eidolon` (kleine ehrliche Runtime) |
 | **Soll** | Der Agent ruft im Turn echte Tools/Skills auf (lesen, schreiben, ausführen, recherchieren) und berichtet das Ergebnis. |
-| **Ist** | `POST /chat` geht über LLM/`complete()` plus Wahrheits- und Settings-Pfade. Es gibt **keine** Chat-Route, die `SkillRegistry.execute` oder `SkillRuntime.execute` aufruft. Es gibt **keinen** HTTP-Execute für Skills. MCP ist nicht verdrahtet. |
-| **Was real da ist** | Capability-Katalog mit echten Checks (`file.read/write`, `python.execute`, `browser.control`, `image.generate`, `tts.speak`, `mesh.quic`, …) in `python/eidolon/core/capability_catalog.py`. Skill-Liste und Ein/Aus unter `/skills` (`BUILTIN_SKILLS`). Datei-Skills mit `run()` (z. B. `note.py` schreibt `notes.json`, `system-info.py` liest Host-Daten). Builtin-Lambdas in `skill_catalog.py` sind Echo-Stubs (`Eidolon: {text}`). `SPECS/03-skill-engine.md` plant OpenClaw/Hermes-Import — unerledigte Checkboxen, kein Ist. |
-| **Beleg für das Gap** | `python/eidolon/chat_message_routes.py` (kein Skill-Execute). `python/eidolon/healing_skills_routes.py` (list/enable/disable/priority). `python/eidolon/runtime_builtin_skills.py`. |
+| **Ist** | `POST /chat` erkennt konservativ Skill-Absicht. Live-Skills `note`, `system_info`, `device_status` rufen echte `run()`-Handler auf und liefern Host-/Store-Daten. Katalog-Skills (`calendar`, `file_organizer`, `mesh_send`, `goal_manager`, …) antworten ehrlich „nicht verdrahtet“ — kein Fake-Erfolg. `arbeitet` wird nur gesetzt, während ein Live-Skill läuft. Mehr bleibt ein Katalog; verdrahtete Zeilen sind als ausführbar im Chat markiert. |
+| **Was real da ist** | `python/eidolon/skills/live_skills.py`, `python/eidolon/skills/chat_skill_turn.py`, `python/eidolon/chat_message_routes.py`. Datei-Handler: `note.py` → `notes.json`, `system-info.py` → Host/psutil, `device-status.py` → Mesh-Store. |
+| **Nicht behauptet** | Kein OpenClaw/Hermes-Tool-Ökosystem, kein MCP, kein Skill-Import, kein Kalender-Backend, kein Datei-Umordnen aus dem Chat, kein Mesh-Versand aus dem Gespräch. |
 
 ### 1.4 Memory — nur wo real
 
@@ -103,7 +103,7 @@ Was ein Messenger-Agent (OpenClaw, Hermes, Grok Bot) können muss und Eidolon **
 | **Status** | `required for parity` · `already in Eidolon` (Kernel + Chat-Phasen) |
 | **Soll** | Sichtbar, ob der Agent bereit ist, denkt, arbeitet, wartet, blockiert oder fertig ist — aus echtem Zustand, nicht aus Dekor. |
 | **Ist** | Signature-Object und Presence (`idle` / `thinking` / `acting` / `waiting` / `blocked` / `done`) aus Operate (`describeOperatePresence` → `setEidolonPresence`). Chat-Turn-Status `denkt` / `arbeitet` / `antwortet` über `GET /chat/turn-status`. `POST /chat` setzt `denkt` und `antwortet`. Die eine Live-Chat-Marke (`#chat-eidolon-presence`) sitzt im Composer-Chrome **über dem Eingabefeld**, neben dem Phasen-Text (`denkt…`). Keine Avatare an Du-/Eidolon-Zeilen. Das Transcript (`.chat-messages`) scrollt in einer begrenzten Kartenhöhe; Composer + Presence bleiben unten fixiert. Die Sidebar-Signature bleibt sekundär. Innere Bewegung kommt aus `eidolon-presence.js`: WebGL-Curl-/Domain-Warp der Still-Texel (Canvas-2D-Gitter-Warp als Fallback) plus ein Gold-Mote. Drei lesbare Signaturen: `schreibt` (Composer-Fokus/`#chat-input`, langsamer Horizontal-Drift, weiches Glow, `data-presence-phase="schreibt"`, Aria „Eidolon achtet auf die Eingabe“; `data-turn-phase` bleibt `idle`), `denkt` (schneller Filament-Churn, helles Mote, ehrliche Turn-Phase), `antwortet` (sprechender Puls, Gaze nach links/oben zum Transcript). Idle ohne Fokus ist leiser, aber lebendig. Die Textur lädt immer den PNG-Pfad (`img[src]`), nie das `<picture>`-WebP, damit Safari/iOS WebGL nicht auf einer WebP-Quelle scheitert; schlägt WebGL fehl, bleibt Canvas2D sichtbar lebendig. `data-presence-engine` meldet `webgl` / `canvas2d` / `still`. `/assets/eidolon-presence.js` ist per Query-Version und `Cache-Control: no-cache` cache-bust. Turn-Phasen kommen nur aus `data-turn-phase` (`setEidolonTurnPhase`); die sichtbare Motion-Phase steht in `data-presence-phase` plus `is-schreibt` / `is-denkt` / `is-antwortet`. `prefers-reduced-motion` und Settings `ui.animations=off` zeigen nur das genehmigte Still; unsichtbare Marks pausieren. Healing-/LLM-Probleme erscheinen in Connection/Systemstatus, nicht als Fake-Erfolg. |
-| **Gap innerhalb der Phase** | `arbeitet` wird im normalen `/chat`-Pfad **nicht** gesetzt; nur der Self-Reflection-Chat setzt `PHASE_ARBEITET`. Die UI faked diese Phase nicht. Keine Emotions-, Stimmen- oder Tool-Work-Visuals. Kein CSS-Pan/Zoom des Still-Bitmaps als Haupteffekt. Presence bleibt eine Marke (42px Composer, max. 48px Chat / 56px Sidebar), kein Idle-Hero und kein Zeilen-Avatar. |
+| **Gap innerhalb der Phase** | `arbeitet` setzt der normale `/chat`-Pfad nur, während ein Live-Skill wirklich läuft. Die UI faked diese Phase nicht. Keine Emotions-, Stimmen- oder Tool-Work-Visuals. Kein CSS-Pan/Zoom des Still-Bitmaps als Haupteffekt. Presence bleibt eine Marke (42px Composer, max. 48px Chat / 56px Sidebar), kein Idle-Hero und kein Zeilen-Avatar. |
 | **Beleg** | `python/eidolon/chat_turn_status.py`, `python/eidolon/chat_message_routes.py`, `python/eidolon/operate_api_self_reflection_chat.py`, `python/eidolon/web/app-shell.js`, `python/eidolon/web/chat-ui.js`, `python/eidolon/web/eidolon-presence.js`, `python/eidolon/web/components/shell/eidolon-presence.css`, `tests/test_presence_avatar_contracts.py` |
 
 ### 1.7 Always-on-Erreichbarkeit
@@ -122,7 +122,7 @@ Was ein Messenger-Agent (OpenClaw, Hermes, Grok Bot) können muss und Eidolon **
 |---|---|---|---|
 | Chat-Kanal (Web/Mobile lokal) | `required for parity` | `already in Eidolon` | `/#chat`, `POST /chat`, Sessions, Pairing in dieselbe Shell |
 | Multi-Channel Messenger | `required for parity` | `gap` | keine Channel-Adapter |
-| Tools/Skills im Agent-Turn | `required for parity` | `gap` | Katalog + Toggle ja; Chat führt sie nicht aus |
+| Tools/Skills im Agent-Turn | `required for parity` | `already in Eidolon` | Kleine Chat-Runtime: note, system_info, device_status; Rest ehrlich unwired |
 | Session-/Arbeitsgedächtnis | `required for parity` | `already in Eidolon` | Chat-Sessions + Operate-SQLite + Topic-Signale |
 | Semantisches Langzeitgedächtnis | `required for parity` | `gap` | kein Cross-Session-Recall, Generator entkoppelt |
 | Steuerfläche (kein Slash nötig) | `required for parity` | `already in Eidolon` | Freigabe/Weiter/Formation/CLI/Settings-Intent |
@@ -224,7 +224,7 @@ Was über einen Messenger-Agenten hinausgeht. Das ist der eigentliche Produktker
 **Ist:**
 
 - `already in Eidolon`: dunkle Schale, Chat-Tür statt Dashboard, genehmigtes Presence-Still als Marke über dem Composer und in der Sidebar-Signature, innere Tintenbewegung (WebGL-Warp, 2D-Fallback; PNG-Textur, nicht Picture-WebP) plus drei lesbare Motion-Signaturen: `schreibt` (Composer-Fokus/`#chat-input`), `denkt` und `antwortet`, Idle leiser, Chat-Status `denkt…` / `antwortet` am Turn, Action-Motion nur nach Mutation, `prefers-reduced-motion` + Settings `ui.animations` → statisches Still, `data-presence-engine` und `data-presence-phase` ehrlich.
-- `gap`: `arbeitet` nicht im normalen Chat-Turn. Kein zweites Maskottchen-Zoo, kein Hero auf der Idle-Tür. Embodied Gaze in Skizzen bleibt Skizze; im Produkt gibt es nur den phasengebundenen Mote-Blick (Composer/Transcript), keine Emotionserkennung.
+- `already in Eidolon` für `arbeitet` im normalen Chat-Turn, aber nur während eines Live-Skills. Kein zweites Maskottchen-Zoo, kein Hero auf der Idle-Tür. Embodied Gaze in Skizzen bleibt Skizze; im Produkt gibt es nur den phasengebundenen Mote-Blick (Composer/Transcript), keine Emotionserkennung.
 
 ---
 
@@ -272,7 +272,7 @@ Regeln:
 
 - UI darf eine Phase nur zeigen, wenn Server oder lokaler Sendepfad sie **gesetzt** hat.
 - `GET /chat/turn-status` ist die Serverquelle; der Client pollt nur während eines echten Sends.
-- `arbeitet` darf nicht dekorativ zwischen `denkt` und `antwortet` geblinkt werden, solange `/chat` diese Phase nicht setzt.
+- `arbeitet` darf nicht dekorativ zwischen `denkt` und `antwortet` geblinkt werden. `/chat` setzt sie nur, während ein Live-Skill wirklich läuft.
 - Signature-Presence folgt Operate, nicht einem Zufallsgenerator.
 - Der Chat-Avatar sitzt als Composer-Chrome **über dem Eingabefeld** (`#chat-eidolon-presence` in `.chat-composer-chrome`). Keine Avatare an Transcript-Zeilen. Das Transcript scrollt in `.chat-messages` bei begrenzter Kartenhöhe; Presence + Composer bleiben unten. Die Sidebar-Signature bleibt sekundär. Phasen-Text (`denkt…`) steht neben der Marke.
 - Idle-Motion (innerer Tintenfluss + Lichtpuls + Mote-Drift) ist ruhige, aber bei 42–48px in 1–2s lesbare Präsenz, kein Arbeitsclaim.

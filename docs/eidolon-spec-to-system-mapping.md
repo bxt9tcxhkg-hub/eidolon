@@ -378,6 +378,7 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 - chat runtime compiles context and enforces a brief cowork reply (max ~3–5 lines, one next action or one question, board over catalog)
 - operate snapshot provides run/objective/blocker/approval/evidence state
 - `/chat/context` exposes pending approvals, open blockers, and next_action for Chat execute actions
+- `POST /chat` can execute a small live skill set (`note`, `system_info`, `device_status`) and honestly refuses catalog-only skills
 
 ### Remaining mismatch
 - the full conversation→operate→workspace loop is still distributed across several modules rather than one explicit kernel boundary

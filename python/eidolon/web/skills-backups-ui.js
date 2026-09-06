@@ -5,7 +5,7 @@ async function loadSkills() {
         const el = document.getElementById('skills-summary');
         const listEl = document.getElementById('skills-list');
         const skills = d.skills || [];
-        const notice = '<div class="empty" style="margin-bottom:10px;">' + escapeHtml(d.detail || 'Katalog hinterlegter Fähigkeiten — nicht als Runtime verdrahtet. Ein/Aus nur im Speicher, nicht persistent.') + '</div>';
+        const notice = '<div class="empty" style="margin-bottom:10px;">' + escapeHtml(d.detail || 'Katalog hinterlegter Fähigkeiten — ausführbar nur im Chat, wo verdrahtet. Ein/Aus nur im Speicher, nicht persistent.') + '</div>';
         if (!skills.length) {
             if (el) el.innerHTML = notice + '<div class="empty">Keine Skills</div>';
             if (listEl) listEl.innerHTML = notice + '<div class="empty">Keine Skills</div>';
@@ -13,7 +13,7 @@ async function loadSkills() {
         }
         const rows = skills.map(s => {
             const executable = s.executable === true && s.runtime_wired === true;
-            const label = executable ? (s.description || '') : ((s.description ? s.description + ' · ' : '') + 'Katalog · nicht verdrahtet');
+            const label = executable ? ((s.description ? s.description + ' · ' : '') + 'ausführbar im Chat') : ((s.description ? s.description + ' · ' : '') + 'Katalog · nicht verdrahtet');
             return '<div class="comp-row"><span class="comp-dot ' + (executable ? 'ok' : 'warn') + '"></span><span class="comp-name">' + escapeHtml(s.name) + '</span><span class="comp-detail">' + escapeHtml(label) + '</span></div>';
         }).join('');
         if (el) el.innerHTML = notice + rows;

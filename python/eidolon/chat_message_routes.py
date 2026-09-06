@@ -4,10 +4,12 @@ from fastapi import FastAPI
 
 from eidolon.chat_error_support import sanitize_chat_error
 from eidolon.chat_route_support import session_payload, truth_quality
-from eidolon.chat_turn_status import PHASE_ANTWORTET, PHASE_DENKT, set_chat_turn_phase
+from eidolon.chat_turn_status import PHASE_ANTWORTET, PHASE_ARBEITET, PHASE_DENKT, set_chat_turn_phase
 from eidolon.core.llm_backend import configure_from_settings
 from eidolon.core.settings_apply import apply_user_settings, format_settings_apply_reply
 from eidolon.core.settings_intent import parse_settings_intent
+from eidolon.runtime_builtin_skills import lookup_builtin_enabled
+from eidolon.skills.chat_skill_turn import match_chat_skill, run_chat_skill_turn
 
 
 def _mark_chat_phase(session_id: str | None, phase: str, reason: str) -> None:
@@ -46,6 +48,38 @@ def register_chat_routes(app: FastAPI, *, chat_session_store, llm_backend, setti
             _mark_chat_phase(session_id, PHASE_ANTWORTET, 'settings_apply_reply')
             chat_session_store.append_message(session_id, 'assistant', reply)
             return {'ok': bool(result.get('ok')), 'response': reply, 'provider': llm_backend.status(), 'session_id': session_id, 'runtime_context': runtime_context, 'response_quality': quality, 'settings_apply': runtime_context['settings_apply']}
+        skill_match = match_chat_skill(message)
+        if skill_match is not None:
+            live_enabled = skill_match.wired and lookup_builtin_enabled(skill_match.name)
+            if live_enabled:
+                _mark_chat_phase(session_id, PHASE_ARBEITET, f'skill_execute:{skill_match.name}')
+            skill_turn = run_chat_skill_turn(message, enabled_lookup=lookup_builtin_enabled)
+            skill_meta = {
+                'name': skill_turn.name,
+                'wired': skill_turn.wired,
+                'executed': skill_turn.executed,
+                'ok': skill_turn.ok,
+                'disabled': skill_turn.disabled,
+            }
+            quality = {
+                **truth_quality(runtime_context),
+                'path': 'skill_execute' if skill_turn.executed else 'skill_unwired',
+                'skill': skill_turn.name,
+                'skill_wired': skill_turn.wired,
+                'skill_executed': skill_turn.executed,
+            }
+            runtime_context = {**runtime_context, 'skill': {**skill_meta, 'result': skill_turn.outcome.get('result')}}
+            _mark_chat_phase(session_id, PHASE_ANTWORTET, 'skill_reply' if skill_turn.executed else 'skill_unwired')
+            chat_session_store.append_message(session_id, 'assistant', skill_turn.reply)
+            return {
+                'ok': True,
+                'response': skill_turn.reply,
+                'provider': llm_backend.status(),
+                'session_id': session_id,
+                'runtime_context': runtime_context,
+                'response_quality': quality,
+                'skill': skill_meta,
+            }
         topic_attention_store.record_interaction(message, source=source)
         try:
             area = settings_store.get_area('llm')
