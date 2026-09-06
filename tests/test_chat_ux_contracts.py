@@ -63,7 +63,11 @@ def test_chat_status_is_honest_and_german():
     assert "startChatStatusPoll(currentChatSessionId)" in js
     assert "'/chat/turn-status?session_id='" in js
     assert "setChatAgentStatus('antwortet', 'response')" in js
+    assert "setChatAgentStatus('antwortet', 'stream')" in js
     assert "setChatAgentStatus('arbeitet'" not in js
+    assert "stream: true" in js
+    assert 'text/event-stream' in js
+    assert 'typewriter' not in js.lower()
     assert 'setEidolonTurnPhase(phase)' in js
     assert "PHASE_DENKT, 'build_runtime_context')" in routes or "PHASE_DENKT, 'llm_complete')" in routes
     assert "PHASE_ANTWORTET" in routes

@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from eidolon.chat_error_support import sanitize_chat_error
 from eidolon.chat_route_support import session_payload, truth_quality
+from eidolon.chat_stream import immediate_sse, llm_sse_response
 from eidolon.chat_turn_status import PHASE_ANTWORTET, PHASE_ARBEITET, PHASE_DENKT, set_chat_turn_phase
 from eidolon.core.llm_backend import configure_from_settings
 from eidolon.core.settings_apply import apply_user_settings, format_settings_apply_reply
@@ -22,6 +23,7 @@ def register_chat_routes(app: FastAPI, *, chat_session_store, llm_backend, setti
         message = request.get('message', '')
         source = request.get('source', 'chat')
         requested_session_id = str(request.get('session_id') or '').strip() or None
+        want_stream = bool(request.get('stream'))
         if not message:
             return {'ok': False, 'error': 'Keine Nachricht'}
         session = chat_session_store.ensure_session(requested_session_id, source=source)
@@ -34,7 +36,8 @@ def register_chat_routes(app: FastAPI, *, chat_session_store, llm_backend, setti
             quality = truth_quality(runtime_context)
             _mark_chat_phase(session_id, PHASE_ANTWORTET, 'runtime_truth_reply')
             chat_session_store.append_message(session_id, 'assistant', truth_reply)
-            return {'ok': True, 'response': truth_reply, 'provider': llm_backend.status(), 'session_id': session_id, 'runtime_context': runtime_context, 'response_quality': quality}
+            payload = {'ok': True, 'response': truth_reply, 'provider': llm_backend.status(), 'session_id': session_id, 'runtime_context': runtime_context, 'response_quality': quality}
+            return immediate_sse(payload, phase=PHASE_ANTWORTET) if want_stream else payload
         settings_intent = parse_settings_intent(message)
         if settings_intent is not None:
             result = apply_user_settings(
@@ -47,7 +50,8 @@ def register_chat_routes(app: FastAPI, *, chat_session_store, llm_backend, setti
             runtime_context = {**runtime_context, 'settings_apply': {'ok': result.get('ok'), 'applied': result.get('applied'), 'area': result.get('area'), 'updated': result.get('updated') or [], 'error': result.get('error')}}
             _mark_chat_phase(session_id, PHASE_ANTWORTET, 'settings_apply_reply')
             chat_session_store.append_message(session_id, 'assistant', reply)
-            return {'ok': bool(result.get('ok')), 'response': reply, 'provider': llm_backend.status(), 'session_id': session_id, 'runtime_context': runtime_context, 'response_quality': quality, 'settings_apply': runtime_context['settings_apply']}
+            payload = {'ok': bool(result.get('ok')), 'response': reply, 'provider': llm_backend.status(), 'session_id': session_id, 'runtime_context': runtime_context, 'response_quality': quality, 'settings_apply': runtime_context['settings_apply']}
+            return immediate_sse(payload, phase=PHASE_ANTWORTET) if want_stream else payload
         skill_match = match_chat_skill(message)
         if skill_match is not None:
             live_enabled = skill_match.wired and lookup_builtin_enabled(skill_match.name)
@@ -71,7 +75,7 @@ def register_chat_routes(app: FastAPI, *, chat_session_store, llm_backend, setti
             runtime_context = {**runtime_context, 'skill': {**skill_meta, 'result': skill_turn.outcome.get('result')}}
             _mark_chat_phase(session_id, PHASE_ANTWORTET, 'skill_reply' if skill_turn.executed else 'skill_unwired')
             chat_session_store.append_message(session_id, 'assistant', skill_turn.reply)
-            return {
+            payload = {
                 'ok': True,
                 'response': skill_turn.reply,
                 'provider': llm_backend.status(),
@@ -80,11 +84,24 @@ def register_chat_routes(app: FastAPI, *, chat_session_store, llm_backend, setti
                 'response_quality': quality,
                 'skill': skill_meta,
             }
+            return immediate_sse(payload, phase=PHASE_ANTWORTET) if want_stream else payload
         topic_attention_store.record_interaction(message, source=source)
         try:
             area = settings_store.get_area('llm')
             base_prompt = str(area.get('system_prompt') or '').strip() or system_prompt
             compiled_system_prompt, user_prompt = build_chat_prompts(base_prompt, runtime_context)
+            if want_stream:
+                return llm_sse_response(
+                    session_id=session_id,
+                    runtime_context=runtime_context,
+                    compiled_system_prompt=compiled_system_prompt,
+                    user_prompt=user_prompt,
+                    llm_backend=llm_backend,
+                    finalize_chat_reply=finalize_chat_reply,
+                    build_grounded_fallback_reply=build_grounded_fallback_reply,
+                    chat_session_store=chat_session_store,
+                    mark_phase=_mark_chat_phase,
+                )
             _mark_chat_phase(session_id, PHASE_DENKT, 'llm_complete')
             reply = await llm_backend.complete(compiled_system_prompt, user_prompt)
             _mark_chat_phase(session_id, PHASE_ANTWORTET, 'finalize_reply')

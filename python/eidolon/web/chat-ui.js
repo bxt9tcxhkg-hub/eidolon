@@ -312,7 +312,8 @@ function loadStoredChatMessages() {
 }
 function persistChatMessages() {
     try {
-        localStorage.setItem('eidolon-chat-messages', JSON.stringify(chatMessages.slice(-100)));
+        const serializable = (chatMessages || []).map((m) => ({ role: m.role, content: m.content }));
+        localStorage.setItem('eidolon-chat-messages', JSON.stringify(serializable.slice(-100)));
     } catch (_) {}
 }
 function getStoredChatSessionId() {
@@ -602,6 +603,136 @@ function chatErrorText(r) {
     return 'Keine Modellantwort erhalten';
 }
 
+function applyChatEnvelope(r) {
+    if (r?.session_id) {
+        currentChatSessionId = r.session_id;
+        persistCurrentChatSessionId();
+    }
+    if (r?.runtime_context) {
+        renderChatRuntimeContext(r.runtime_context);
+    }
+}
+
+function applyFinishedChatReply(r) {
+    applyChatEnvelope(r);
+    const reply = chatModelText(r);
+    if (r?.ok === false) {
+        chatMessages.push({ role: 'assistant', content: 'Fehler: ' + chatErrorText(r) });
+    } else if (reply) {
+        chatMessages.push({ role: 'assistant', content: reply });
+    } else {
+        chatMessages.push({ role: 'assistant', content: 'Fehler: Keine Modellantwort erhalten' });
+    }
+}
+
+function chatStreamingDraft() {
+    const last = chatMessages[chatMessages.length - 1];
+    return last && last.role === 'assistant' && last.streaming ? last : null;
+}
+
+function updateStreamingAssistant(text) {
+    const draft = chatStreamingDraft();
+    if (draft) {
+        draft.content = text;
+    } else {
+        chatMessages.push({ role: 'assistant', content: text, streaming: true });
+    }
+    renderChat();
+}
+
+function finishStreamingAssistant(text) {
+    const draft = chatStreamingDraft();
+    if (draft) {
+        draft.content = text;
+        delete draft.streaming;
+    } else if (text) {
+        chatMessages.push({ role: 'assistant', content: text });
+    }
+}
+
+function parseSseBuffer(buffer) {
+    const events = [];
+    const parts = String(buffer || '').split('\n\n');
+    const rest = parts.pop() || '';
+    for (const block of parts) {
+        const dataLines = block.split('\n').filter((line) => line.startsWith('data:')).map((line) => line.slice(5).trim());
+        if (!dataLines.length) continue;
+        try {
+            const parsed = JSON.parse(dataLines.join('\n'));
+            if (parsed && typeof parsed === 'object') events.push(parsed);
+        } catch (_) {}
+    }
+    return { events, rest };
+}
+
+async function consumeChatStream(response) {
+    const reader = response.body && response.body.getReader ? response.body.getReader() : null;
+    if (!reader) {
+        const fallback = await response.json();
+        setChatAgentStatus('antwortet', 'response');
+        applyFinishedChatReply(fallback);
+        return fallback;
+    }
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let acc = '';
+    let sawDelta = false;
+    let terminal = null;
+    while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parsed = parseSseBuffer(buffer);
+        buffer = parsed.rest;
+        for (const event of parsed.events) {
+            if (event.type === 'phase' && chatStatusLabel(event.phase)) {
+                setChatAgentStatus(event.phase, 'stream');
+            }
+            if (event.type === 'delta' && typeof event.text === 'string' && event.text) {
+                if (!sawDelta) setChatAgentStatus('antwortet', 'stream');
+                sawDelta = true;
+                acc += event.text;
+                updateStreamingAssistant(acc);
+            }
+            if (event.type === 'replace' && typeof event.text === 'string') {
+                acc = event.text;
+                if (sawDelta) updateStreamingAssistant(acc);
+            }
+            if (event.type === 'done' || event.type === 'error') {
+                terminal = event;
+            }
+        }
+    }
+    if (buffer.trim()) {
+        const parsed = parseSseBuffer(buffer + '\n\n');
+        for (const event of parsed.events) {
+            if (event.type === 'done' || event.type === 'error') terminal = event;
+            if (event.type === 'replace' && typeof event.text === 'string') acc = event.text;
+        }
+    }
+    applyChatEnvelope(terminal || {});
+    if (!terminal) {
+        if (sawDelta) finishStreamingAssistant(acc);
+        else chatMessages.push({ role: 'assistant', content: 'Fehler: Keine Modellantwort erhalten' });
+        return { ok: false, error: 'Keine Modellantwort erhalten' };
+    }
+    if (terminal.type === 'error' || terminal.ok === false) {
+        const errorText = 'Fehler: ' + chatErrorText(terminal);
+        if (sawDelta) finishStreamingAssistant(errorText);
+        else chatMessages.push({ role: 'assistant', content: errorText });
+        return terminal;
+    }
+    const reply = chatModelText(terminal) || acc;
+    if (sawDelta) {
+        finishStreamingAssistant(reply || acc);
+    } else {
+        setChatAgentStatus('antwortet', 'response');
+        if (reply) chatMessages.push({ role: 'assistant', content: reply });
+        else chatMessages.push({ role: 'assistant', content: 'Fehler: Keine Modellantwort erhalten' });
+    }
+    return terminal;
+}
+
 async function sendChat() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
@@ -620,29 +751,35 @@ async function sendChat() {
     try {
         const pairedDevice = getStoredMobileDevice();
         const isMetaQuestion = /selbstreflexion|analysiere dich|was würdest du verbessern|reflektiere|was ist deine schwäche|was ist deine stärke/i.test(text);
-        const endpoint = isMetaQuestion ? '/api/v1/self-reflection/chat' : '/chat';
-        const r = await api('POST', endpoint, { message: text, source: pairedDevice ? ('mobile:' + pairedDevice.peer_id) : 'chat', session_id: currentChatSessionId });
-        if (r?.session_id) {
-            currentChatSessionId = r.session_id;
-            persistCurrentChatSessionId();
-        }
-        if (r?.runtime_context) {
-            renderChatRuntimeContext(r.runtime_context);
+        const body = { message: text, source: pairedDevice ? ('mobile:' + pairedDevice.peer_id) : 'chat', session_id: currentChatSessionId };
+        if (isMetaQuestion) {
+            const r = await api('POST', '/api/v1/self-reflection/chat', body);
+            if (!r?.runtime_context) await loadChatRuntimeContext(currentChatSessionId);
+            setChatAgentStatus('antwortet', 'response');
+            applyFinishedChatReply(r);
         } else {
-            await loadChatRuntimeContext(currentChatSessionId);
-        }
-        setChatAgentStatus('antwortet', 'response');
-        const reply = chatModelText(r);
-        if (r?.ok === false) {
-            chatMessages.push({ role: 'assistant', content: 'Fehler: ' + chatErrorText(r) });
-        } else if (reply) {
-            chatMessages.push({ role: 'assistant', content: reply });
-        } else {
-            chatMessages.push({ role: 'assistant', content: 'Fehler: Keine Modellantwort erhalten' });
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
+                body: JSON.stringify({ ...body, stream: true }),
+            });
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.indexOf('text/event-stream') !== -1) {
+                const terminal = await consumeChatStream(response);
+                if (!terminal?.runtime_context) await loadChatRuntimeContext(currentChatSessionId);
+            } else {
+                if (!response.ok) throw new Error(response.status + ': ' + response.statusText);
+                const r = await response.json();
+                if (!r?.runtime_context) await loadChatRuntimeContext(currentChatSessionId);
+                setChatAgentStatus('antwortet', 'response');
+                applyFinishedChatReply(r);
+            }
         }
     } catch (e) {
         await loadChatRuntimeContext(currentChatSessionId);
-        chatMessages.push({ role: 'assistant', content: 'Fehler: ' + e.message });
+        const draft = chatStreamingDraft();
+        if (draft) finishStreamingAssistant('Fehler: ' + e.message);
+        else chatMessages.push({ role: 'assistant', content: 'Fehler: ' + e.message });
     }
     stopChatStatusPoll();
     chatSendInFlight = false;
@@ -653,13 +790,15 @@ async function sendChat() {
 }
 function renderChatTurn(m) {
     const role = m.role === 'user' ? 'user' : 'assistant';
-    return '<div class="chat-turn msg ' + role + '" data-role="' + role + '">'
+    const streaming = Boolean(m.streaming);
+    return '<div class="chat-turn msg ' + role + (streaming ? ' is-streaming' : '') + '" data-role="' + role + '">'
         + '<div class="chat-turn-meta"><span class="chat-turn-sender sender">' + escapeHtml(m.role === 'user' ? 'Du' : 'Eidolon') + '</span></div>'
         + '<div class="chat-turn-body">' + escapeHtml(m.content) + '</div>'
         + '</div>';
 }
 function renderChatStatusTurn() {
     if (!chatAgentStatus) return '';
+    if (chatStreamingDraft()) return '';
     return '<div class="chat-turn chat-turn-status msg assistant" data-role="status" data-phase="' + escapeHtml(chatAgentStatus.phase) + '">'
         + '<div class="chat-turn-meta">'
         + '<span class="chat-turn-sender sender">Eidolon</span>'

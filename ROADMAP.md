@@ -48,6 +48,7 @@
 - Ersatzkette ist in den Settings sortierbar und persistent; leer/ungültig wird ehrlich abgelehnt. Chat und Operate wenden Settings nur auf ausdrücklichen Wunsch an (`POST /settings/apply`, `POST /api/v1/operate/settings/apply`); Schema lehnt ungültige Werte ab, Secrets bleiben draußen. Erkannte `/health`-, LLM- und SelfHealing-Probleme erscheinen im Connection-Status, Systemstatus und Healing, nicht als Chat-Tür-Diagnose. Kein neues Self-Repair-OS in diesem Schnitt.
 - Nav-Vertrag (`python/eidolon/web/nav_contract.py`) hält Primärweg und Mehr-Labels an einem Ort; Fähigkeiten-Katalog und Helfer-Protokoll bleiben ehrlich gekennzeichnet (nicht ausführbar / keine eigenen Prozesse)
 - Chat-Turn führt eine kleine ehrliche Skill-Runtime aus (`note`, `system_info`, `device_status`); Katalog-Skills sagen „nicht verdrahtet“ statt Fake-Erfolg; `arbeitet` nur während eines Live-Skills
+- Chat-Antworten streamen ehrlich per SSE auf dem OpenAI-kompatiblen (Groq) Pfad; nicht-streamfähige Provider und Sofortpfade bleiben ein Stück, ohne Typewriter auf fertigem Text
 
 ## Offene Prioritäten
 
