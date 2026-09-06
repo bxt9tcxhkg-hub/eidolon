@@ -2,12 +2,37 @@
     const ws = window.EidolonWorkspace;
     const state = ws.state;
 
+    function isNarrowProjectSurface() {
+        try {
+            return Boolean(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+        } catch (_) {
+            return false;
+        }
+    }
+
+    function bindProjectSurfaceLayout() {
+        if (bindProjectSurfaceLayout.bound || !window.matchMedia) return;
+        bindProjectSurfaceLayout.bound = true;
+        const mq = window.matchMedia('(max-width: 768px)');
+        const onChange = () => {
+            if (document.getElementById('ws-view-mode')?.value === 'board' && state.currentProject) renderBoardView();
+        };
+        if (mq.addEventListener) mq.addEventListener('change', onChange);
+        else if (mq.addListener) mq.addListener(onChange);
+    }
+
+    function syncIdeaLineVisibility(view) {
+        const ideaLine = document.getElementById('ws-idea-line');
+        if (ideaLine) ideaLine.hidden = view !== 'board';
+    }
+
     function switchView() {
         const view = document.getElementById('ws-view-mode')?.value || 'board';
         document.getElementById('ws-canvas-card').style.display = view === 'canvas' ? 'block' : 'none';
         document.getElementById('ws-elements-card').style.display = view !== 'canvas' ? 'block' : 'none';
         const title = document.getElementById('ws-elements-title');
         if (title) title.textContent = view === 'board' ? 'Planung' : view === 'timeline' ? 'Timeline' : 'Liste';
+        syncIdeaLineVisibility(view);
         if (view === 'canvas') renderCanvas();
         else if (view === 'board') renderBoardView();
         else if (view === 'timeline') renderTimelineView();
@@ -82,14 +107,21 @@
         ).join('');
     }
 
-    function elementCard(item) {
+    function statusChip(status) {
+        const key = planningColumnFor(status);
+        return '<span class="status-chip plan-card-status-chip" data-s="' + escapeHtml(key) + '">' + escapeHtml(ws.statusLabel(status || 'idea')) + '</span>';
+    }
+
+    function elementCard(item, options) {
+        const wall = Boolean(options && options.wall);
         const elements = state.currentProject?.elements || [];
         const note = cardNote(item, elements);
         const elementId = escapeHtml(item.id);
-        return '<div class="plan-card" data-status="' + escapeHtml(item.status || 'idea') + '" data-element-id="' + elementId + '" draggable="true">' +
+        return '<div class="plan-card' + (wall ? ' plan-card-wall' : '') + '" data-status="' + escapeHtml(item.status || 'idea') + '" data-element-id="' + elementId + '" draggable="' + (wall ? 'false' : 'true') + '">' +
             '<div class="plan-card-face">' +
             '<div class="plan-card-copy">' +
             '<div class="plan-card-title" title="' + escapeHtml(item.title || '') + '">' + escapeHtml(item.title || '') + '</div>' +
+            statusChip(item.status) +
             (note ? '<div class="plan-card-notes" title="' + escapeHtml(note) + '">' + escapeHtml(note) + '</div>' : '') +
             '</div>' +
             '<button type="button" class="plan-card-menu-btn" data-plan-menu="' + elementId + '" aria-label="Kartenmenü" aria-haspopup="true" aria-expanded="false">…</button>' +
@@ -116,19 +148,24 @@
         });
     }
 
-    function renderBoardView() {
-        if (!state.currentProject) return;
-        const elements = state.currentProject.elements || [];
-        const el = document.getElementById('ws-elements-view');
-        if (!el) return;
-        const filterInput = document.getElementById('ws-element-filter');
-        const filterText = filterInput ? filterInput.value.toLowerCase().trim() : '';
-        const filteredElements = filterText
-            ? elements.filter(item => item.title.toLowerCase().includes(filterText) || (item.description || '').toLowerCase().includes(filterText))
-            : elements;
+    function draftSuggestionCard(item, index) {
+        const title = escapeHtml(item.title || 'Vorschlag');
+        const reason = String(item.reason || '').trim();
+        return '<div class="plan-card plan-card-wall plan-card-draft" data-suggestion-index="' + index + '">' +
+            '<div class="plan-card-face">' +
+            '<div class="plan-card-copy">' +
+            '<div class="plan-card-title">' + title + '</div>' +
+            '<span class="status-chip plan-card-status-chip" data-s="idea">Vorschlag</span>' +
+            (reason ? '<div class="plan-card-notes">' + escapeHtml(reason) + '</div>' : '') +
+            '</div></div>' +
+            '<div class="plan-card-actions">' +
+            '<button type="button" class="btn btn-sm btn-primary" data-suggestion-action="accept" data-index="' + index + '">Übernehmen</button>' +
+            '<button type="button" class="btn btn-sm" data-suggestion-action="reject" data-index="' + index + '">Ablehnen</button>' +
+            '</div></div>';
+    }
 
-        const columns = PLANNING_COLUMNS;
-        el.innerHTML = '<div class="planning-board">' + columns.map(([status, label]) => {
+    function renderPlanningColumns(filteredElements) {
+        return '<div class="planning-board" data-planning-layout="columns">' + PLANNING_COLUMNS.map(([status, label]) => {
             const items = filteredElements.filter((item) => planningColumnFor(item.status) === status);
             const body = items.length
                 ? items.map((item) => elementCard(item)).join('')
@@ -139,9 +176,74 @@
                 '<span class="planning-column-count">' + items.length + '</span></div>' +
                 '<div class="planning-column-body">' + body + '</div></div>';
         }).join('') + '</div>';
+    }
+
+    function renderPlanningWall(filteredElements) {
+        const drafts = (state.brainstormData || []).map((item, index) => draftSuggestionCard(item, index)).join('');
+        const cards = filteredElements.map((item) => elementCard(item, { wall: true })).join('');
+        const empty = (!filteredElements.length && !drafts)
+            ? '<div class="empty planning-wall-empty">Noch keine Karten. Schreib oben eine Idee.</div>'
+            : '';
+        return '<div class="planning-board planning-wall" data-planning-layout="wall">' +
+            '<div class="planning-wall-list">' + drafts + cards + empty + '</div></div>';
+    }
+
+    function renderBoardView() {
+        if (!state.currentProject) return;
+        bindProjectSurfaceLayout();
+        const elements = state.currentProject.elements || [];
+        const el = document.getElementById('ws-elements-view');
+        if (!el) return;
+        const filterInput = document.getElementById('ws-element-filter');
+        const filterText = filterInput ? filterInput.value.toLowerCase().trim() : '';
+        const filteredElements = filterText
+            ? elements.filter(item => item.title.toLowerCase().includes(filterText) || (item.description || '').toLowerCase().includes(filterText))
+            : elements;
+
+        const wall = isNarrowProjectSurface();
+        el.innerHTML = wall ? renderPlanningWall(filteredElements) : renderPlanningColumns(filteredElements);
         bindOpenElementTargets(el);
         bindPlanningBoard(el);
-        document.getElementById('ws-elements-count').textContent = String(filteredElements.length);
+        if (wall) bindWallDraftActions(el);
+        const countEl = document.getElementById('ws-elements-count');
+        if (countEl) countEl.textContent = String(filteredElements.length);
+    }
+
+    async function submitIdeaLine() {
+        const input = document.getElementById('ws-idea-title');
+        const title = (input?.value || '').trim();
+        if (!title) { showNotice('Titel erforderlich', 'warning'); return; }
+        if (!state.currentProjectId) { showNotice('Kein Projekt geöffnet', 'warning'); return; }
+        try {
+            const response = await api('POST', '/projects/' + state.currentProjectId + '/elements', {
+                title,
+                description: '',
+                status: 'idea',
+                priority: 1,
+                element_type: 'idea',
+            });
+            if (response?.ok === false) { showNotice(response.error || 'Karte anlegen fehlgeschlagen', 'error'); return; }
+            if (input) input.value = '';
+            showNotice('Karte angelegt', 'success');
+            await openProject(state.currentProjectId);
+            const created = document.querySelector('.plan-card[data-element-id]');
+            if (typeof confirmAction === 'function') confirmAction(created || document.getElementById('ws-idea-line'), 'created');
+        } catch (e) { showNotice(e.message, 'error'); }
+    }
+
+    function bindWallDraftActions(root) {
+        root.querySelectorAll('[data-suggestion-action="accept"]').forEach((btn) => {
+            btn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                if (typeof acceptSuggestion === 'function') acceptSuggestion(Number(btn.dataset.index));
+            });
+        });
+        root.querySelectorAll('[data-suggestion-action="reject"]').forEach((btn) => {
+            btn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                if (typeof rejectSuggestion === 'function') rejectSuggestion(Number(btn.dataset.index));
+            });
+        });
     }
 
     async function persistPlanElement(elementId, patch) {
@@ -210,7 +312,7 @@
 
     function collectBoardOrder() {
         const ids = [];
-        document.querySelectorAll('.planning-column .plan-card').forEach((card) => {
+        document.querySelectorAll('.planning-column .plan-card, .planning-wall-list .plan-card[data-element-id]').forEach((card) => {
             if (card.dataset.elementId) ids.push(card.dataset.elementId);
         });
         (state.currentProject?.elements || []).forEach((item) => {
@@ -272,6 +374,13 @@
             btn.addEventListener('click', (event) => {
                 event.stopPropagation();
                 dropPlanElement(btn.dataset.planDrop);
+            });
+        });
+        root.querySelectorAll('.plan-card-wall .plan-card-face').forEach((face) => {
+            face.addEventListener('click', (event) => {
+                if (event.target.closest('[data-plan-menu], .plan-card-menu, button, select, a')) return;
+                const btn = face.querySelector('[data-plan-menu]');
+                if (btn) btn.click();
             });
         });
         root.querySelectorAll('.plan-card').forEach((card) => {
@@ -350,5 +459,5 @@
         document.getElementById('ws-elements-count').textContent = String(elements.length);
     }
 
-    Object.assign(window, { switchView, renderBoardView, renderTimelineView, renderListView, updatePlanElement, reorderPlanElements, archivePlanElement, dropPlanElement });
+    Object.assign(window, { switchView, renderBoardView, renderTimelineView, renderListView, updatePlanElement, reorderPlanElements, archivePlanElement, dropPlanElement, submitIdeaLine, isNarrowProjectSurface });
 })();

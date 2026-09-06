@@ -431,6 +431,7 @@ Chat is fixed entry; Eidolon understands, structures, classifies, organizes, exe
 - operate page (`#operate`) shows approvals, blockers, subagents, evidence, next action, history, work graph
 - operate is reachable from nav, but `/` and empty hash still open Chat
 - project work surface defaults to a generic planning board with kernel-fed slots; no domain packs
+- narrow Projektfläche (max-width 768px, including 390px phones) is a vertical card wall: title + status chip, idea line → `POST /projects/{id}/elements`, suggestions as draft cards; desktop keeps horizontal columns
 - idle Projektfläche leads with Neues Projekt + empty board and hides the Operate overview wall
 - idle Arbeit offers Chat start, optional project takeover, and a short hint instead of an empty section wall
 - action motion confirms real mutations only and honors reduced-motion plus `ui.animations`

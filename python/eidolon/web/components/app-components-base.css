@@ -171,6 +171,10 @@
     letter-spacing: 0;
 }
 
+#ws-project-detail {
+    flex-direction: column;
+}
+
 #panel-workspaces,
 #ws-project-detail,
 .ws-board-card,
@@ -410,6 +414,143 @@
     min-width: 0;
 }
 
+.planning-idea-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+}
+
+.planning-idea-line[hidden] { display: none; }
+
+.planning-idea-line-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+}
+
+.planning-idea-line input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 8px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.88rem;
+}
+
+.planning-wall {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: hidden;
+    overflow-y: visible;
+    min-height: 0;
+    padding-bottom: 0;
+}
+
+.planning-wall-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.planning-wall-empty {
+    min-height: 80px;
+    padding: 20px 8px;
+    text-align: left;
+}
+
+.plan-card-status-chip {
+    display: inline-flex;
+    flex: 0 0 auto;
+    margin-top: 6px;
+    padding: 3px 8px;
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: none;
+}
+
+.plan-card-status-chip[data-s="idea"] {
+    background: var(--surface-hover);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+.plan-card-status-chip[data-s="planned"] {
+    background: var(--surface-hover);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+.plan-card-status-chip[data-s="in_progress"],
+.plan-card-status-chip[data-s="active"] {
+    background: var(--accent);
+    color: #fff;
+}
+
+.plan-card-status-chip[data-s="blocked"] {
+    background: var(--warning);
+    color: #1a1d26;
+}
+
+.plan-card-status-chip[data-s="done"] {
+    background: var(--success);
+    color: #fff;
+}
+
+.plan-card-status-chip[data-s="archived"] {
+    background: var(--border);
+    color: var(--text-muted);
+}
+
+.plan-card-draft {
+    border-style: dashed;
+    cursor: default;
+}
+
+.ws-brainstorm-card {
+    padding: 12px 14px 14px;
+}
+
+.ws-brainstorm-summary {
+    list-style: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.ws-brainstorm-summary::-webkit-details-marker { display: none; }
+
+.ws-brainstorm-summary::after {
+    content: ' ▾';
+    color: var(--text-dim);
+}
+
+.ws-brainstorm-card[open] .ws-brainstorm-summary {
+    color: var(--text);
+    margin-bottom: 10px;
+}
+
+.ws-brainstorm-hint {
+    text-align: left;
+    padding: 0 0 10px;
+}
+
+.ws-brainstorm-actions {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
 .ws-idle-hero {
     display: flex;
     flex-direction: column;
@@ -641,6 +782,12 @@
     align-items: flex-start;
     gap: 8px;
 }
+
+.plan-card-wall {
+    cursor: pointer;
+}
+
+.plan-card-wall:active { cursor: pointer; }
 
 .plan-card-copy {
     min-width: 0;

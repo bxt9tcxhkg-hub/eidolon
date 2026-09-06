@@ -193,7 +193,7 @@
     async function openProject(projectId) {
         try {
             if (ws.projectListEl()) ws.projectListEl().style.display = 'none';
-            if (ws.projectDetailEl()) ws.projectDetailEl().style.display = 'block';
+            if (ws.projectDetailEl()) ws.projectDetailEl().style.display = 'flex';
             const hero = document.getElementById('ws-idle-hero');
             if (hero) hero.hidden = true;
             const scaffold = document.getElementById('ws-planning-scaffold');
@@ -399,6 +399,7 @@
             if (response?.ok === false) { showNotice(response.error || 'Brainstorm fehlgeschlagen', 'error'); return; }
             state.brainstormData = response.suggestions || [];
             renderBrainstorm(state.brainstormData);
+            if (typeof renderBoardView === 'function' && document.getElementById('ws-view-mode')?.value === 'board') renderBoardView();
         } catch (e) { showNotice(e.message, 'error'); }
     }
 
@@ -435,6 +436,8 @@
             const response = await api('POST', '/projects/' + state.currentProjectId + '/elements', payload);
             if (response?.ok === false) { showNotice(response.error || 'Vorschlag übernehmen fehlgeschlagen', 'error'); return; }
             showNotice('Element hinzugefügt' + (item.connect_to ? ' (verknüpft)' : ''), 'success');
+            state.brainstormData.splice(index, 1);
+            renderBrainstorm(state.brainstormData);
             await openProject(state.currentProjectId);
         } catch (e) { showNotice(e.message, 'error'); }
     }
@@ -442,12 +445,16 @@
     function rejectSuggestion(index) {
         state.brainstormData.splice(index, 1);
         renderBrainstorm(state.brainstormData);
+        if (typeof renderBoardView === 'function' && document.getElementById('ws-view-mode')?.value === 'board') renderBoardView();
     }
 
     function clearBrainstorm() {
-        document.getElementById('brainstorm-text').value = '';
-        document.getElementById('brainstorm-suggestions').innerHTML = '<div class="empty" style="text-align:center;padding:20px;color:var(--text-muted);">Beschreibe dein Projekt und frage die KI nach fehlenden Bausteinen.</div>';
+        const text = document.getElementById('brainstorm-text');
+        if (text) text.value = '';
+        const el = document.getElementById('brainstorm-suggestions');
+        if (el) el.innerHTML = '<div class="empty">Noch keine Vorschläge.</div>';
         state.brainstormData = [];
+        if (typeof renderBoardView === 'function' && document.getElementById('ws-view-mode')?.value === 'board') renderBoardView();
     }
 
     Object.assign(window, { loadWorkspaces, toggleProjectComposer, resetProjectForm, submitProjectForm, openProject, showProjectList, deleteProject, generateBrainstorm, acceptSuggestion, rejectSuggestion, clearBrainstorm, saveProjectTitle, saveProjectStatus, archiveCurrentProject, toggleArchiveProject, syncWorkspaceIdleLayout });
