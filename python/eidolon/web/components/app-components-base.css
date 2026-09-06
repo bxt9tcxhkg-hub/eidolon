@@ -467,7 +467,7 @@
     text-align: left;
 }
 
-.plan-card-status-chip {
+.plan-card .status-chip.plan-card-status-chip {
     display: inline-flex;
     flex: 0 0 auto;
     margin-top: 6px;

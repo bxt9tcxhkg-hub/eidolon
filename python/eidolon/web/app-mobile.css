@@ -205,8 +205,9 @@
                 margin-bottom: 0;
                 cursor: pointer;
             }
-            .plan-card-status-chip {
+            .plan-card .status-chip.plan-card-status-chip {
                 display: inline-flex;
+                text-transform: none;
             }
             .ws-brainstorm-card {
                 order: 8;
