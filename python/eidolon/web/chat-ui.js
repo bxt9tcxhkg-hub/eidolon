@@ -589,6 +589,7 @@ function renderChatAgentStatus() {
     el.classList.add('is-visible');
     el.dataset.phase = chatAgentStatus.phase;
     if (labelEl) labelEl.textContent = chatAgentStatus.label;
+    el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
 function stopChatStatusPoll() {
